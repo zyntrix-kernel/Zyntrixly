@@ -31,6 +31,7 @@ let presenceStatusText='end-to-end encrypted';
 let typingUsers=[];
 let forwardPayload=null;
 const CONV_INDEX={};
+const _iosDevice=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
 let dmListUnsub=null;
 let groupListUnsub=null;
 let selectionMode=false;
@@ -277,7 +278,7 @@ function stopTypingSoon(){
 }
 
 function handleComposerInput(){
-  if(!CHAT)return;
+  if(!CHAT||!ME)return;
   const inp=id('msg-inp');
   const text=(inp?.value||'').trim();
   saveDraftText(CHAT.type,CHAT.id,inp?.value||'');
@@ -312,11 +313,13 @@ function getChatContext(chat=CHAT){
 }
 
 function updateCallButtons(chat=CHAT){
-  const vBtn=document.getElementById('hdr-voice-btn');
-  const vidBtn=document.getElementById('hdr-video-btn');
-  const isDM=chat&&chat.type==='dm';
-  if(vBtn)  vBtn.style.display=isDM?'flex':'none';
-  if(vidBtn)vidBtn.style.display=isDM?'flex':'none';
+  try{
+    const vBtn=document.getElementById('hdr-voice-btn');
+    const vidBtn=document.getElementById('hdr-video-btn');
+    const isDM=!!(chat&&chat.type==='dm');
+    if(vBtn)  vBtn.style.display=isDM?'flex':'none';
+    if(vidBtn)vidBtn.style.display=isDM?'flex':'none';
+  }catch(e){}
 }
 
 function updateMobileChatActions(chat=CHAT){
@@ -447,10 +450,19 @@ function openEmojiPicker(e){
     });
   }
   const btn=document.getElementById('emoji-btn');
+  if(!btn)return;
   const rect=btn.getBoundingClientRect();
-  const top=rect.top-220;
+  const pickerH=244;
+  const spaceAbove=rect.top;
+  const spaceBelow=window.innerHeight-rect.bottom;
+  let top;
+  if(spaceAbove>=pickerH||spaceAbove>spaceBelow){
+    top=Math.max(4,rect.top-pickerH-6);
+  } else {
+    top=Math.min(rect.bottom+6,window.innerHeight-pickerH-4);
+  }
   picker.style.left=Math.min(rect.left,window.innerWidth-240)+'px';
-  picker.style.top=Math.max(top,8)+'px';
+  picker.style.top=top+'px';
   picker.style.display=picker.style.display==='flex'?'none':'flex';
 }
 
@@ -741,6 +753,8 @@ function setAuthLoading(on){
 //  Fresh register/login are handled by bootApp().
 // ─────────────────────────────────────────────
 let _booted=false; // prevent double-boot if both fire
+// Guard: only attach listener once Firebase is confirmed ready
+if(typeof auth==='undefined'){console.error('[Zyntrixly] auth not ready — firebase-config missing');}
 auth.onAuthStateChanged(async user=>{
   if(_registering) return; // registration in progress — skip
   if(user){
@@ -823,7 +837,7 @@ async function bootApp(user){
     updateNotifUI();
     setAuthLoading(false);
     // Start listening for incoming calls (lazy WebRTC)
-    if(typeof ZxCall!=='undefined') ZxCall.listenForIncomingCalls();
+    if(typeof ZxCall!=='undefined'){ try{ ZxCall.listenForIncomingCalls(); }catch(e){} }
 
     // ── SHOW RESTORE MODAL if still no key ──
     if(!ME.privKey){
@@ -1722,15 +1736,23 @@ async function decryptBubble(bub,data,mine,chatCtx=getChatContext()){
       const parsed=JSON.parse(plain);
       if(parsed&&parsed.__type==='file'){
         const sz=parsed.size>1024*1024?(parsed.size/1024/1024).toFixed(1)+'MB':(Math.round(parsed.size/1024))+'KB';
-        bub.innerHTML=`<div class="file-bubble" onclick="downloadFileMsg('${esc(parsed.url)}','${esc(parsed.name)}','${esc(parsed.key)}','${esc(parsed.iv)}')" style="cursor:pointer;display:flex;align-items:center;gap:10px;padding:4px 0">
-          <div style="width:38px;height:38px;border-radius:10px;background:rgba(59,130,246,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        const card=document.createElement('div');
+        card.className='file-bubble';
+        card.style.cssText='cursor:pointer;display:flex;align-items:center;gap:10px;padding:4px 0';
+        // Store metadata as data attributes (avoids quote escaping in onclick)
+        card.dataset.url=parsed.url||'';
+        card.dataset.name=parsed.name||'file';
+        card.dataset.key=parsed.key||'';
+        card.dataset.iv=parsed.iv||'';
+        card.onclick=function(){downloadFileMsg(this.dataset.url,this.dataset.name,this.dataset.key,this.dataset.iv);};
+        card.innerHTML=`<div style="width:38px;height:38px;border-radius:10px;background:rgba(59,130,246,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           </div>
           <div style="min-width:0">
-            <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px">${esc(parsed.name)}</div>
-            <div style="font-size:11px;color:var(--muted-fg)">${sz} · Expires ${esc(parsed.expiry)} · Tap to download</div>
-          </div>
-        </div>`;
+            <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px">${esc(parsed.name||'file')}</div>
+            <div style="font-size:11px;color:var(--muted-fg)">${sz} · Expires ${esc(parsed.expiry||'soon')} · Tap to download</div>
+          </div>`;
+        bub.appendChild(card);
         return;
       }
     }catch(_){}
@@ -1786,7 +1808,8 @@ function onMsgKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg
 
 async function sendMsg(){
   const inp=id('msg-inp');const text=inp.value.trim();
-  if(!text||!CHAT)return;
+  if(!text||!CHAT||!ME)return;
+  if(!ME.privKey&&CHAT.type==='dm'){toast('Encryption keys not loaded. Please re-login.',3500);return;}
   inp.value='';
   saveDraftText(CHAT.type,CHAT.id,'');
   setTyping(false);
@@ -2408,8 +2431,6 @@ document.addEventListener('keydown',e=>{
 /* ════════════════════════════════════════════════
    FULLSCREEN (iOS Safari does not support this API)
 ════════════════════════════════════════════════ */
-const _iosDevice=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
-
 function toggleFullscreen(){
   // iOS Safari has no Fullscreen API — show a tip instead
   if(_iosDevice){

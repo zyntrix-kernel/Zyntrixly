@@ -180,7 +180,7 @@ const ZxCall = (() => {
 
   // ── Listen for remote ICE candidates ──
   function listenICE(remoteUid) {
-    if (!callDoc) return;
+    if (!callDoc || !ME) return;
     const colName = 'ice_' + remoteUid + '_to_' + ME.uid;
     const unsub = callDoc.collection(colName).orderBy('ts')
       .onSnapshot(snap => {
@@ -199,7 +199,9 @@ const ZxCall = (() => {
 
   // ── Initiate call (1-to-1 or start group) ──
   async function startCall(targetUid, mode = 'voice') {
+    if (!targetUid) { toast('No contact selected for call.'); return; }
     if (callId) { toast('Already in a call.'); return; }
+    if (typeof db === 'undefined') { toast('App not ready. Try again.'); return; }
     callMode = mode;
     callRole = 'caller';
 
@@ -260,7 +262,8 @@ const ZxCall = (() => {
 
   // ── Receive incoming call notification ──
   function listenForIncomingCalls() {
-    if (!ME) return;
+    if (typeof ME === 'undefined' || !ME) return;
+    if (typeof db === 'undefined' || !db) return;
     db.collection('calls')
       .where('calleeId', '==', ME.uid)
       .where('status', '==', 'ringing')
@@ -338,9 +341,12 @@ const ZxCall = (() => {
 
   // ── End / clean up ──
   async function endCall() {
+    if (!callId) return; // already ended
     // Notify remote
-    if (callDoc) {
-      await callDoc.update({ status: 'ended' }).catch(() => {});
+    const docToEnd = callDoc;
+    callId = null; // prevent re-entry
+    if (docToEnd) {
+      await docToEnd.update({ status: 'ended' }).catch(() => {});
     }
 
     // Stop all tracks
@@ -358,7 +364,6 @@ const ZxCall = (() => {
     sigUnsubs.forEach(u => { try { u(); } catch(_) {} });
     sigUnsubs = [];
 
-    callId   = null;
     callRole = null;
     callMode = null;
     callDoc  = null;

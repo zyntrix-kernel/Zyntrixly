@@ -634,7 +634,39 @@
 </script>
 <script src="crypto.js"></script>
 <script src="security.js"></script>
-<script src="app.js"></script>
+<script>
+// ── DEFERRED APP BOOT ──────────────────────────
+// app.js MUST load after Firebase is initialised.
+// The async config loader above fires 'firebase-ready'
+// once auth + db are available. We wait for that
+// before injecting app.js and webrtc.js into the page.
+(function deferAppBoot() {
+  function loadScripts() {
+    ['app.js', 'webrtc.js'].forEach(function(src) {
+      var s = document.createElement('script');
+      s.src = src;
+      document.body.appendChild(s);
+    });
+  }
+
+  // Already ready (inline firebase-config.js path or fast API response)
+  if (window.auth && window.db) {
+    loadScripts();
+  } else {
+    window.addEventListener('firebase-ready', loadScripts, { once: true });
+    // Absolute safety net — if firebase-ready never fires in 6s, show error
+    setTimeout(function() {
+      if (!window.auth || !window.db) {
+        document.getElementById('startup')?.classList.add('out');
+        var errDiv = document.createElement('div');
+        errDiv.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0a0a1a;color:#ef4444;font-family:sans-serif;font-size:16px;text-align:center;padding:32px;z-index:99999';
+        errDiv.innerHTML = '<div><div style="font-size:32px;margin-bottom:16px">⚠️</div><strong>Firebase not configured</strong><br><br>See <code>GUIDE.md</code> Part 3 to set your<br>environment variables on Vercel.</div>';
+        document.body.appendChild(errDiv);
+      }
+    }, 6000);
+  }
+})();
+</script>
 
 <!-- ═══════════ CALL OVERLAY ═══════════ -->
 <div id="call-overlay" class="call-overlay hidden" data-mode="voice">
@@ -670,6 +702,5 @@
   </div>
 </div>
 
-<script src="webrtc.js"></script>
 </body>
 </html>
