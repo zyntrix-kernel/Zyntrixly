@@ -7,7 +7,7 @@
 **A free, open-source, end-to-end encrypted messaging app you can host yourself.**  
 No phone number. No email. No ads. No surveillance.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/YOURUSERNAME/zyntrixly)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/zyntrix-kernel/zyntrixly)
 
 </div>
 
