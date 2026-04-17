@@ -1,0 +1,35 @@
+name: Auto Unzip to Root
+
+on:
+  push:
+    paths:
+      - "**.zip"
+
+jobs:
+  unzip:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install unzip
+        run: sudo apt-get update && sudo apt-get install -y unzip
+
+      - name: Extract zip into root
+        run: |
+          for f in *.zip; do
+            [ -e "$f" ] || continue
+            unzip -o "$f" -d .
+          done
+
+      - name: Remove zip files
+        run: rm -f *.zip
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add .
+          git commit -m "Auto unzip to root" || echo "No changes"
+          git push
