@@ -623,10 +623,12 @@
   }, 2200);
   setTimeout(()=>{
     window._startupMinDone=true;
-    if(!window._authResolved && typeof showScreen === 'function'){
+    if(!window._authResolved){
       window._authResolved=true;
-      showScreen('auth-screen');
-      if (typeof finishStartup === 'function') finishStartup();
+      if(typeof showScreen === 'function'){
+        showScreen('auth-screen');
+        if (typeof finishStartup === 'function') finishStartup();
+      }
     }
   }, 3000);
 })();
@@ -650,6 +652,7 @@
         window.auth = firebase.auth();
         window.db   = firebase.firestore();
         db.enablePersistence({synchronizeTabs:true}).catch(e=>console.warn('Persistence:',e?.code||e));
+        window._firebaseReady = true;
         window.dispatchEvent(new Event('firebase-ready'));
         return;
       }
@@ -659,7 +662,10 @@
   // Local dev fallback: load firebase-config.js (gitignored, never committed)
   const s = document.createElement('script');
   s.src = 'firebase-config.js';
-  s.onload = () => window.dispatchEvent(new Event('firebase-ready'));
+  s.onload = () => {
+    window._firebaseReady = true;
+    window.dispatchEvent(new Event('firebase-ready'));
+  };
   s.onerror = () => console.error('[Zyntrixly] Neither /api/config nor firebase-config.js found. See GUIDE.md for setup.');
   document.head.appendChild(s);
 })();
@@ -682,7 +688,7 @@
   }
 
   // Already ready (inline firebase-config.js path or fast API response)
-  if (window.auth && window.db) {
+  if (window._firebaseReady || (window.auth && window.db)) {
     loadScripts();
   } else {
     window.addEventListener('firebase-ready', loadScripts, { once: true });

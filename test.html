@@ -1,0 +1,13 @@
+<script>
+  window.foo = false;
+  setTimeout(() => {
+    window.foo = true;
+    checkFoo();
+  }, 100);
+</script>
+<script>
+  var foo = window.foo || false;
+  function checkFoo() {
+    console.log("foo inside script is:", foo);
+  }
+</script>
