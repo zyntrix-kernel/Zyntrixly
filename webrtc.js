@@ -551,6 +551,19 @@ const ZxCall = (() => {
   }
 
   // ── Public API ──
+  async function startGroupCall(gid, mode='voice'){
+    if(callId){toast('Already in a call.');return;}
+    if(typeof db==='undefined'||!db){toast('App not ready.');return;}
+    // Create/reset the group call doc
+    const ref = db.collection('calls').doc('grp_'+gid);
+    await ref.set({
+      callId:'grp_'+gid, callerId:ME.uid, callerName:ME.username,
+      mode, status:'active', participants:[ME.uid],
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(()=>{});
+    await joinGroupCall('grp_'+gid, mode);
+  }
+
   return {
     startCall,
     acceptCall,
@@ -560,6 +573,7 @@ const ZxCall = (() => {
     toggleVideo,
     toggleScreenShare,
     switchCamera,
+    startGroupCall,
     joinGroupCall,
     listenForIncomingCalls,
     isInCall: () => !!callId,

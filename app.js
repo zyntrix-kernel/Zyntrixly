@@ -292,13 +292,23 @@ function getChatContext(chat=CHAT){
   };
 }
 
+function startChatCall(mode){
+  if(!CHAT||typeof ZxCall==='undefined'){toast('Call unavailable.');return;}
+  if(CHAT.type==='dm'){
+    if(!CHAT.otherUid){toast('Cannot start call: contact not loaded yet.');return;}
+    ZxCall.startCall(CHAT.otherUid,mode);
+  } else if(CHAT.type==='group'){
+    ZxCall.startGroupCall(CHAT.id,mode);
+  }
+}
+
 function updateCallButtons(chat=CHAT){
   try{
     const vBtn=document.getElementById('hdr-voice-btn');
     const vidBtn=document.getElementById('hdr-video-btn');
-    const isDM=!!(chat&&chat.type==='dm');
-    if(vBtn)  vBtn.style.display=isDM?'flex':'none';
-    if(vidBtn)vidBtn.style.display=isDM?'flex':'none';
+    const hasChat=!!(chat&&(chat.type==='dm'||chat.type==='group'));
+    if(vBtn)  vBtn.style.display=hasChat?'flex':'none';
+    if(vidBtn)vidBtn.style.display=hasChat?'flex':'none';
   }catch(e){}
 }
 
@@ -355,7 +365,7 @@ function openFileShare(){
   input.onchange=async()=>{
     const file=input.files?.[0]; if(!file)return;
     if(file.size>5*1024*1024){toast('Max file size: 5MB',3000);return;}
-    toast('Encrypting & uploading…',12000);
+    toast('Encrypting…',12000);
     try{
       const key=await crypto.subtle.generateKey({name:'AES-GCM',length:256},true,['encrypt','decrypt']);
       const iv=crypto.getRandomValues(new Uint8Array(12));
@@ -364,29 +374,37 @@ function openFileShare(){
       const rawKey=await crypto.subtle.exportKey('raw',key);
       const keyHex=Array.from(new Uint8Array(rawKey)).map(b=>b.toString(16).padStart(2,'0')).join('');
       const ivHex=Array.from(iv).map(b=>b.toString(16).padStart(2,'0')).join('');
-      const blob=new Blob([enc]);
-      const fd=new FormData(); fd.append('file',blob,file.name+'.enc');
-      const res=await fetch('https://file.io/?expires=1d',{method:'POST',body:fd});
-      const json=await res.json();
-      if(!json.success)throw new Error(json.message||'Upload failed');
-      const payload=JSON.stringify({__type:'file',url:json.link,name:file.name,size:file.size,key:keyHex,iv:ivHex,expiry:'24h'});
+      // Store encrypted file as base64 directly in the message (no external host needed)
+      const encArr=new Uint8Array(enc);
+      const b64chunks=[];
+      for(let i=0;i<encArr.length;i+=8192) b64chunks.push(String.fromCharCode(...encArr.subarray(i,i+8192)));
+      const encB64=btoa(b64chunks.join(''));
+      const payload=JSON.stringify({__type:'file',data:encB64,name:file.name,size:file.size,key:keyHex,iv:ivHex});
       if(CHAT.type==='dm')await sendDMMsg(payload,null);
       else await sendGrpMsg(payload,null);
       toast('📎 File sent!');
     }catch(e){
-      // Never log encryption keys
       toast('Upload failed: '+(e.message||'Unknown error'),4000);
     }
   };
   input.click();
 }
 
-async function downloadFileMsg(url,name,keyHex,ivHex){
+async function downloadFileMsg(urlOrData,name,keyHex,ivHex,isB64){
   try{
-    toast('Downloading & decrypting…',8000);
-    const res=await fetch(url);
-    if(!res.ok)throw new Error('File expired or unavailable');
-    const encBuf=await res.arrayBuffer();
+    toast('Decrypting…',8000);
+    let encBuf;
+    if(isB64||(!urlOrData.startsWith('http')&&urlOrData.length>100)){
+      // Inline base64 data
+      const bin=atob(urlOrData);
+      const arr=new Uint8Array(bin.length);
+      for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+      encBuf=arr.buffer;
+    } else {
+      const res=await fetch(urlOrData);
+      if(!res.ok)throw new Error('File expired or unavailable');
+      encBuf=await res.arrayBuffer();
+    }
     const rawKey=new Uint8Array(keyHex.match(/.{2}/g).map(b=>parseInt(b,16)));
     const iv=new Uint8Array(ivHex.match(/.{2}/g).map(b=>parseInt(b,16)));
     const aesKey=await crypto.subtle.importKey('raw',rawKey,{name:'AES-GCM'},false,['decrypt']);
@@ -394,6 +412,7 @@ async function downloadFileMsg(url,name,keyHex,ivHex){
     const a=document.createElement('a');
     a.href=URL.createObjectURL(new Blob([decBuf]));
     a.download=name; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),10000);
     toast('✅ File saved!');
   }catch(e){
     toast('Download failed: '+e.message,4000);
@@ -747,6 +766,26 @@ auth.onAuthStateChanged(async user=>{
     if(_booted) return;
     await bootApp(user);
   } else {
+    // user=null can happen offline even when user IS logged in
+    // Check for cached session before forcing auth screen
+    const cachedUid = localStorage.getItem('zx_last_uid');
+    const cachedProfile = cachedUid ? getCachedProfile(cachedUid) : null;
+    if(!navigator.onLine && cachedUid && cachedProfile){
+      // Offline but we have cached data — boot in offline mode
+      const privKey = Crypto.loadLocal(cachedUid);
+      ME={uid:cachedUid,username:cachedProfile.username,color:cachedProfile.color||'#3b82f6',privKey,publicKey:cachedProfile.publicKey||null};
+      _booted=true;
+      updateMeUI();
+      _authResolved=true;
+      showScreen('app-screen');
+      finishStartup();
+      startDMListener();
+      startGroupListener();
+      updateNotifUI();
+      setAuthLoading(false);
+      toast('📴 Offline mode — showing cached data.',4000);
+      return;
+    }
     _booted=false;
     ME=null;CHAT=null;
     _authResolved=true;
@@ -812,6 +851,7 @@ async function bootApp(user){
     sessionStorage.removeItem('zx_p');
 
     ME={uid:user.uid,username:data.username,color:data.color||'#3b82f6',privKey,publicKey:data.publicKey};
+    try{ localStorage.setItem('zx_last_uid',user.uid); }catch(e){}
 
     setOnline(true);
     window.addEventListener('beforeunload',()=>setOnline(false));
@@ -1039,6 +1079,7 @@ function doSignOut(){
   _authResolved=true;
   ME=null;CHAT=null;
   closeAllModals();
+  try{localStorage.removeItem('zx_last_uid');}catch(e){}
   auth.signOut();
 }
 
@@ -1729,11 +1770,11 @@ async function decryptBubble(bub,data,mine,chatCtx=getChatContext()){
         card.className='file-bubble';
         card.style.cssText='cursor:pointer;display:flex;align-items:center;gap:10px;padding:4px 0';
         // Store metadata as data attributes (avoids quote escaping in onclick)
-        card.dataset.url=parsed.url||'';
+        card.dataset.src=parsed.data||parsed.url||'';
         card.dataset.name=parsed.name||'file';
         card.dataset.key=parsed.key||'';
         card.dataset.iv=parsed.iv||'';
-        card.onclick=function(){downloadFileMsg(this.dataset.url,this.dataset.name,this.dataset.key,this.dataset.iv);};
+        card.onclick=function(){downloadFileMsg(this.dataset.src,this.dataset.name,this.dataset.key,this.dataset.iv);};
         card.innerHTML=`<div style="width:38px;height:38px;border-radius:10px;background:rgba(59,130,246,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           </div>

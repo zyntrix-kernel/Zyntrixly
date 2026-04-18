@@ -1,11 +1,12 @@
-const CACHE_NAME='zyntrixly-shell-v1';
-const CORE_ASSETS=[
+const CACHE='zyntrixly-v3';
+const SHELL=[
   './',
   './index.html',
-  './style.css',
   './app.js',
   './crypto.js',
-  './firebase-config.js',
+  './security.js',
+  './webrtc.js',
+  './style.css',
   './manifest.webmanifest',
   './assets/app-icon-192.png',
   './assets/app-icon-512.png',
@@ -28,48 +29,53 @@ const CORE_ASSETS=[
   './vendor/fonts/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxjPQ.ttf'
 ];
 
-self.addEventListener('install',event=>{
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache=>cache.addAll(CORE_ASSETS))
-  );
+self.addEventListener('install',e=>{
+  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)));
   self.skipWaiting();
 });
 
-self.addEventListener('activate',event=>{
-  event.waitUntil(
+self.addEventListener('activate',e=>{
+  e.waitUntil(
     caches.keys().then(keys=>Promise.all(
-      keys.filter(key=>key!==CACHE_NAME).map(key=>caches.delete(key))
+      keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))
     )).then(()=>self.clients.claim())
   );
 });
 
-self.addEventListener('fetch',event=>{
-  const request=event.request;
-  if(request.method!=='GET') return;
+self.addEventListener('fetch',e=>{
+  const req=e.request;
+  if(req.method!=='GET') return;
+  const url=new URL(req.url);
 
-  const url=new URL(request.url);
-  if(url.origin!==self.location.origin) return;
+  // Never intercept /api/* — always needs network
+  if(url.pathname.startsWith('/api/')) return;
 
-  if(request.mode==='navigate'){
-    event.respondWith(
-      fetch(request).then(response=>{
-        const copy=response.clone();
-        caches.open(CACHE_NAME).then(cache=>cache.put('./index.html',copy));
-        return response;
-      }).catch(()=>caches.match('./index.html'))
+  // Navigation: serve cached shell, update in background
+  if(req.mode==='navigate'){
+    e.respondWith(
+      caches.match('./index.html').then(cached=>{
+        const fresh=fetch(req).then(res=>{
+          caches.open(CACHE).then(c=>c.put('./index.html',res.clone()));
+          return res;
+        }).catch(()=>cached);
+        return cached||fresh;
+      })
     );
     return;
   }
 
-  event.respondWith(
-    caches.match(request).then(cached=>{
-      if(cached) return cached;
-      return fetch(request).then(response=>{
-        if(!response||response.status!==200||response.type!=='basic') return response;
-        const copy=response.clone();
-        caches.open(CACHE_NAME).then(cache=>cache.put(request,copy));
-        return response;
-      });
-    })
-  );
+  // Same-origin assets: cache-first
+  if(url.origin===self.location.origin){
+    e.respondWith(
+      caches.match(req).then(cached=>{
+        if(cached) return cached;
+        return fetch(req).then(res=>{
+          if(res&&res.status===200&&res.type==='basic'){
+            caches.open(CACHE).then(c=>c.put(req,res.clone()));
+          }
+          return res;
+        }).catch(()=>new Response('Offline',{status:503}));
+      })
+    );
+  }
 });

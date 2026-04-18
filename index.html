@@ -239,11 +239,10 @@
           </div>
           <div class="chat-hdr-actions">
             <!-- Voice call -->
-            <button class="chat-call-btn" id="hdr-voice-btn" title="Voice call" onclick="ZxCall.startCall(CHAT?.otherUid||null,'voice')" style="display:none">
+            <button class="chat-call-btn" id="hdr-voice-btn" title="Voice call" onclick="startChatCall('voice')" style="display:none">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.67A2 2 0 012.18 1h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 8.1a16 16 0 006.29 6.29l1.46-1.46a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
             </button>
-            <!-- Video call -->
-            <button class="chat-call-btn" id="hdr-video-btn" title="Video call" onclick="ZxCall.startCall(CHAT?.otherUid||null,'video')" style="display:none">
+            <button class="chat-call-btn" id="hdr-video-btn" title="Video call" onclick="startChatCall('video')" style="display:none">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
             </button>
             <button class="sb-icon-btn hidden" id="grp-info-btn" onclick="openGrpPanel()" title="Group info">
