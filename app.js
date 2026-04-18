@@ -19,8 +19,8 @@ let fontStyle='modern'; // 'modern'|'futuristic'|'rounded'
 let isSignIn=true;
 let sbArchOpen=false;
 let settingsView='main';// current settings sub-view
-let _startupMinDone=false;
-let _authResolved=false;
+var _startupMinDone=window._startupMinDone||false;
+var _authResolved=window._authResolved||false;
 let deferredInstallPrompt=null;
 let installBannerTimer=null;
 let presenceUnsub=null;
@@ -42,63 +42,30 @@ let chatSessionId=0;
 /* ════════════════════════════════════════════════
    STARTUP ANIMATION
 ════════════════════════════════════════════════ */
-function initApp() {
-  // Startup phases
-  const el=id=>(document.getElementById(id));
-  setTimeout(()=>el('startup').querySelector('.startup-bg-grad').classList.add('vis'),200);
-  setTimeout(()=>el('startup').querySelector('.startup-orb').classList.add('vis'),200);
-  setTimeout(()=>{
-    el('startup').querySelector('.startup-icon-glow').classList.add('vis');
-    el('startup').querySelector('.startup-icon').classList.add('vis');
-    el('startup').querySelector('.startup-title').classList.add('vis');
-  },600);
-  setTimeout(()=>{
-    el('startup').querySelector('.startup-sub').classList.add('vis');
-    el('startup').querySelector('.startup-dots').classList.add('vis');
-  },1200);
-  setTimeout(()=>el('startup-fade').classList.add('vis'),2000);
-  setTimeout(()=>{
-    _startupMinDone=true;
-    finishStartup();
-  },2500);
-  // Hard cap: never block UI beyond 3 seconds
-  setTimeout(()=>{
-    _startupMinDone=true;
-    if(!_authResolved){
-      _authResolved=true;
-      showScreen('auth-screen');
-      finishStartup();
-    }
-  },3000);
+// Startup animation logic moved to index.html inline script
 
-  // Load saved font
-  const saved=localStorage.getItem('zx_font')||'modern';
-  applyFont(saved,false);
+// Load saved font
+const saved=localStorage.getItem('zx_font')||'modern';
+applyFont(saved,false);
 
-  // Global click: close menus
-  document.addEventListener('click',e=>{
-    if(!e.target.closest('#ctx'))           closeCtx();
-    if(!e.target.closest('#react-pick'))    closeRP();
-    if(!e.target.closest('#chat-menu'))     closeChatMenu();
-    if(!e.target.closest('.sb-search-wrap'))el('sb-search-drop').classList.add('hidden');
-  });
-  document.addEventListener('keydown',e=>{
-    if(e.key==='Escape'){
-      closeAllModals();cancelReply();closeCtx();closeRP();
-    }
-  });
+// Global click: close menus
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#ctx'))           closeCtx();
+  if(!e.target.closest('#react-pick'))    closeRP();
+  if(!e.target.closest('#chat-menu'))     closeChatMenu();
+  if(!e.target.closest('.sb-search-wrap'))document.getElementById('sb-search-drop').classList.add('hidden');
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    closeAllModals();cancelReply();closeCtx();closeRP();
+  }
+});
 
-  // Build settings items
-  buildSettings();
-  registerServiceWorker();
-  setupInstallPrompt();
-}
+// Build settings items
+buildSettings();
+registerServiceWorker();
+setupInstallPrompt();
 
-if(document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initApp);
-} else {
-  initApp();
-}
 
 /* ════════════════════════════════════════════════
    HELPERS
@@ -717,7 +684,7 @@ async function doRegister(username,pass){
     _registering=false;
     // If Firestore write failed but auth user was created, clean up
     if(auth.currentUser) await auth.signOut();
-    showErr('auth-err',authErrMsg(err.code));
+    showErr('auth-err',authErrMsg(err));
     setAuthLoading(false);
   }
 }
@@ -737,12 +704,14 @@ async function doLogin(username,pass){
     await bootApp(cred.user);
   } catch(err){
     sessionStorage.removeItem('zx_p');
-    showErr('auth-err',authErrMsg(err.code));
+    showErr('auth-err',authErrMsg(err));
     setAuthLoading(false);
   }
 }
 
-function authErrMsg(code){
+function authErrMsg(err){
+  const code = err && err.code ? err.code : '';
+  const msg = err && err.message ? err.message : 'Something went wrong. Try again.';
   return({
     'auth/email-already-in-use':'Username already taken.',
     'auth/invalid-credential':  'Wrong username or password.',
@@ -750,7 +719,7 @@ function authErrMsg(code){
     'auth/wrong-password':      'Wrong password.',
     'auth/weak-password':       'Password is too short.',
     'auth/too-many-requests':   'Too many attempts. Please wait.',
-  })[code]||'Something went wrong. Try again.';
+  })[code]||msg;
 }
 
 function setAuthLoading(on){

@@ -600,6 +600,38 @@
 <!-- NOISE OVERLAY -->
 <div class="noise-overlay"></div>
 
+<script>
+(function runStartupAnim() {
+  const el = id => document.getElementById(id);
+  const startup = el('startup');
+  if (!startup) return;
+  setTimeout(() => startup.querySelector('.startup-bg-grad')?.classList.add('vis'), 50);
+  setTimeout(() => startup.querySelector('.startup-orb')?.classList.add('vis'), 50);
+  setTimeout(() => {
+    startup.querySelector('.startup-icon-glow')?.classList.add('vis');
+    startup.querySelector('.startup-icon')?.classList.add('vis');
+    startup.querySelector('.startup-title')?.classList.add('vis');
+  }, 400);
+  setTimeout(() => {
+    startup.querySelector('.startup-sub')?.classList.add('vis');
+    startup.querySelector('.startup-dots')?.classList.add('vis');
+  }, 800);
+  setTimeout(() => el('startup-fade')?.classList.add('vis'), 1600);
+  setTimeout(() => {
+    window._startupMinDone = true;
+    if (typeof finishStartup === 'function') finishStartup();
+  }, 2200);
+  setTimeout(()=>{
+    window._startupMinDone=true;
+    if(!window._authResolved && typeof showScreen === 'function'){
+      window._authResolved=true;
+      showScreen('auth-screen');
+      if (typeof finishStartup === 'function') finishStartup();
+    }
+  }, 3000);
+})();
+</script>
+
 <script src="vendor/firebase/firebase-app-compat.js"></script>
 <script src="vendor/firebase/firebase-auth-compat.js"></script>
 <script src="vendor/firebase/firebase-firestore-compat.js"></script>
