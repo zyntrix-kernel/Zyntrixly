@@ -623,14 +623,21 @@
   }, 2200);
   setTimeout(()=>{
     window._startupMinDone=true;
-    if(!window._authResolved){
-      window._authResolved=true;
-      if(typeof showScreen === 'function'){
-        showScreen('auth-screen');
-        if (typeof finishStartup === 'function') finishStartup();
-      }
+    window._authResolved=true;
+    // Force-hide startup directly — no dependency on app.js functions
+    var su = document.getElementById('startup');
+    if(su && !su.classList.contains('out')){
+      su.classList.add('out');
+      setTimeout(()=>{ su.style.display='none'; }, 600);
     }
-  }, 3000);
+    // Show auth screen directly
+    var auth = document.getElementById('auth-screen');
+    var app  = document.getElementById('app-screen');
+    if(auth) { auth.classList.remove('hidden'); auth.style.display=''; }
+    if(app)  { app.classList.add('hidden'); }
+    // Also call app.js functions if they loaded in time
+    if(typeof finishStartup === 'function') finishStartup();
+  }, 3500);
 })();
 </script>
 
