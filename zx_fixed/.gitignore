@@ -1,0 +1,21 @@
+# ── SECRETS — NEVER commit these ──
+firebase-config.js
+.env
+.env.local
+.env*.local
+
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+.vercel/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
