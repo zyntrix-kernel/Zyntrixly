@@ -42,7 +42,7 @@ let chatSessionId=0;
 /* ════════════════════════════════════════════════
    STARTUP ANIMATION
 ════════════════════════════════════════════════ */
-window.addEventListener('DOMContentLoaded',()=>{
+function initApp() {
   // Startup phases
   const el=id=>(document.getElementById(id));
   setTimeout(()=>el('startup').querySelector('.startup-bg-grad').classList.add('vis'),200);
@@ -62,7 +62,14 @@ window.addEventListener('DOMContentLoaded',()=>{
     finishStartup();
   },2500);
   // Hard cap: never block UI beyond 3 seconds
-  setTimeout(()=>{_startupMinDone=true;_authResolved=true;finishStartup();},3000);
+  setTimeout(()=>{
+    _startupMinDone=true;
+    if(!_authResolved){
+      _authResolved=true;
+      showScreen('auth-screen');
+      finishStartup();
+    }
+  },3000);
 
   // Load saved font
   const saved=localStorage.getItem('zx_font')||'modern';
@@ -85,7 +92,13 @@ window.addEventListener('DOMContentLoaded',()=>{
   buildSettings();
   registerServiceWorker();
   setupInstallPrompt();
-});
+}
+
+if(document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
 
 /* ════════════════════════════════════════════════
    HELPERS
