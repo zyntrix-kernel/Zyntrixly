@@ -89,7 +89,7 @@ function showErr(elId,msg){
 function clearErr(elId){const el=id(elId);el.textContent='';el.classList.add('hidden');}
 
 function finishStartup(){
-  if(!_startupMinDone||!_authResolved)return;
+  if(!(window._startupMinDone || _startupMinDone) || !(window._authResolved || _authResolved)) return;
   const startup=id('startup');
   if(!startup||startup.classList.contains('out'))return;
   startup.classList.add('out');
@@ -2439,4 +2439,11 @@ function updateFsIcon(){
     const el=id(iconId);
     if(el) el.innerHTML=isFs?compressSvg:expandSvg;
   });
+}
+
+// Safety net: If index.html's 3000ms timeout fired before app.js loaded,
+// we need to immediately show the auth screen and fade out the startup UI.
+if (window._authResolved) {
+  showScreen('auth-screen');
+  finishStartup();
 }
