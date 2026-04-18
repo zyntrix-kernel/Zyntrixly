@@ -623,14 +623,21 @@
   }, 2200);
   setTimeout(()=>{
     window._startupMinDone=true;
-    if(!window._authResolved){
-      window._authResolved=true;
-      if(typeof showScreen === 'function'){
-        showScreen('auth-screen');
-        if (typeof finishStartup === 'function') finishStartup();
-      }
+    window._authResolved=true;
+    // Force-hide startup directly — no dependency on app.js functions
+    var su = document.getElementById('startup');
+    if(su && !su.classList.contains('out')){
+      su.classList.add('out');
+      setTimeout(()=>{ su.style.display='none'; }, 600);
     }
-  }, 3000);
+    // Show auth screen directly
+    var auth = document.getElementById('auth-screen');
+    var app  = document.getElementById('app-screen');
+    if(auth) { auth.classList.remove('hidden'); auth.style.display=''; }
+    if(app)  { app.classList.add('hidden'); }
+    // Also call app.js functions if they loaded in time
+    if(typeof finishStartup === 'function') finishStartup();
+  }, 3500);
 })();
 </script>
 
@@ -648,10 +655,10 @@
     if (res.ok) {
       const cfg = await res.json();
       if (cfg && cfg.apiKey) {
-        firebase.initializeApp(cfg);
+        try { firebase.initializeApp(cfg); } catch(dupErr) { /* already initialized */ }
         window.auth = firebase.auth();
         window.db   = firebase.firestore();
-        db.enablePersistence({synchronizeTabs:true}).catch(e=>console.warn('Persistence:',e?.code||e));
+        try { db.enablePersistence({synchronizeTabs:true}); } catch(e) {}
         window._firebaseReady = true;
         window.dispatchEvent(new Event('firebase-ready'));
         return;
@@ -663,10 +670,34 @@
   const s = document.createElement('script');
   s.src = 'firebase-config.js';
   s.onload = () => {
-    window._firebaseReady = true;
-    window.dispatchEvent(new Event('firebase-ready'));
+    // firebase-config.js may set window.firebaseConfig (new safe format)
+    // or may have already called firebase.initializeApp (old format)
+    if (!window.auth || !window.db) {
+      const cfg = window.firebaseConfig;
+      if (cfg && cfg.apiKey) {
+        try { firebase.initializeApp(cfg); } catch(e) {}
+        window.auth = firebase.auth();
+        window.db   = firebase.firestore();
+        try { db.enablePersistence({synchronizeTabs:true}); } catch(e) {}
+      }
+    }
+    if (window.auth && window.db) {
+      window._firebaseReady = true;
+      window.dispatchEvent(new Event('firebase-ready'));
+    } else {
+      console.error('[Zyntrixly] firebase-config.js loaded but Firebase not initialized. Check your config.');
+    }
   };
-  s.onerror = () => console.error('[Zyntrixly] Neither /api/config nor firebase-config.js found. See GUIDE.md for setup.');
+  s.onerror = () => {
+    // Neither API nor local file — show error after startup anim finishes
+    setTimeout(()=>{
+      document.getElementById('startup')?.classList.add('out');
+      const d = document.createElement('div');
+      d.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0a0a1a;color:#ef4444;font-family:sans-serif;font-size:15px;text-align:center;padding:32px;z-index:99999';
+      d.innerHTML = '<div><div style="font-size:40px;margin-bottom:12px">⚠️</div><strong>Firebase not configured</strong><br><br>Set env vars on Vercel or create<br><code>firebase-config.js</code> locally.<br><br>See GUIDE.md → Part 3</div>';
+      document.body.appendChild(d);
+    }, 500);
+  };
   document.head.appendChild(s);
 })();
 </script>
@@ -680,11 +711,19 @@
 // before injecting app.js and webrtc.js into the page.
 (function deferAppBoot() {
   function loadScripts() {
-    ['app.js', 'webrtc.js'].forEach(function(src) {
-      var s = document.createElement('script');
-      s.src = src;
-      document.body.appendChild(s);
-    });
+    // Load app.js first, then webrtc.js
+    var appScript = document.createElement('script');
+    appScript.src = 'app.js';
+    appScript.onload = function() {
+      // app.js is ready — attach the auth listener now Firebase is confirmed up
+      if (typeof _attachAuthListener === 'function') _attachAuthListener();
+      // Then load webrtc
+      var rtcScript = document.createElement('script');
+      rtcScript.src = 'webrtc.js';
+      document.body.appendChild(rtcScript);
+    };
+    appScript.onerror = function() { console.error('Failed to load app.js'); };
+    document.body.appendChild(appScript);
   }
 
   // Already ready (inline firebase-config.js path or fast API response)

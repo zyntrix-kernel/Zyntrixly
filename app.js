@@ -370,7 +370,8 @@ function openFileShare(){
       const json=await res.json();
       if(!json.success)throw new Error(json.message||'Upload failed');
       const payload=JSON.stringify({__type:'file',url:json.link,name:file.name,size:file.size,key:keyHex,iv:ivHex,expiry:'24h'});
-      CHAT.type==='dm'?await sendDMMsg(payload,null):await sendGrpMsg(payload,null);
+      if(CHAT.type==='dm')await sendDMMsg(payload,null);
+      else await sendGrpMsg(payload,null);
       toast('📎 File sent!');
     }catch(e){
       // Never log encryption keys
@@ -734,9 +735,12 @@ function setAuthLoading(on){
 //  auto-login (Firebase remembered session).
 //  Fresh register/login are handled by bootApp().
 // ─────────────────────────────────────────────
-let _booted=false; // prevent double-boot if both fire
-// Guard: only attach listener once Firebase is confirmed ready
-if(typeof auth==='undefined'){console.error('[Zyntrixly] auth not ready — firebase-config missing');}
+let _booted=false;
+function _attachAuthListener(){
+  if(typeof auth==='undefined'||!auth){
+    console.error('[Zyntrixly] auth not ready');
+    return;
+  }
 auth.onAuthStateChanged(async user=>{
   if(_registering) return; // registration in progress — skip
   if(user){
@@ -750,7 +754,8 @@ auth.onAuthStateChanged(async user=>{
     finishStartup();
     setAuthLoading(false);
   }
-});
+}); // end auth.onAuthStateChanged
+} // end _attachAuthListener
 
 // ─────────────────────────────────────────────
 //  bootApp — THE single place that sets up the
@@ -760,8 +765,10 @@ auth.onAuthStateChanged(async user=>{
 //    • onAuthStateChanged (page reload)
 // ─────────────────────────────────────────────
 async function bootApp(user){
-  if(_booted) return; // already running
+  if(_booted) return;
   _booted=true;
+  // Hard cap: startup always clears within 5s of bootApp
+  setTimeout(()=>{ window._startupMinDone=true; window._authResolved=true; if(typeof finishStartup==='function')finishStartup(); },5000);
 
   try{
     // Fetch user doc — retry once if race condition (doc just created)
@@ -2441,9 +2448,5 @@ function updateFsIcon(){
   });
 }
 
-// Safety net: If index.html's 3000ms timeout fired before app.js loaded,
-// we need to immediately show the auth screen and fade out the startup UI.
-if (window._authResolved) {
-  showScreen('auth-screen');
-  finishStartup();
-}
+// App loaded — attach auth listener now that Firebase is confirmed ready
+_attachAuthListener();
