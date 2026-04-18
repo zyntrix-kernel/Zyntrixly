@@ -643,104 +643,75 @@
 <script src="vendor/firebase/firebase-app-compat.js"></script>
 <script src="vendor/firebase/firebase-auth-compat.js"></script>
 <script src="vendor/firebase/firebase-firestore-compat.js"></script>
-<script>
-// ── SECURE CONFIG LOADER ──────────────────────
-// Fetches Firebase config from Vercel serverless function (/api/config)
-// which reads from environment variables. No secrets in frontend bundle.
-// Fallback: if running locally without the API, loads firebase-config.js
-(async function loadFirebaseConfig(){
-  try {
-    const res = await fetch('/api/config');
-    if (res.ok) {
-      const cfg = await res.json();
-      if (cfg && cfg.apiKey) {
-        try { firebase.initializeApp(cfg); } catch(dupErr) { /* already initialized */ }
-        window.auth = firebase.auth();
-        window.db   = firebase.firestore();
-        try { db.enablePersistence({synchronizeTabs:true}); } catch(e) {}
-        window._firebaseReady = true;
-        window.dispatchEvent(new Event('firebase-ready'));
-        return;
-      }
-    }
-  } catch(e) { /* API not available — fall through to local file */ }
-
-  // Local dev fallback: load firebase-config.js (gitignored, never committed)
-  const s = document.createElement('script');
-  s.src = 'firebase-config.js';
-  s.onload = () => {
-    // firebase-config.js may set window.firebaseConfig (new safe format)
-    // or may have already called firebase.initializeApp (old format)
-    if (!window.auth || !window.db) {
-      const cfg = window.firebaseConfig;
-      if (cfg && cfg.apiKey) {
-        try { firebase.initializeApp(cfg); } catch(e) {}
-        window.auth = firebase.auth();
-        window.db   = firebase.firestore();
-        try { db.enablePersistence({synchronizeTabs:true}); } catch(e) {}
-      }
-    }
-    if (window.auth && window.db) {
-      window._firebaseReady = true;
-      window.dispatchEvent(new Event('firebase-ready'));
-    } else {
-      console.error('[Zyntrixly] firebase-config.js loaded but Firebase not initialized. Check your config.');
-    }
-  };
-  s.onerror = () => {
-    // Neither API nor local file — show error after startup anim finishes
-    setTimeout(()=>{
-      document.getElementById('startup')?.classList.add('out');
-      const d = document.createElement('div');
-      d.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0a0a1a;color:#ef4444;font-family:sans-serif;font-size:15px;text-align:center;padding:32px;z-index:99999';
-      d.innerHTML = '<div><div style="font-size:40px;margin-bottom:12px">⚠️</div><strong>Firebase not configured</strong><br><br>Set env vars on Vercel or create<br><code>firebase-config.js</code> locally.<br><br>See GUIDE.md → Part 3</div>';
-      document.body.appendChild(d);
-    }, 500);
-  };
-  document.head.appendChild(s);
-})();
-</script>
+<script src="firebase-config.js"></script>
 <script src="crypto.js"></script>
 <script src="security.js"></script>
 <script>
-// ── DEFERRED APP BOOT ──────────────────────────
-// app.js MUST load after Firebase is initialised.
-// The async config loader above fires 'firebase-ready'
-// once auth + db are available. We wait for that
-// before injecting app.js and webrtc.js into the page.
-(function deferAppBoot() {
-  function loadScripts() {
-    // Load app.js first, then webrtc.js
-    var appScript = document.createElement('script');
-    appScript.src = 'app.js';
-    appScript.onload = function() {
-      // app.js is ready — attach the auth listener now Firebase is confirmed up
-      if (typeof _attachAuthListener === 'function') _attachAuthListener();
-      // Then load webrtc
-      var rtcScript = document.createElement('script');
-      rtcScript.src = 'webrtc.js';
-      document.body.appendChild(rtcScript);
-    };
-    appScript.onerror = function() { console.error('Failed to load app.js'); };
-    document.body.appendChild(appScript);
+(function ZxBoot(){
+  // firebase-config.js already called firebase.initializeApp()
+  // and set local auth/db — expose them on window so app.js can use them
+  try {
+    window.auth = firebase.auth();
+    window.db   = firebase.firestore();
+  } catch(e) {
+    // Show fatal error if firebase-config.js missing
+    document.getElementById('startup').style.display='none';
+    var d=document.createElement('div');
+    d.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0a0a1a;color:#ef4444;font-family:sans-serif;font-size:15px;text-align:center;padding:32px;z-index:99999';
+    d.innerHTML='<div><div style="font-size:40px;margin-bottom:12px">⚠️</div><strong>firebase-config.js missing</strong><br><br>Add your Firebase config file to the project root.<br>See GUIDE.md for instructions.</div>';
+    document.body.appendChild(d);
+    return;
   }
 
-  // Already ready (inline firebase-config.js path or fast API response)
-  if (window._firebaseReady || (window.auth && window.db)) {
-    loadScripts();
-  } else {
-    window.addEventListener('firebase-ready', loadScripts, { once: true });
-    // Absolute safety net — if firebase-ready never fires in 6s, show error
-    setTimeout(function() {
-      if (!window.auth || !window.db) {
-        document.getElementById('startup')?.classList.add('out');
-        var errDiv = document.createElement('div');
-        errDiv.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0a0a1a;color:#ef4444;font-family:sans-serif;font-size:16px;text-align:center;padding:32px;z-index:99999';
-        errDiv.innerHTML = '<div><div style="font-size:32px;margin-bottom:16px">⚠️</div><strong>Firebase not configured</strong><br><br>See <code>GUIDE.md</code> Part 3 to set your<br>environment variables on Vercel.</div>';
-        document.body.appendChild(errDiv);
+  // Enable Firestore offline persistence
+  try { window.db.enablePersistence({synchronizeTabs:true}); } catch(e) {}
+
+  // Set LOCAL persistence so session always survives page reload
+  window.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(){});
+
+  // Hide startup screen helper — exposed globally for app.js
+  var _startupHidden = false;
+  window.ZxHideStartup = function(){
+    if(_startupHidden) return;
+    _startupHidden = true;
+    var s = document.getElementById('startup');
+    if(!s) return;
+    s.classList.add('out');
+    setTimeout(function(){ s.style.display='none'; }, 600);
+  };
+
+  // Hard cap: startup ALWAYS hides within 4 seconds no matter what
+  setTimeout(function(){
+    window._startupMinDone = true;
+    window._authResolved   = true;
+    window.ZxHideStartup();
+    // If app.js hasn't shown a screen yet, force auth screen
+    var app = document.getElementById('app-screen');
+    var auth = document.getElementById('auth-screen');
+    if(app && auth){
+      var appVisible = !app.classList.contains('hidden') && app.style.display!=='none';
+      if(!appVisible){
+        app.classList.add('hidden');
+        auth.classList.remove('hidden');
+        auth.style.display = '';
       }
-    }, 6000);
-  }
+    }
+  }, 4000);
+
+  // Load app.js → on load attach auth listener → then load webrtc.js
+  var appScript = document.createElement('script');
+  appScript.src = 'app.js';
+  appScript.onload = function(){
+    if(typeof _attachAuthListener === 'function') _attachAuthListener();
+    var rtc = document.createElement('script');
+    rtc.src = 'webrtc.js';
+    document.body.appendChild(rtc);
+  };
+  appScript.onerror = function(){
+    window.ZxHideStartup();
+    alert('Failed to load app.js. Check your deployment.');
+  };
+  document.body.appendChild(appScript);
 })();
 </script>
 

@@ -44,28 +44,8 @@ let chatSessionId=0;
 ════════════════════════════════════════════════ */
 // Startup animation logic moved to index.html inline script
 
-// Load saved font
-const saved=localStorage.getItem('zx_font')||'modern';
-applyFont(saved,false);
 
-// Global click: close menus
-document.addEventListener('click',e=>{
-  if(!e.target.closest('#ctx'))           closeCtx();
-  if(!e.target.closest('#react-pick'))    closeRP();
-  if(!e.target.closest('#chat-menu'))     closeChatMenu();
-  if(!e.target.closest('.sb-search-wrap'))document.getElementById('sb-search-drop').classList.add('hidden');
-});
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){
-    closeAllModals();cancelReply();closeCtx();closeRP();
-  }
-});
-
-// Build settings items
-buildSettings();
-registerServiceWorker();
-setupInstallPrompt();
-
+// Global listeners moved to end of file (after all functions are defined)
 
 /* ════════════════════════════════════════════════
    HELPERS
@@ -89,11 +69,12 @@ function showErr(elId,msg){
 function clearErr(elId){const el=id(elId);el.textContent='';el.classList.add('hidden');}
 
 function finishStartup(){
-  if(!(window._startupMinDone || _startupMinDone) || !(window._authResolved || _authResolved)) return;
+  if(!(window._startupMinDone||_startupMinDone)||!(window._authResolved||_authResolved)) return;
+  if(typeof window.ZxHideStartup==='function'){ window.ZxHideStartup(); return; }
   const startup=id('startup');
-  if(!startup||startup.classList.contains('out'))return;
+  if(!startup||startup.classList.contains('out')) return;
   startup.classList.add('out');
-  setTimeout(()=>{startup.style.display='none';},500);
+  setTimeout(()=>{ startup.style.display='none'; },500);
 }
 
 function setCachedProfile(uid,data){
@@ -755,36 +736,64 @@ function setAuthLoading(on){
 //  Fresh register/login are handled by bootApp().
 // ─────────────────────────────────────────────
 let _booted=false;
+
+function _bootFromCache(uid, profile){
+  const privKey = typeof Crypto!=='undefined' ? Crypto.loadLocal(uid) : null;
+  ME={uid,username:profile.username,color:profile.color||'#3b82f6',privKey,publicKey:profile.publicKey||null};
+  _booted=true; updateMeUI(); _authResolved=true;
+  showScreen('app-screen'); finishStartup();
+  startDMListener(); startGroupListener(); updateNotifUI(); setAuthLoading(false);
+  if(!navigator.onLine) toast('📴 Offline — showing cached data.',4000);
+}
+
 function _attachAuthListener(){
   if(typeof auth==='undefined'||!auth){
     console.error('[Zyntrixly] auth not ready');
     return;
   }
+  // Set LOCAL persistence first so Firebase always restores session without
+  // firing user=null on page reload. Then attach listener.
+  const _doAttach = () => {
 auth.onAuthStateChanged(async user=>{
   if(_registering) return; // registration in progress — skip
   if(user){
+    if(window._nullAuthTimer){clearTimeout(window._nullAuthTimer);window._nullAuthTimer=null;}
     if(_booted) return;
     await bootApp(user);
   } else {
-    // user=null can happen offline even when user IS logged in
-    // Check for cached session before forcing auth screen
+    // user=null fires during cold start BEFORE Firebase resolves the cached session.
+    // Wait up to 3s for a real user before falling back to auth screen.
     const cachedUid = localStorage.getItem('zx_last_uid');
-    const cachedProfile = cachedUid ? getCachedProfile(cachedUid) : null;
-    if(!navigator.onLine && cachedUid && cachedProfile){
-      // Offline but we have cached data — boot in offline mode
-      const privKey = Crypto.loadLocal(cachedUid);
-      ME={uid:cachedUid,username:cachedProfile.username,color:cachedProfile.color||'#3b82f6',privKey,publicKey:cachedProfile.publicKey||null};
-      _booted=true;
-      updateMeUI();
-      _authResolved=true;
-      showScreen('app-screen');
-      finishStartup();
-      startDMListener();
-      startGroupListener();
-      updateNotifUI();
-      setAuthLoading(false);
-      toast('📴 Offline mode — showing cached data.',4000);
-      return;
+    if(cachedUid && !_booted){
+      // Had a previous session — wait and see if Firebase resolves it
+      setTimeout(()=>{
+        if(_booted) return; // Firebase resolved the session — already booted
+        // Still no session after wait
+        const cachedProfile = getCachedProfile(cachedUid);
+        if(cachedProfile){
+          // Boot offline with cached data
+          const privKey = Crypto.loadLocal(cachedUid);
+          ME={uid:cachedUid,username:cachedProfile.username,color:cachedProfile.color||'#3b82f6',privKey,publicKey:cachedProfile.publicKey||null};
+          _booted=true;
+          updateMeUI();
+          _authResolved=true;
+          showScreen('app-screen');
+          finishStartup();
+          startDMListener();
+          startGroupListener();
+          updateNotifUI();
+          setAuthLoading(false);
+          toast('📴 Offline — loaded from cache.',3000);
+        } else {
+          _booted=false;
+          ME=null;CHAT=null;
+          _authResolved=true;
+          showScreen('auth-screen');
+          finishStartup();
+          setAuthLoading(false);
+        }
+      }, 1500);
+      return; // don't show auth screen yet
     }
     _booted=false;
     ME=null;CHAT=null;
@@ -794,6 +803,12 @@ auth.onAuthStateChanged(async user=>{
     setAuthLoading(false);
   }
 }); // end auth.onAuthStateChanged
+  }; // end _doAttach
+  // Apply LOCAL persistence so session survives page refresh before attaching
+  try {
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+      .then(_doAttach).catch(_doAttach);
+  } catch(e) { _doAttach(); }
 } // end _attachAuthListener
 
 // ─────────────────────────────────────────────
@@ -807,7 +822,7 @@ async function bootApp(user){
   if(_booted) return;
   _booted=true;
   // Hard cap: startup always clears within 5s of bootApp
-  setTimeout(()=>{ window._startupMinDone=true; window._authResolved=true; if(typeof finishStartup==='function')finishStartup(); },5000);
+  setTimeout(()=>{ window._startupMinDone=true; window._authResolved=true; if(typeof window.ZxHideStartup==='function')window.ZxHideStartup(); if(typeof finishStartup==='function')finishStartup(); },4000);
 
   try{
     // Fetch user doc — retry once if race condition (doc just created)
@@ -1532,7 +1547,7 @@ function openGroup(gid,data){
   watchChatMeta();
   highlightConv(gid);
   listenMsgs();
-  updateCallButtons(CHAT);
+  if(CHAT) updateCallButtons(CHAT);
 }
 
 /* ── Group panel ── */
@@ -2489,5 +2504,24 @@ function updateFsIcon(){
   });
 }
 
-// App loaded — attach auth listener now that Firebase is confirmed ready
-_attachAuthListener();
+// ── Global listeners (functions all defined by this point) ──
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#ctx'))           closeCtx();
+  if(!e.target.closest('#react-pick'))    closeRP();
+  if(!e.target.closest('#chat-menu'))     closeChatMenu();
+  const drop=document.getElementById('sb-search-drop');
+  if(drop&&!e.target.closest('.sb-search-wrap')) drop.classList.add('hidden');
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){ closeAllModals();cancelReply();closeCtx();closeRP(); }
+});
+
+// ── Init (functions all defined by this point) ──
+(function(){
+  const saved=localStorage.getItem('zx_font')||'modern';
+  applyFont(saved,false);
+  buildSettings();
+  registerServiceWorker();
+  setupInstallPrompt();
+})();
+
