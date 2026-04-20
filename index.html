@@ -651,22 +651,36 @@
 <script src="vendor/firebase/firebase-app-compat.js"></script>
 <script src="vendor/firebase/firebase-auth-compat.js"></script>
 <script src="vendor/firebase/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
+<!-- ═══ ZYNIX FIREBASE CONFIG — hardcoded, no .env needed ═══ -->
+<script>
+// Initialise Firebase directly — no external config file required
+(function(){
+  var firebaseConfig = {
+    apiKey:            "AIzaSyADe7-8VV6flXLwRc3pQtVpallWScxbY90",
+    authDomain:        "zyntrixly.firebaseapp.com",
+    projectId:         "zyntrixly",
+    storageBucket:     "zyntrixly.firebasestorage.app",
+    messagingSenderId: "663603557838",
+    appId:             "1:663603557838:web:634138b6999cf849d5e79f"
+  };
+  window.firebaseConfig = firebaseConfig;
+  // initialise the firebase app so compat SDKs can find it
+  firebase.initializeApp(firebaseConfig);
+})();
+</script>
 <script src="crypto.js"></script>
 <script src="security.js"></script>
 <script>
 (function ZxBoot(){
-  // firebase-config.js already called firebase.initializeApp()
-  // and set local auth/db — expose them on window so app.js can use them
+  // Firebase already initialised above — wire up auth + db
   try {
     window.auth = firebase.auth();
     window.db   = firebase.firestore();
   } catch(e) {
-    // Show fatal error if firebase-config.js missing
     document.getElementById('startup').style.display='none';
     var d=document.createElement('div');
-    d.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0a0a1a;color:#ef4444;font-family:sans-serif;font-size:15px;text-align:center;padding:32px;z-index:99999';
-    d.innerHTML='<div><div style="font-size:40px;margin-bottom:12px">⚠️</div><strong>firebase-config.js missing</strong><br><br>Add your Firebase config file to the project root.<br>See GUIDE.md for instructions.</div>';
+    d.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#03050f;color:#f87171;font-family:sans-serif;font-size:15px;text-align:center;padding:32px;z-index:99999';
+    d.innerHTML='<div><div style="font-size:40px;margin-bottom:16px">⚡</div><strong>Firebase initialisation failed</strong><br><br>Check the browser console for details.</div>';
     document.body.appendChild(d);
     return;
   }
