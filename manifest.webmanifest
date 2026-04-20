@@ -1,12 +1,12 @@
 {
-  "name": "Zyntrixly",
-  "short_name": "Zyntrixly",
-  "description": "Private-by-default encrypted messaging.",
+  "name": "Zynix",
+  "short_name": "Zynix",
+  "description": "Dangerously beautiful encrypted messaging",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#0f1423",
-  "theme_color": "#121a2b",
+  "background_color": "#03050f",
+  "theme_color": "#03050f",
   "orientation": "any",
   "icons": [
     {

@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-  <meta name="theme-color" content="#121a2b"/>
-  <meta name="description" content="Zyntrixly is a private-by-default encrypted messaging app."/>
-  <title>Zyntrixly</title>
+  <meta name="theme-color" content="#03050f"/>
+  <meta name="description" content="Zynix — Dangerously beautiful encrypted messaging."/>
+  <title>Zynix</title>
   <link rel="manifest" href="manifest.webmanifest"/>
   <link rel="icon" href="assets/app-icon-192.png" sizes="192x192"/>
   <link rel="icon" href="assets/app-icon-512.png" sizes="512x512"/>
@@ -18,19 +18,27 @@
 </head>
 <body class="font-modern">
 
+<!-- PARTICLE CANVAS (behind everything) -->
+<canvas id="zynix-canvas"></canvas>
+
 <!-- STARTUP ANIMATION -->
 <div id="startup" class="startup">
   <div class="startup-bg-grad"></div>
   <div class="startup-orb"></div>
+  <div class="startup-rings">
+    <div class="s-ring"></div>
+    <div class="s-ring"></div>
+    <div class="s-ring"></div>
+  </div>
   <div class="startup-content">
     <div class="startup-icon-wrap">
       <div class="startup-icon-glow"></div>
       <div class="startup-icon glass-panel-strong glow-blue">
-        <img src="app-icon.png" alt="Zyntrixly app icon" class="brand-mark brand-mark-xl"/>
+        <img src="app-icon.png" alt="Zynix app icon" class="brand-mark brand-mark-xl"/>
       </div>
     </div>
-    <h1 class="startup-title"><span class="text-foreground">Zyn</span><span class="text-primary glow-text">trixly</span></h1>
-    <p class="startup-sub"><span class="text-primary-light glow-text-sm">Private</span><span class="text-muted"> by default</span></p>
+    <h1 class="startup-title"><span class="brand-gradient">Zynix</span></h1>
+    <p class="startup-sub"><span class="text-primary-light glow-text-sm">Dangerously</span><span class="text-muted"> beautiful</span></p>
     <div class="startup-dots">
       <div class="typing-dot"></div>
       <div class="typing-dot"></div>
@@ -51,10 +59,10 @@
       <!-- Header -->
       <div class="auth-header">
         <div class="auth-icon glass-panel glow-blue">
-          <img src="app-icon.png" alt="Zyntrixly app icon" class="brand-mark brand-mark-md"/>
+          <img src="app-icon.png" alt="Zynix app icon" class="brand-mark brand-mark-md"/>
         </div>
         <h1 id="auth-title" class="auth-title">Welcome back</h1>
-        <p id="auth-subtitle" class="auth-subtitle">Sign in to continue to Zyntrixly</p>
+        <p id="auth-subtitle" class="auth-subtitle">Sign in to continue to Zynix</p>
       </div>
 
       <!-- Form -->
@@ -129,8 +137,8 @@
 
     <!-- Title -->
     <div class="mob-brand" id="mob-title">
-      <img src="zyntrixly-logo.png" alt="Zyntrixly" class="brand-lockup-img"/>
-      <span class="text-foreground">Zyn</span><span class="text-primary glow-text">trixly</span>
+      <img src="zyntrixly-logo.png" alt="Zynix" class="brand-lockup-img"/>
+      <span class="brand-gradient">Zynix</span>
     </div>
 
     <!-- Right: new chat (list) or more options (chat) -->
@@ -749,5 +757,94 @@
   </div>
 </div>
 
+
+<!-- ZYNIX PARTICLE ENGINE -->
+<script>
+(function ZynixParticles(){
+  const canvas = document.getElementById('zynix-canvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const COLORS = [
+    'rgba(79,142,247,','rgba(167,139,250,','rgba(34,211,238,','rgba(244,114,182,','rgba(52,211,153,',
+  ];
+  let W, H, particles = [], orbs = [], stars = [];
+  function resize(){ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  function mkP(){
+    const c = COLORS[Math.random()*COLORS.length|0];
+    return { x:Math.random()*W, y:Math.random()*H, r:Math.random()*1.8+0.4,
+      vx:(Math.random()-.5)*.22, vy:(Math.random()-.5)*.22, color:c,
+      alpha:Math.random()*.55+.1, life:1, decay:Math.random()*.0007+.0002,
+      pulse:Math.random()*Math.PI*2, ps:Math.random()*.02+.005 };
+  }
+  function mkOrb(){
+    return { x:Math.random()*W, y:Math.random()*H, r:Math.random()*90+30,
+      vx:(Math.random()-.5)*.1, vy:(Math.random()-.5)*.1,
+      color:COLORS[Math.random()*COLORS.length|0], alpha:Math.random()*.055+.018 };
+  }
+  function mkStar(){
+    const a=Math.random()*Math.PI*.5-Math.PI*.125, spd=Math.random()*9+4;
+    return { x:Math.random()*W*.75, y:Math.random()*H*.5, vx:Math.cos(a)*spd, vy:Math.sin(a)*spd,
+      color:COLORS[Math.random()*COLORS.length|0], alpha:1, decay:Math.random()*.022+.014 };
+  }
+  function init(){ resize(); particles=Array.from({length:110},mkP); orbs=Array.from({length:6},mkOrb); }
+  function drawOrb(o){
+    const g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);
+    g.addColorStop(0,o.color+o.alpha+')'); g.addColorStop(1,o.color+'0)');
+    ctx.beginPath(); ctx.arc(o.x,o.y,o.r,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+  }
+  function drawP(p){
+    const pulse=Math.sin(p.pulse)*.3+.7, a=p.alpha*p.life;
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r*pulse,0,Math.PI*2);
+    ctx.fillStyle=p.color+a+')'; ctx.fill();
+    const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*pulse*3);
+    g.addColorStop(0,p.color+(a*.35)+')'); g.addColorStop(1,p.color+'0)');
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r*pulse*3,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+  }
+  function drawConnections(){
+    const D=95;
+    for(let i=0;i<particles.length;i++){
+      for(let j=i+1;j<particles.length;j++){
+        const dx=particles[i].x-particles[j].x, dy=particles[i].y-particles[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<D){ ctx.beginPath(); ctx.moveTo(particles[i].x,particles[i].y);
+          ctx.lineTo(particles[j].x,particles[j].y);
+          ctx.strokeStyle='rgba(79,142,247,'+(1-d/D)*.1+')'; ctx.lineWidth=.5; ctx.stroke(); }
+      }
+    }
+  }
+  function drawStar(s){
+    ctx.beginPath(); ctx.moveTo(s.x,s.y);
+    ctx.lineTo(s.x-s.vx*5,s.y-s.vy*5);
+    const g=ctx.createLinearGradient(s.x,s.y,s.x-s.vx*5,s.y-s.vy*5);
+    g.addColorStop(0,s.color+s.alpha+')'); g.addColorStop(1,s.color+'0)');
+    ctx.strokeStyle=g; ctx.lineWidth=1.5; ctx.stroke();
+  }
+  function loop(){
+    ctx.clearRect(0,0,W,H);
+    orbs.forEach(o=>{
+      o.x+=o.vx; o.y+=o.vy;
+      if(o.x<-o.r)o.x=W+o.r; if(o.x>W+o.r)o.x=-o.r;
+      if(o.y<-o.r)o.y=H+o.r; if(o.y>H+o.r)o.y=-o.r;
+      drawOrb(o);
+    });
+    drawConnections();
+    for(let i=particles.length-1;i>=0;i--){
+      const p=particles[i]; p.x+=p.vx; p.y+=p.vy; p.pulse+=p.ps; p.life-=p.decay;
+      if(p.life<=0||p.x<-10||p.x>W+10||p.y<-10||p.y>H+10) particles[i]=mkP();
+      else drawP(p);
+    }
+    for(let i=stars.length-1;i>=0;i--){
+      const s=stars[i]; s.x+=s.vx; s.y+=s.vy; s.alpha-=s.decay;
+      if(s.alpha<=0) stars.splice(i,1); else drawStar(s);
+    }
+    if(Math.random()<.004&&stars.length<5) stars.push(mkStar());
+    requestAnimationFrame(loop);
+  }
+  window.addEventListener('resize', resize);
+  init(); loop();
+})();
+</script>
+
 </body>
 </html>
+<!-- injected before closing body via append — actual tag already closed above -->
