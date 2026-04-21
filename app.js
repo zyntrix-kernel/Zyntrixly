@@ -89,7 +89,8 @@ function showErr(elId,msg){
 function clearErr(elId){const el=id(elId);el.textContent='';el.classList.add('hidden');}
 
 function finishStartup(){
-  if(!(window._startupMinDone || _startupMinDone) || !(window._authResolved || _authResolved)) return;
+  // Only hide startup if the animation min-time has passed
+  if(!(window._startupMinDone || _startupMinDone)) return;
   const startup=id('startup');
   if(!startup||startup.classList.contains('out'))return;
   startup.classList.add('out');
@@ -354,7 +355,7 @@ function openFileShare(){
   input.type='file'; input.accept='*/*';
   input.onchange=async()=>{
     const file=input.files?.[0]; if(!file)return;
-    if(file.size>5*1024*1024){toast('Max file size: 5MB',3000);return;}
+    if(file.size>900*1024){toast('Max file size: 900KB for encrypted transfers',3000);return;}
     toast('Encrypting & uploading…',12000);
     try{
       const key=await crypto.subtle.generateKey({name:'AES-GCM',length:256},true,['encrypt','decrypt']);
@@ -364,12 +365,10 @@ function openFileShare(){
       const rawKey=await crypto.subtle.exportKey('raw',key);
       const keyHex=Array.from(new Uint8Array(rawKey)).map(b=>b.toString(16).padStart(2,'0')).join('');
       const ivHex=Array.from(iv).map(b=>b.toString(16).padStart(2,'0')).join('');
-      const blob=new Blob([enc]);
-      const fd=new FormData(); fd.append('file',blob,file.name+'.enc');
-      const res=await fetch('https://file.io/?expires=1d',{method:'POST',body:fd});
-      const json=await res.json();
-      if(!json.success)throw new Error(json.message||'Upload failed');
-      const payload=JSON.stringify({__type:'file',url:json.link,name:file.name,size:file.size,key:keyHex,iv:ivHex,expiry:'24h'});
+      // Store encrypted file as base64 inline in Firestore (max 900KB encrypted)
+      const encArr=new Uint8Array(enc);
+      const encB64=btoa(String.fromCharCode(...encArr));
+      const payload=JSON.stringify({__type:'file',data:encB64,name:file.name,size:file.size,key:keyHex,iv:ivHex});
       if(CHAT.type==='dm')await sendDMMsg(payload,null);
       else await sendGrpMsg(payload,null);
       toast('📎 File sent!');
@@ -381,12 +380,23 @@ function openFileShare(){
   input.click();
 }
 
-async function downloadFileMsg(url,name,keyHex,ivHex){
+async function downloadFileMsg(url,name,keyHex,ivHex,inlineData){
   try{
-    toast('Downloading & decrypting…',8000);
-    const res=await fetch(url);
-    if(!res.ok)throw new Error('File expired or unavailable');
-    const encBuf=await res.arrayBuffer();
+    toast('Decrypting file…',8000);
+    let encBuf;
+    if(inlineData){
+      // Inline base64 data (new format)
+      const binStr=atob(inlineData);
+      const bytes=new Uint8Array(binStr.length);
+      for(let i=0;i<binStr.length;i++) bytes[i]=binStr.charCodeAt(i);
+      encBuf=bytes.buffer;
+    } else if(url){
+      const res=await fetch(url);
+      if(!res.ok)throw new Error('File expired or unavailable');
+      encBuf=await res.arrayBuffer();
+    } else {
+      throw new Error('No file data available');
+    }
     const rawKey=new Uint8Array(keyHex.match(/.{2}/g).map(b=>parseInt(b,16)));
     const iv=new Uint8Array(ivHex.match(/.{2}/g).map(b=>parseInt(b,16)));
     const aesKey=await crypto.subtle.importKey('raw',rawKey,{name:'AES-GCM'},false,['decrypt']);
@@ -537,7 +547,7 @@ function updateInstallUI(){
     if(canInstall){
       const iosOnly=!deferredInstallPrompt&&isIosPwaCandidate();
       label.textContent=iosOnly?'Add to Home Screen':'Install App';
-      sub.textContent=iosOnly?'Use Safari Share → Add to Home Screen.':'Open Zyntrixly in its own window.';
+      sub.textContent=iosOnly?'Use Safari Share → Add to Home Screen.':'Open Zynix in its own window.';
     }
   }
 
@@ -609,7 +619,7 @@ function applyFont(style,save=true){
 function toggleAuthMode(){
   isSignIn=!isSignIn;
   id('auth-title').textContent=isSignIn?'Welcome back':'Create account';
-  id('auth-subtitle').textContent=isSignIn?'Sign in to continue to Zyntrixly':'Join the encrypted future';
+  id('auth-subtitle').textContent=isSignIn?'Sign in to continue to Zynix':'Private by default 🔒';
   id('auth-btn-label').textContent=isSignIn?'Sign in':'Create account';
   id('auth-toggle-label').textContent=isSignIn?'Create a new account':'Already have an account?';
   id('f-confirm-wrap').classList.toggle('hidden',isSignIn);
@@ -745,11 +755,13 @@ auth.onAuthStateChanged(async user=>{
   if(_registering) return; // registration in progress — skip
   if(user){
     if(_booted) return;
+    // Don't show auth-screen while we load user data
     await bootApp(user);
   } else {
     _booted=false;
     ME=null;CHAT=null;
     _authResolved=true;
+    window._authResolved=true;
     showScreen('auth-screen');
     finishStartup();
     setAuthLoading(false);
@@ -767,8 +779,8 @@ auth.onAuthStateChanged(async user=>{
 async function bootApp(user){
   if(_booted) return;
   _booted=true;
-  // Hard cap: startup always clears within 5s of bootApp
-  setTimeout(()=>{ window._startupMinDone=true; window._authResolved=true; if(typeof finishStartup==='function')finishStartup(); },5000);
+  // Hard cap: startup overlay always clears within 5s of bootApp starting
+  setTimeout(()=>{ window._startupMinDone=true; if(typeof finishStartup==='function')finishStartup(); },5000);
 
   try{
     // Fetch user doc — retry once if race condition (doc just created)
@@ -819,14 +831,22 @@ async function bootApp(user){
 
     updateMeUI();
     _authResolved=true;
+    window._authResolved=true;
     showScreen('app-screen');
     finishStartup();
     startDMListener();
     startGroupListener();
     updateNotifUI();
     setAuthLoading(false);
-    // Start listening for incoming calls (lazy WebRTC)
-    if(typeof ZxCall!=='undefined'){ try{ ZxCall.listenForIncomingCalls(); }catch(e){} }
+    // Start listening for incoming calls — wait until webrtc.js is loaded
+    function _startCallListener(){
+      if(typeof ZxCall!=='undefined'){
+        try{ ZxCall.listenForIncomingCalls(); }catch(e){ console.error('Call listener error:',e); }
+      } else {
+        setTimeout(_startCallListener, 300);
+      }
+    }
+    setTimeout(_startCallListener, 500);
 
     // ── SHOW RESTORE MODAL if still no key ──
     if(!ME.privKey){
@@ -847,6 +867,7 @@ async function bootApp(user){
       ME={uid:user.uid,username:cachedProfile.username,color:cachedProfile.color||'#3b82f6',privKey,publicKey:cachedProfile.publicKey||null};
       updateMeUI();
       _authResolved=true;
+      window._authResolved=true;
       showScreen('app-screen');
       finishStartup();
       startDMListener();
@@ -1733,13 +1754,24 @@ async function decryptBubble(bub,data,mine,chatCtx=getChatContext()){
         card.dataset.name=parsed.name||'file';
         card.dataset.key=parsed.key||'';
         card.dataset.iv=parsed.iv||'';
-        card.onclick=function(){downloadFileMsg(this.dataset.url,this.dataset.name,this.dataset.key,this.dataset.iv);};
+        // Store inline base64 data for new-format files
+        if(parsed.data) card.dataset.inlinedata=parsed.data;
+        card.onclick=function(){
+          downloadFileMsg(
+            this.dataset.url||null,
+            this.dataset.name,
+            this.dataset.key,
+            this.dataset.iv,
+            this.dataset.inlinedata||null
+          );
+        };
+        const fileLabel=parsed.data?'Encrypted · Tap to decrypt':'Tap to download';
         card.innerHTML=`<div style="width:38px;height:38px;border-radius:10px;background:rgba(59,130,246,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           </div>
           <div style="min-width:0">
             <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px">${esc(parsed.name||'file')}</div>
-            <div style="font-size:11px;color:var(--muted-fg)">${sz} · Expires ${esc(parsed.expiry||'soon')} · Tap to download</div>
+            <div style="font-size:11px;color:var(--muted-fg)">${sz} · ${fileLabel}</div>
           </div>`;
         bub.appendChild(card);
         return;

@@ -45,6 +45,9 @@ const ZxCall = (() => {
   // ── Helpers ──
   function log(...a) { /* intentionally silent in production */ }
 
+  // Safe accessor for ME — avoids crashes if called before app.js sets ME
+  function getMe() { return window.ME || null; }
+
   function safeClose(pc) {
     try { pc.close(); } catch(_) {}
   }
@@ -161,7 +164,7 @@ const ZxCall = (() => {
     // ICE → write to Firestore
     pc.onicecandidate = e => {
       if (!e.candidate || !callDoc) return;
-      callDoc.collection('ice_' + ME.uid + '_to_' + remoteUid)
+      callDoc.collection('ice_' + getMe()?.uid + '_to_' + remoteUid)
         .add({ candidate: JSON.stringify(e.candidate), ts: Date.now() })
         .catch(() => {});
     };
@@ -181,7 +184,7 @@ const ZxCall = (() => {
   // ── Listen for remote ICE candidates ──
   function listenICE(remoteUid) {
     if (!callDoc || !ME) return;
-    const colName = 'ice_' + remoteUid + '_to_' + ME.uid;
+    const colName = 'ice_' + remoteUid + '_to_' + getMe()?.uid;
     const unsub = callDoc.collection(colName).orderBy('ts')
       .onSnapshot(snap => {
         snap.docChanges().forEach(change => {
@@ -201,7 +204,8 @@ const ZxCall = (() => {
   async function startCall(targetUid, mode = 'voice') {
     if (!targetUid) { toast('No contact selected for call.'); return; }
     if (callId) { toast('Already in a call.'); return; }
-    if (typeof db === 'undefined') { toast('App not ready. Try again.'); return; }
+    if (typeof db === 'undefined' || !db) { toast('App not ready. Try again.'); return; }
+    if (!getMe()?.uid) { toast('Not logged in.'); return; }
     callMode = mode;
     callRole = 'caller';
 
@@ -217,10 +221,10 @@ const ZxCall = (() => {
     callId  = ref.id;
     callDoc = ref;
 
-    const callerName = ME.username;
+    const callerName = getMe()?.username;
     await ref.set({
       callId,
-      callerId:   ME.uid,
+      callerId:   getMe()?.uid,
       callerName,
       calleeId:   targetUid,
       mode,
@@ -238,10 +242,10 @@ const ZxCall = (() => {
 
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
-    await ref.collection('offers').doc(targetUid).set({ sdp: JSON.stringify(offer), from: ME.uid });
+    await ref.collection('offers').doc(targetUid).set({ sdp: JSON.stringify(offer), from: getMe()?.uid });
 
     // Watch for answer
-    const ansUnsub = ref.collection('answers').doc(ME.uid)
+    const ansUnsub = ref.collection('answers').doc(getMe()?.uid)
       .onSnapshot(async snap => {
         const d = snap.data();
         if (!d?.sdp) return;
@@ -262,10 +266,11 @@ const ZxCall = (() => {
 
   // ── Receive incoming call notification ──
   function listenForIncomingCalls() {
-    if (typeof ME === 'undefined' || !ME) return;
+    const ME = getMe();
+    if (!ME || !ME.uid) { console.warn('[ZxCall] ME not ready, retrying...'); setTimeout(listenForIncomingCalls, 500); return; }
     if (typeof db === 'undefined' || !db) return;
     db.collection('calls')
-      .where('calleeId', '==', ME.uid)
+      .where('calleeId', '==', getMe()?.uid)
       .where('status', '==', 'ringing')
       .onSnapshot(snap => {
         snap.docChanges().forEach(change => {
@@ -286,6 +291,8 @@ const ZxCall = (() => {
 
   // ── Accept incoming call ──
   async function acceptCall() {
+    const ME = getMe();
+    if (!ME) return;
     const pending = window._pendingCall;
     if (!pending) return;
     window._pendingCall = null;
@@ -313,14 +320,14 @@ const ZxCall = (() => {
     listenICE(callerUid);
 
     // Get offer
-    const offerSnap = await callDoc.collection('offers').doc(ME.uid).get();
+    const offerSnap = await callDoc.collection('offers').doc(getMe()?.uid).get();
     if (!offerSnap.exists) { toast('Call offer expired.'); endCall(); return; }
 
     const offer = JSON.parse(offerSnap.data().sdp);
     await pc.setRemoteDescription(offer);
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
-    await callDoc.collection('answers').doc(callerUid).set({ sdp: JSON.stringify(answer), from: ME.uid });
+    await callDoc.collection('answers').doc(callerUid).set({ sdp: JSON.stringify(answer), from: getMe()?.uid });
     await callDoc.update({ status: 'accepted' });
 
     // Watch for call end
@@ -516,34 +523,34 @@ const ZxCall = (() => {
     const snap = await callDoc.get();
     const participants = snap.data()?.participants || [];
     for (const uid of participants) {
-      if (uid === ME.uid) continue;
+      if (uid === getMe()?.uid) continue;
       const pc = createPC(uid);
       listenICE(uid);
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
-      await callDoc.collection('offers').doc(uid).set({ sdp: JSON.stringify(offer), from: ME.uid });
+      await callDoc.collection('offers').doc(uid).set({ sdp: JSON.stringify(offer), from: getMe()?.uid });
     }
 
     // Register self as participant
     await callDoc.update({
-      participants: firebase.firestore.FieldValue.arrayUnion(ME.uid)
+      participants: firebase.firestore.FieldValue.arrayUnion(getMe()?.uid)
     }).catch(() => {});
 
     // Watch for new participants
     const joinUnsub = callDoc.onSnapshot(async snap => {
       const newParts = snap.data()?.participants || [];
       for (const uid of newParts) {
-        if (uid === ME.uid || peers[uid]) continue;
+        if (uid === getMe()?.uid || peers[uid]) continue;
         const pc = createPC(uid);
         listenICE(uid);
         // Wait for their offer
-        const offerSnap = await callDoc.collection('offers').doc(ME.uid).get().catch(() => null);
+        const offerSnap = await callDoc.collection('offers').doc(getMe()?.uid).get().catch(() => null);
         if (offerSnap?.exists) {
           const offer = JSON.parse(offerSnap.data().sdp);
           await pc.setRemoteDescription(offer);
           const answer = await pc.createAnswer();
           await pc.setLocalDescription(answer);
-          await callDoc.collection('answers').doc(uid).set({ sdp: JSON.stringify(answer), from: ME.uid });
+          await callDoc.collection('answers').doc(uid).set({ sdp: JSON.stringify(answer), from: getMe()?.uid });
         }
       }
     });
@@ -557,8 +564,8 @@ const ZxCall = (() => {
     // Create/reset the group call doc
     const ref = db.collection('calls').doc('grp_'+gid);
     await ref.set({
-      callId:'grp_'+gid, callerId:ME.uid, callerName:ME.username,
-      mode, status:'active', participants:[ME.uid],
+      callId:'grp_'+gid, callerId:getMe()?.uid, callerName:getMe()?.username,
+      mode, status:'active', participants:[getMe()?.uid],
       createdAt:firebase.firestore.FieldValue.serverTimestamp()
     }).catch(()=>{});
     await joinGroupCall('grp_'+gid, mode);

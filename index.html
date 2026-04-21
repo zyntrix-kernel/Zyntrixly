@@ -38,7 +38,7 @@
       </div>
     </div>
     <h1 class="startup-title"><span class="brand-gradient">Zynix</span></h1>
-    <p class="startup-sub"><span class="text-primary-light glow-text-sm">Dangerously</span><span class="text-muted"> beautiful</span></p>
+    <p class="startup-sub"><span class="text-muted">Private</span><span class="text-primary-light glow-text-sm"> by default</span></p>
     <div class="startup-dots">
       <div class="typing-dot"></div>
       <div class="typing-dot"></div>
@@ -164,7 +164,7 @@
       <!-- Sidebar header -->
       <div class="sb-hdr">
         <div class="sb-hdr-left">
-          <img src="zyntrixly-logo.png" alt="Zyntrixly" class="brand-lockup-img brand-lockup-sidebar"/>
+          <img src="zyntrixly-logo.png" alt="Zynix" class="brand-lockup-img brand-lockup-sidebar"/>
           <div class="sb-av" id="sb-av" onclick="openSettings()">
             <div class="av-circle" id="sb-av-circle">?</div>
             <div class="av-status av-online" id="sb-status"></div>
@@ -225,7 +225,7 @@
           <div class="ep-icon glass-panel-strong glow-blue">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-primary"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </div>
-          <h2 class="ep-title">Welcome to Zyntrixly</h2>
+          <h2 class="ep-title">Welcome to Zynix</h2>
           <p class="ep-sub">Select a conversation to start messaging.<br/>All your chats are end-to-end encrypted.</p>
         </div>
       </div>
@@ -444,7 +444,7 @@
             <span>Open Source</span>
           </div>
           <p class="about-oss-desc">This app is open source. View the code, contribute, or report issues on GitHub.</p>
-          <a href="https://github.com/zyntrix-kernel/zyntrixly" target="_blank" class="about-gh-link">View on GitHub <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></a>
+          <a href="https://github.com/zyntrix-kernel/zynix" target="_blank" class="about-gh-link">View on GitHub <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></a>
         </div>
         <div class="about-credits">
           <p class="credits-built">Built with <svg width="16" height="16" viewBox="0 0 24 24" fill="red" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg> by</p>
@@ -595,8 +595,8 @@
 <div id="toast" class="toast glass-panel"><span id="toast-msg"></span></div>
 <div id="install-banner" class="install-banner glass-panel hidden">
   <div class="install-copy">
-    <p id="install-banner-title" class="install-title">Install Zyntrixly</p>
-    <p id="install-banner-sub" class="install-sub">Open chats in a dedicated app window and keep the shell available offline.</p>
+    <p id="install-banner-title" class="install-title">Install Zynix</p>
+    <p id="install-banner-sub" class="install-sub">Install for a faster, standalone experience.</p>
   </div>
   <div class="install-actions">
     <button type="button" class="install-btn install-btn-muted" onclick="dismissInstallBanner()">Not now</button>
@@ -624,27 +624,23 @@
     startup.querySelector('.startup-dots')?.classList.add('vis');
   }, 800);
   setTimeout(() => el('startup-fade')?.classList.add('vis'), 1600);
+  // After animation completes, signal app.js it can hide the startup overlay.
+  // We do NOT decide which screen to show — only bootApp() / onAuthStateChanged do that.
   setTimeout(() => {
     window._startupMinDone = true;
+    // Do NOT set _authResolved here — only bootApp/onAuthStateChanged decides screens
     if (typeof finishStartup === 'function') finishStartup();
   }, 2200);
-  setTimeout(()=>{
-    window._startupMinDone=true;
-    window._authResolved=true;
-    // Force-hide startup directly — no dependency on app.js functions
+  // Absolute safety cap: hide startup overlay after 9s no matter what.
+  // Still does NOT force any screen — bootApp decides.
+  setTimeout(() => {
+    window._startupMinDone = true;
     var su = document.getElementById('startup');
     if(su && !su.classList.contains('out')){
       su.classList.add('out');
       setTimeout(()=>{ su.style.display='none'; }, 600);
     }
-    // Show auth screen directly
-    var auth = document.getElementById('auth-screen');
-    var app  = document.getElementById('app-screen');
-    if(auth) { auth.classList.remove('hidden'); auth.style.display=''; }
-    if(app)  { app.classList.add('hidden'); }
-    // Also call app.js functions if they loaded in time
-    if(typeof finishStartup === 'function') finishStartup();
-  }, 3500);
+  }, 9000);
 })();
 </script>
 
@@ -702,23 +698,14 @@
     setTimeout(function(){ s.style.display='none'; }, 600);
   };
 
-  // Hard cap: startup ALWAYS hides within 4 seconds no matter what
+  // Hard cap: startup animation hides after 8s max.
+  // We do NOT force auth-screen here — bootApp() decides which screen to show.
+  // Only hide the startup spinner overlay; let the auth/app screen be set by bootApp.
   setTimeout(function(){
     window._startupMinDone = true;
-    window._authResolved   = true;
-    window.ZxHideStartup();
-    // If app.js hasn't shown a screen yet, force auth screen
-    var app = document.getElementById('app-screen');
-    var auth = document.getElementById('auth-screen');
-    if(app && auth){
-      var appVisible = !app.classList.contains('hidden') && app.style.display!=='none';
-      if(!appVisible){
-        app.classList.add('hidden');
-        auth.classList.remove('hidden');
-        auth.style.display = '';
-      }
-    }
-  }, 4000);
+    // Only hide the overlay — never force a screen
+    window.ZxHideStartup && window.ZxHideStartup();
+  }, 8000);
 
   // Load app.js → on load attach auth listener → then load webrtc.js
   var appScript = document.createElement('script');
