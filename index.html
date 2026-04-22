@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="theme-color" content="#03050f"/>
-  <meta name="description" content="Zynix — Dangerously beautiful encrypted messaging."/>
+  <meta name="description" content="Zynix — Private by default. End-to-end encrypted messaging."/>
   <title>Zynix</title>
   <link rel="manifest" href="manifest.webmanifest"/>
   <link rel="icon" href="assets/app-icon-192.png" sizes="192x192"/>
@@ -343,7 +343,7 @@
 </div>
 
 <!-- Settings panel -->
-<div id="settings-modal" class="modal-bg hidden" id="settings-modal">
+<div id="settings-modal" class="modal-bg hidden">
   <div class="modal settings-panel glass-panel-strong glow-blue">
     <div class="modal-hdr">
       <h3 id="settings-title">Settings</h3>
@@ -435,7 +435,7 @@
         <div class="about-icon glass-panel-strong glow-blue">
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-primary"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         </div>
-        <h1 class="about-app-name"><span>Zyn</span><span class="text-primary glow-text">trixly</span></h1>
+        <h1 class="about-app-name"><span class="brand-gradient">Zynix</span></h1>
         <p class="about-ver">Version 1.0.0</p>
         <p class="about-desc">Next-generation secure messaging platform with end-to-end encryption.</p>
         <div class="about-oss glass-panel">
@@ -794,12 +794,14 @@
     ctx.beginPath(); ctx.arc(o.x,o.y,o.r,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
   }
   function drawP(p){
-    const pulse=Math.sin(p.pulse)*.3+.7, a=p.alpha*p.life;
+    const pulse=Math.sin(p.pulse)*.32+.68, a=p.alpha*p.life;
+    // core dot
     ctx.beginPath(); ctx.arc(p.x,p.y,p.r*pulse,0,Math.PI*2);
-    ctx.fillStyle=p.color+a+')'; ctx.fill();
-    const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*pulse*3);
-    g.addColorStop(0,p.color+(a*.35)+')'); g.addColorStop(1,p.color+'0)');
-    ctx.beginPath(); ctx.arc(p.x,p.y,p.r*pulse*3,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+    ctx.fillStyle=p.color+(Math.min(a*1.4,0.9))+')'; ctx.fill();
+    // glow halo — bigger and brighter so they look through glass
+    const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*pulse*5);
+    g.addColorStop(0,p.color+(a*.5)+')'); g.addColorStop(1,p.color+'0)');
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r*pulse*5,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
   }
   function drawConnections(){
     const D=95;

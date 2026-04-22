@@ -382,20 +382,24 @@ function openFileShare(){
 
 async function downloadFileMsg(url,name,keyHex,ivHex,inlineData){
   try{
-    toast('Decrypting file…',8000);
+    toast('Decrypting…',5000);
     let encBuf;
-    if(inlineData){
-      // Inline base64 data (new format)
-      const binStr=atob(inlineData);
-      const bytes=new Uint8Array(binStr.length);
-      for(let i=0;i<binStr.length;i++) bytes[i]=binStr.charCodeAt(i);
-      encBuf=bytes.buffer;
-    } else if(url){
-      const res=await fetch(url);
-      if(!res.ok)throw new Error('File expired or unavailable');
+    if(inlineData && inlineData.length>0){
+      // Inline base64 (current format — stored in Firestore)
+      try{
+        const binStr=atob(inlineData);
+        const bytes=new Uint8Array(binStr.length);
+        for(let i=0;i<binStr.length;i++) bytes[i]=binStr.charCodeAt(i);
+        encBuf=bytes.buffer;
+      }catch(b64err){
+        throw new Error('File data is corrupted');
+      }
+    } else if(url && url.length>0){
+      const res=await fetch(url,{mode:'cors'});
+      if(!res.ok)throw new Error('File download failed ('+res.status+')');
       encBuf=await res.arrayBuffer();
     } else {
-      throw new Error('No file data available');
+      throw new Error('No file data found — try re-sending the file');
     }
     const rawKey=new Uint8Array(keyHex.match(/.{2}/g).map(b=>parseInt(b,16)));
     const iv=new Uint8Array(ivHex.match(/.{2}/g).map(b=>parseInt(b,16)));
@@ -2257,6 +2261,7 @@ function openSettings(){
   updateMeUI();updateNotifUI();buildSettings();
   openSettingsView('main');
   const m=id('settings-modal');
+  if(!m){console.error('settings-modal not found');return;}
   m.classList.remove('hidden');
   // Prevent backdrop tap from closing settings — notification permission dialog
   // fires a synthetic click event that can land on the backdrop.
@@ -2314,6 +2319,10 @@ function showChatPane(name,color,avChar,type){
   // Mobile: slide chat panel in (WhatsApp style)
   const layout=id('app-layout');
   if(layout) layout.classList.add('mob-chat-open');
+
+  // Update mobile header: show back button + chat name, hide list buttons
+  document.querySelectorAll('.mob-list-only').forEach(el=>el.style.display='none');
+  document.querySelectorAll('.mob-back-only').forEach(el=>el.style.display='flex');
 }
 
 function goBack(){
@@ -2334,9 +2343,11 @@ function goBack(){
   const layout=id('app-layout');
   if(layout) layout.classList.remove('mob-chat-open');
 
-  // Restore mobile title
+  // Restore mobile header to list mode
   const mobTitle=id('mob-title');
-  if(mobTitle) mobTitle.innerHTML='<img src="zyntrixly-logo.png" alt="Zyntrixly" class="brand-lockup-img"/><span class="text-foreground">Zyn</span><span class="text-primary glow-text">trixly</span>';
+  if(mobTitle) mobTitle.innerHTML='<img src="zyntrixly-logo.png" alt="Zynix" class="brand-lockup-img"/><span class="brand-gradient">Zynix</span>';
+  document.querySelectorAll('.mob-list-only').forEach(el=>el.style.display='flex');
+  document.querySelectorAll('.mob-back-only').forEach(el=>el.style.display='none');
   updateMobileChatActions(null);
 }
 
