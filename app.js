@@ -367,7 +367,7 @@ function openFileShare(){
       const ivHex=Array.from(iv).map(b=>b.toString(16).padStart(2,'0')).join('');
       // Store encrypted file as base64 inline in Firestore (max 900KB encrypted)
       const encArr=new Uint8Array(enc);
-      const encB64=btoa(String.fromCharCode(...encArr));
+      let binary = ''; const len = encArr.byteLength; for (let i = 0; i < len; i++) { binary += String.fromCharCode(encArr[i]); } const encB64 = btoa(binary);
       const payload=JSON.stringify({__type:'file',data:encB64,name:file.name,size:file.size,key:keyHex,iv:ivHex});
       if(CHAT.type==='dm')await sendDMMsg(payload,null);
       else await sendGrpMsg(payload,null);
@@ -1383,12 +1383,12 @@ function toggleArchived(){
 function openNewChat(){
   grpMembers=[];
   ['nc-dm-q','nc-grp-name','nc-grp-q'].forEach(i=>{const el=id(i);if(el)el.value='';});
-  id('nc-dm-res').innerHTML='';id('nc-grp-res').innerHTML='';
+  id('nc-dm-res').innerHTML='<div class="sr-sl">Type a username to search</div>'; id('nc-grp-res').innerHTML='<div class="sr-sl">Search users to add</div>';
   id('nc-chips').innerHTML='';id('nc-err').textContent='';
   ncTab('dm',document.querySelector('.m-tab'));
   id('nc-modal').classList.remove('hidden');
 }
-function ncTab(tab,btn){
+function ncTab(tab,btn){ ['nc-dm-q','nc-grp-name','nc-grp-q'].forEach(i=>{const el=id(i);if(el)el.value='';}); id('nc-dm-res').innerHTML='<div class="sr-sl">Type a username to search</div>'; id('nc-grp-res').innerHTML='<div class="sr-sl">Search users to add</div>';
   document.querySelectorAll('.m-tab').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.nc-pane').forEach(p=>p.classList.remove('active'));
   btn.classList.add('active');
@@ -2493,3 +2493,19 @@ function updateFsIcon(){
 
 // App loaded — attach auth listener now that Firebase is confirmed ready
 _attachAuthListener();
+
+window.startChatCall = function(mode) {
+  if (!CHAT) {
+    toast('Open a chat first.');
+    return;
+  }
+  if (CHAT.type !== 'dm') {
+    toast('Calls are only supported in direct messages.');
+    return;
+  }
+  if (typeof ZxCall !== 'undefined' && ZxCall.startCall) {
+    ZxCall.startCall(CHAT.otherUid, mode);
+  } else {
+    toast('Call system is not ready yet.');
+  }
+};
