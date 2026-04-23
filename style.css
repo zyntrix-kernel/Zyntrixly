@@ -420,7 +420,7 @@ img { display: block; }
 @keyframes drop-in { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:none} }
 .sb-search-drop {
   position: absolute; left: 11px; right: 11px; top: calc(100% + 3px);
-  background: transparent;
+  background: rgba(255,255,255,0.08);
   backdrop-filter: blur(var(--blur-lg));
   -webkit-backdrop-filter: blur(var(--blur-lg));
   border: 1px solid var(--b2); border-radius: 12px; z-index: 100;
@@ -594,10 +594,10 @@ img { display: block; }
   -webkit-backdrop-filter: blur(var(--blur-md));
   flex-shrink: 0;
 }
-.compose-icon-btn { width:44px; height:44px; border-radius:9px; display:flex; align-items:center; justify-content:center; color:var(--fg3); transition:all .14s; flex-shrink:0; }
+.compose-icon-btn { width:48px; height:48px; border-radius:9px; display:flex; align-items:center; justify-content:center; color:var(--fg3); transition:all .14s; flex-shrink:0; }
 .compose-icon-btn:hover { background:rgba(255,255,255,.08); color:var(--blue); }
 .compose-input {
-  flex: 1; height: 44px; padding: 0 12px;
+  flex: 1; height: 48px; padding: 0 12px;
   border-radius: 10px; font-size: 14px;
   background: rgba(255,255,255,.07);
   border: 1px solid var(--b0);
@@ -607,7 +607,7 @@ img { display: block; }
 .compose-input:focus { border-color: rgba(91,143,249,.45); background: rgba(255,255,255,.09); box-shadow: 0 0 0 2px rgba(91,143,249,.12); }
 .compose-input::placeholder { color: var(--fg3); }
 .send-btn {
-  width: 44px; height: 44px; border-radius: 9px;
+  width: 48px; height: 48px; border-radius: 9px;
   background: linear-gradient(135deg, var(--blue), #6366f1);
   color: #fff; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
   transition: all .18s var(--spring); box-shadow: 0 0 12px rgba(91,143,249,.22);
@@ -651,7 +651,7 @@ img { display: block; }
 .modal-bg {
   position: fixed; inset: 0; z-index: 800;
   display: flex; align-items: center; justify-content: center;
-  background: rgba(0,0,0,.55);
+  background: rgba(255,255,255,0.08);
   backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   padding: 16px;
   animation: mb-in .18s ease;
@@ -774,7 +774,7 @@ img { display: block; }
 .ctx {
   position: fixed; z-index: 9000; min-width: 155px;
   border-radius: 13px; padding: 4px;
-  background: transparent;
+  background: rgba(255,255,255,0.08);
   backdrop-filter: blur(var(--blur-lg));
   -webkit-backdrop-filter: blur(var(--blur-lg));
   border: 1px solid var(--b2);
@@ -791,7 +791,7 @@ img { display: block; }
 .react-pick {
   position: fixed; z-index: 9001; display: flex; gap: 4px; padding: 7px 9px;
   border-radius: 28px;
-  background: transparent;
+  background: rgba(255,255,255,0.08);
   backdrop-filter: blur(var(--blur-lg));
   -webkit-backdrop-filter: blur(var(--blur-lg));
   border: 1px solid var(--b2); box-shadow: var(--sh-blue);
@@ -808,7 +808,7 @@ img { display: block; }
   padding: 9px 16px; border-radius: 11px; font-size: 13px; font-weight: 500;
   z-index: 9990; pointer-events: none; opacity: 0;
   transition: all .26s var(--spring);
-  background: transparent;
+  background: rgba(255,255,255,0.08);
   backdrop-filter: blur(var(--blur-md));
   -webkit-backdrop-filter: blur(var(--blur-md));
   border: 1px solid var(--b2); box-shadow: var(--sh-blue);
@@ -822,7 +822,7 @@ img { display: block; }
   position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
   width: min(420px, calc(100vw - 22px)); padding: 14px 15px; border-radius: 15px;
   z-index: 9000; display: flex; align-items: center; gap: 12px;
-  background: transparent;
+  background: rgba(255,255,255,0.08);
   backdrop-filter: blur(var(--blur-md));
   -webkit-backdrop-filter: blur(var(--blur-md));
   border: 1px solid var(--b2); box-shadow: var(--sh-blue);

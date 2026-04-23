@@ -367,7 +367,7 @@ function openFileShare(){
       const ivHex=Array.from(iv).map(b=>b.toString(16).padStart(2,'0')).join('');
       // Store encrypted file as base64 inline in Firestore (max 900KB encrypted)
       const encArr=new Uint8Array(enc);
-      let binary = ''; const len = encArr.byteLength; const chunk = 8192; for (let i = 0; i < len; i += chunk) { binary += String.fromCharCode.apply(null, encArr.subarray(i, i + chunk)); } const encB64 = btoa(binary);
+      let binary = ''; const len = encArr.byteLength; for (let i = 0; i < len; i++) { binary += String.fromCharCode(encArr[i]); } const encB64 = btoa(binary);
       const payload=JSON.stringify({__type:'file',data:encB64,name:file.name,size:file.size,key:keyHex,iv:ivHex});
       if(CHAT.type==='dm')await sendDMMsg(payload,null);
       else await sendGrpMsg(payload,null);
@@ -2495,17 +2495,7 @@ function updateFsIcon(){
 _attachAuthListener();
 
 window.startChatCall = function(mode) {
-  if (!CHAT) {
-    toast('Open a chat first.');
-    return;
-  }
-  if (CHAT.type !== 'dm') {
-    toast('Calls are only supported in direct messages.');
-    return;
-  }
-  if (typeof ZxCall !== 'undefined' && ZxCall.startCall) {
-    ZxCall.startCall(CHAT.otherUid, mode);
-  } else {
-    toast('Call system is not ready yet.');
+  if (CHAT && CHAT.type === 'dm') {
+    ZxCall.startCall(CHAT.uid || CHAT.otherUid, mode);
   }
 };
