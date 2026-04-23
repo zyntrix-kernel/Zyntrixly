@@ -926,6 +926,7 @@ img { display: block; }
   .composer  { padding: 7px 10px; gap: 5px; padding-bottom: calc(7px + var(--safe-b)); }
   .grp-panel { width: 100%; z-index: 500; }
   .toast     { max-width: calc(100vw - 22px); white-space: normal; text-align: center; }
+  
   .modal-bg  { padding: 12px; }
   .modal     { max-width: 100%; border-radius: 20px 20px 16px 16px; }
   .settings-panel { max-height: 90dvh; }
