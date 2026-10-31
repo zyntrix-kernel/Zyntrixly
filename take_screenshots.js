@@ -171,7 +171,7 @@ server.listen(PORT, async () => {
     await new Promise(r => setTimeout(r, 400));
     await capture('07-modal-settings.png');
 
-    // 8. Close Settings modal and show Active Chat Pane with messages
+    // 8. Close Settings modal and show Active Chat Pane with text, voice note, and attachment preview
     await page.evaluate(() => {
       const setModal = document.getElementById('settings-modal');
       if (setModal) setModal.classList.add('hidden');
@@ -188,21 +188,48 @@ server.listen(PORT, async () => {
             <div class="bubble">Hey, did you see the new architectural blueprint? All cryptographic primitives are completely client-side.</div>
             <div class="msg-foot"><span class="msg-time">10:42 AM</span></div>
           </div>
+          <div class="msg-row theirs">
+            <div class="msg-sender-name">@alice</div>
+            <div class="bubble">
+              <div class="audio-bubble">
+                <button class="audio-play-btn" type="button" title="Play voice note">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                </button>
+                <div class="audio-wave-bars">
+                  <div class="audio-bar" style="height:8px"></div>
+                  <div class="audio-bar" style="height:14px"></div>
+                  <div class="audio-bar" style="height:20px"></div>
+                  <div class="audio-bar" style="height:12px"></div>
+                  <div class="audio-bar" style="height:18px"></div>
+                  <div class="audio-bar" style="height:22px"></div>
+                  <div class="audio-bar" style="height:14px"></div>
+                  <div class="audio-bar" style="height:10px"></div>
+                  <div class="audio-bar" style="height:16px"></div>
+                  <div class="audio-bar" style="height:6px"></div>
+                </div>
+                <span class="audio-time">00:18</span>
+              </div>
+            </div>
+            <div class="msg-foot"><span class="msg-time">10:43 AM</span></div>
+          </div>
           <div class="msg-row mine">
             <div class="bubble">Yes! RSA-OAEP 2048-bit key exchange and AES-256-GCM symmetric session keys. Everything is zero-knowledge.</div>
-            <div class="msg-foot"><span class="msg-ticks read">✓✓</span><span class="msg-time">10:43 AM</span></div>
+            <div class="msg-foot"><span class="msg-ticks read">✓✓</span><span class="msg-time">10:44 AM</span></div>
             <div class="msg-reactions">
               <div class="r-pill mine-r">🔥 <span>3</span></div>
               <div class="r-pill">🔒 <span>2</span></div>
             </div>
           </div>
-          <div class="msg-row theirs">
-            <div class="msg-reply-preview"><span class="mrp-name">@you</span><span class="mrp-txt">Yes! RSA-OAEP 2048-bit key exchange...</span></div>
-            <div class="bubble">The depth and lighting feel incredible. The subtle hairlines and zinc contrast are on point.</div>
-            <div class="msg-foot"><span class="msg-time">10:44 AM</span></div>
-          </div>
         `;
       }
+
+      // Show attachment dock with staged file preview
+      const dock = document.getElementById('attach-dock');
+      const nameEl = document.getElementById('attach-dock-name');
+      const sizeEl = document.getElementById('attach-dock-size');
+      if (dock) dock.classList.remove('hidden');
+      if (nameEl) nameEl.textContent = 'security_audit_report.pdf';
+      if (sizeEl) sizeEl.textContent = '420 KB · Ready to send encrypted';
     });
     await new Promise(r => setTimeout(r, 400));
     await capture('08-active-chat-pane.png');
@@ -222,15 +249,6 @@ server.listen(PORT, async () => {
       if (emptyPane) emptyPane.style.display = 'none';
       if (typeof updateMobileChatActions === 'function') {
         updateMobileChatActions({ type: 'dm', id: 'alice' });
-      } else {
-        const mobBack = document.getElementById('mob-back-btn');
-        if (mobBack) mobBack.style.display = 'flex';
-        const mobAv = document.getElementById('mob-av-btn');
-        if (mobAv) mobAv.style.display = 'none';
-        const mobNC = document.getElementById('mob-newchat-btn');
-        if (mobNC) mobNC.style.display = 'none';
-        const mobMore = document.getElementById('mob-more-btn');
-        if (mobMore) mobMore.style.display = 'flex';
       }
       const mobTitle = document.getElementById('mob-title');
       if (mobTitle) mobTitle.innerHTML = '<span style="font-size:15px;font-weight:600;color:#fafafa">Alice Smith</span>';
@@ -238,8 +256,22 @@ server.listen(PORT, async () => {
     await new Promise(r => setTimeout(r, 400));
     await capture('10-mobile-chat.png');
 
+    // 11. Tablet viewport (768x1024 iPad)
+    await page.setViewport({ width: 768, height: 1024 });
+    await page.evaluate(() => {
+      const layout = document.getElementById('app-layout');
+      if (layout) layout.classList.remove('mob-chat-open');
+    });
+    await new Promise(r => setTimeout(r, 400));
+    await capture('11-tablet-split.png');
+
+    // 12. Mobile landscape viewport (844x390)
+    await page.setViewport({ width: 844, height: 390 });
+    await new Promise(r => setTimeout(r, 400));
+    await capture('12-mobile-landscape.png');
+
     await browser.close();
-    console.log('All visual regression screenshots captured successfully!');
+    console.log('All 12 visual regression screenshots captured successfully!');
   } catch (err) {
     console.error('Error taking screenshots:', err);
     exitCode = 1;

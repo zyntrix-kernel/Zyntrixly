@@ -230,6 +230,43 @@ img, svg {
 .text-muted         { color: var(--fg2); }
 .text-foreground    { color: var(--fg); }
 
+
+/* ── INTENTIONAL DESIGN-ENGINEERING TYPOGRAPHY & TOUCH TARGETS ── */
+h1, h2, h3, h4, .auth-title, .modal-hdr h3, .empty-card h3, .settings-title, .call-status, .sb-heading {
+  text-wrap: balance;
+}
+
+p, .bubble, .ci-preview, .about-desc, .settings-desc, .empty-card p {
+  text-wrap: pretty;
+}
+
+.tabular-nums, .msg-time, .call-timer, .ci-unread, .r-pill span, .rs-txt, .call-timer-display, .audio-time {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── OPTICAL AVATAR & MEDIA OUTLINES ── */
+.av-circle, .remote-video, .call-local-video, .sp-av, .media-thumb, .file-icon-box {
+  outline: 1px solid rgba(255, 255, 255, 0.08);
+  outline-offset: -1px;
+}
+
+/* ── 44PX TOUCH HIT AREAS ── */
+.sb-icon-btn, .mob-icon-btn, .compose-icon-btn, .modal-x, .chat-call-btn {
+  position: relative;
+}
+.sb-icon-btn::after, .mob-icon-btn::after, .compose-icon-btn::after, .modal-x::after, .chat-call-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 44px;
+  min-height: 44px;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+}
+
 .brand-text, .brand-gradient {
   color: #fafafa !important;
   font-weight: 600;
@@ -578,7 +615,7 @@ img, svg {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s var(--ease), box-shadow 0.15s var(--ease), transform 0.1s var(--ease);
   position: relative;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -642,7 +679,7 @@ img, svg {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s var(--ease), color 0.15s var(--ease), border-color 0.15s var(--ease), transform 0.1s var(--ease);
   box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
   cursor: pointer;
 }
@@ -765,8 +802,9 @@ img, svg {
   align-items: center;
   justify-content: center;
   color: var(--fg2);
-  transition: all 0.14s var(--ease);
+  transition: background-color 0.14s var(--ease), color 0.14s var(--ease), transform 0.1s var(--ease);
 }
+.sb-icon-btn:active { transform: scale(0.94); }
 .sb-icon-btn:hover {
   background: var(--surface-hover);
   color: var(--fg);
@@ -786,7 +824,7 @@ img, svg {
   background: #121215;
   border: 1px solid #27272a;
   color: #fafafa;
-  transition: all 0.15s ease;
+  transition: border-color 0.15s var(--ease), background-color 0.15s var(--ease), box-shadow 0.15s var(--ease);
 }
 .sb-search-input:hover  { border-color: var(--b1); background: #18181b; }
 .sb-search-input:focus {
@@ -810,7 +848,7 @@ img, svg {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  transition: all 0.14s;
+  transition: background-color 0.14s var(--ease), color 0.14s var(--ease), opacity 0.14s var(--ease);
 }
 .sb-clear:hover { background: rgba(255, 255, 255, 0.1); color: var(--fg); }
 
@@ -864,7 +902,7 @@ img, svg {
   width: 100%;
   text-align: left;
   cursor: pointer;
-  transition: all 0.14s var(--ease);
+  transition: background-color 0.14s var(--ease), border-color 0.14s var(--ease), box-shadow 0.14s var(--ease), transform 0.08s var(--ease);
   position: relative;
   background: transparent;
   border: 1px solid transparent;
@@ -956,7 +994,7 @@ img, svg {
   font-size: 12px;
   font-weight: 500;
   color: var(--fg3);
-  transition: all 0.14s;
+  transition: background-color 0.14s var(--ease), color 0.14s var(--ease);
 }
 .sb-archived-btn:hover {
   background: var(--surface-hover);
@@ -1049,7 +1087,7 @@ img, svg {
   color: var(--fg2);
   font-size: 12.5px;
   font-weight: 500;
-  transition: all 0.16s var(--ease);
+  transition: background-color 0.16s var(--ease), border-color 0.16s var(--ease), color 0.16s var(--ease), transform 0.1s var(--ease);
   cursor: pointer;
 }
 .ep-chip:hover {
@@ -1109,9 +1147,10 @@ img, svg {
   align-items: center;
   justify-content: center;
   color: var(--fg2);
-  transition: all 0.14s;
+  transition: background-color 0.14s var(--ease), color 0.14s var(--ease), transform 0.1s var(--ease);
   flex-shrink: 0;
 }
+.chat-back-btn:active { transform: scale(0.94); }
 .chat-back-btn:hover { background: var(--surface-hover); color: var(--fg); }
 
 /* Messages Wrap */
@@ -1247,8 +1286,9 @@ img, svg {
   border: 1px solid var(--b1);
   font-size: 12px;
   cursor: pointer;
-  transition: all 0.13s var(--ease);
+  transition: background-color 0.13s var(--ease), border-color 0.13s var(--ease), transform 0.1s var(--ease);
 }
+.r-pill:active { transform: scale(0.92); }
 .r-pill:hover { background: rgba(255, 255, 255, 0.1); transform: scale(1.05); }
 .r-pill.mine-r {
   background: #27272a;
@@ -1280,8 +1320,9 @@ img, svg {
   justify-content: center;
   color: var(--fg3);
   font-size: 12px;
-  transition: all 0.13s;
+  transition: background-color 0.13s var(--ease), color 0.13s var(--ease), transform 0.1s var(--ease);
 }
+.rs-close:active { transform: scale(0.92); }
 .rs-close:hover { background: rgba(244, 63, 94, 0.15); color: var(--red); }
 
 .composer {
@@ -1305,9 +1346,10 @@ img, svg {
   align-items: center;
   justify-content: center;
   color: var(--fg2);
-  transition: all 0.14s var(--ease);
+  transition: background-color 0.14s var(--ease), color 0.14s var(--ease), transform 0.1s var(--ease);
   flex-shrink: 0;
 }
+.compose-icon-btn:active { transform: scale(0.94); }
 .compose-icon-btn:hover {
   background: var(--surface-hover);
   color: var(--blue);
@@ -1322,7 +1364,7 @@ img, svg {
   background: #09090b;
   border: 1px solid var(--b0);
   color: var(--fg);
-  transition: all 0.16s var(--ease);
+  transition: border-color 0.16s var(--ease), background-color 0.16s var(--ease), box-shadow 0.16s var(--ease);
   min-width: 0;
 }
 .compose-input:hover { border-color: var(--b1); background: #18181b; }
@@ -1392,9 +1434,10 @@ img, svg {
   align-items: center;
   justify-content: center;
   color: var(--fg2);
-  transition: all 0.14s;
+  transition: background-color 0.14s var(--ease), color 0.14s var(--ease), transform 0.1s var(--ease);
   flex-shrink: 0;
 }
+.mob-icon-btn:active { transform: scale(0.94); }
 .mob-icon-btn:hover { background: var(--surface-hover); color: var(--fg); }
 
 .mob-back-only { display: none; }
@@ -1466,8 +1509,9 @@ img, svg {
   justify-content: center;
   font-size: 14px;
   color: var(--fg3);
-  transition: all 0.13s;
+  transition: background-color 0.13s var(--ease), color 0.13s var(--ease), transform 0.1s var(--ease);
 }
+.modal-x:active { transform: scale(0.92); }
 .modal-x:hover { background: rgba(244, 63, 94, 0.15); color: var(--red); }
 
 .modal-input {
@@ -1479,7 +1523,7 @@ img, svg {
   background: #09090b;
   border: 1px solid var(--b1);
   color: var(--fg);
-  transition: all 0.16s var(--ease);
+  transition: border-color 0.16s var(--ease), box-shadow 0.16s var(--ease);
 }
 .modal-input:focus {
   outline: none;
@@ -1505,7 +1549,7 @@ img, svg {
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s var(--ease), box-shadow 0.15s var(--ease), transform 0.1s var(--ease);
 }
 .modal-btn-primary:hover {
   background-color: #f4f4f5;
@@ -1534,7 +1578,7 @@ img, svg {
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s var(--ease), color 0.15s var(--ease), box-shadow 0.15s var(--ease);
 }
 .m-tab.active {
   background: #27272a;
@@ -1562,7 +1606,7 @@ img, svg {
   border: 1px solid #3f3f46;
   color: #fafafa;
   cursor: pointer;
-  transition: all 0.13s;
+  transition: background-color 0.13s var(--ease), border-color 0.13s var(--ease);
 }
 .chip:hover { background: #3f3f46; }
 .chip-x { font-size: 12px; color: #a1a1aa; }
@@ -1673,7 +1717,7 @@ img, svg {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid var(--b1);
   position: relative;
-  transition: all 0.2s var(--ease);
+  transition: background-color 0.2s var(--ease), border-color 0.2s var(--ease);
   flex-shrink: 0;
 }
 .toggle-on {
@@ -1690,7 +1734,7 @@ img, svg {
   height: 16px;
   border-radius: 50%;
   background: #fff;
-  transition: all 0.2s var(--spring);
+  transition: transform 0.2s var(--spring), background-color 0.2s var(--spring);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 .toggle-on .toggle-knob { transform: translateX(16px); }
@@ -1706,7 +1750,7 @@ img, svg {
   border: 1px solid var(--b0);
   background: #09090b;
   cursor: pointer;
-  transition: all 0.14s var(--ease);
+  transition: background-color 0.14s var(--ease), border-color 0.14s var(--ease), color 0.14s var(--ease);
 }
 .font-opt:hover { background: var(--surface-hover); border-color: var(--b1); }
 .font-opt.active {
@@ -1743,7 +1787,7 @@ img, svg {
   align-items: center;
   justify-content: center;
   color: var(--fg2);
-  transition: all 0.13s;
+  transition: background-color 0.13s var(--ease), color 0.13s var(--ease), transform 0.1s var(--ease);
   background: var(--surface-raised);
   border: 1px solid var(--b0);
 }
@@ -1933,7 +1977,7 @@ img, svg {
   z-index: 9990;
   pointer-events: none;
   opacity: 0;
-  transition: all 0.22s var(--spring);
+  transition: opacity 0.22s var(--spring), transform 0.22s var(--spring);
   background: var(--surface-floating);
   backdrop-filter: blur(var(--blur-md));
   -webkit-backdrop-filter: blur(var(--blur-md));
@@ -1978,7 +2022,7 @@ img, svg {
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
-  transition: all 0.14s;
+  transition: background-color 0.14s var(--ease), box-shadow 0.14s var(--ease), transform 0.1s var(--ease);
 }
 .install-btn-primary {
   background: #fafafa;
@@ -2108,7 +2152,7 @@ img, svg {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.16s var(--spring-bounce);
+  transition: background-color 0.16s var(--spring-bounce), border-color 0.16s var(--spring-bounce), color 0.16s var(--spring-bounce), box-shadow 0.16s var(--spring-bounce), transform 0.16s var(--spring-bounce);
 }
 .call-ctrl-btn:hover { background: rgba(255, 255, 255, 0.16); transform: scale(1.08); }
 .call-ctrl-btn.active {
@@ -2179,7 +2223,7 @@ img, svg {
   border: 1px solid rgba(244, 63, 94, 0.3);
   color: var(--red);
   cursor: pointer;
-  transition: all 0.14s;
+  transition: background-color 0.14s var(--ease), border-color 0.14s var(--ease), transform 0.1s var(--ease);
 }
 .call-incoming-reject:hover { background: rgba(244, 63, 94, 0.24); }
 .call-incoming-accept {
@@ -2192,7 +2236,7 @@ img, svg {
   border: 1px solid rgba(16, 185, 129, 0.35);
   color: var(--green);
   cursor: pointer;
-  transition: all 0.14s;
+  transition: background-color 0.14s var(--ease), border-color 0.14s var(--ease), transform 0.1s var(--ease);
 }
 .call-incoming-accept:hover { background: rgba(16, 185, 129, 0.3); }
 
@@ -2206,7 +2250,7 @@ img, svg {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.14s;
+  transition: background-color 0.14s var(--ease), color 0.14s var(--ease), transform 0.1s var(--ease);
   flex-shrink: 0;
 }
 .chat-call-btn:hover { background: #18181b; color: #fafafa; }
@@ -2221,7 +2265,7 @@ img, svg {
   font-size: 14px;
   padding: 11px;
   border-radius: 12px;
-  transition: all 0.13s;
+  transition: background-color 0.13s var(--ease), color 0.13s var(--ease), transform 0.1s var(--ease);
 }
 .btn-ghost:hover { background: rgba(255, 255, 255, 0.1); color: var(--fg); }
 
@@ -2279,7 +2323,8 @@ img, svg {
 }
 
 @media (max-width: 850px) and (orientation: landscape) {
-  .mob-hdr { display: flex !important; height: calc(44px + var(--safe-t)); }
+  .mob-hdr { display: none !important; }
+  .sb-hdr  { display: flex !important; }
   .app-layout { position: relative; flex: 1; min-height: 0; overflow: hidden; }
   .sidebar {
     position: relative !important;
@@ -2333,3 +2378,132 @@ img, svg {
 .color-swatch.active { border-color: #fff; box-shadow: 0 0 10px var(--blue-glow); }
 
 .about-app-name span { display: none; }
+
+
+/* ── AUDIO VOICE NOTE BUBBLE & ATTACHMENT DOCK ── */
+.audio-bubble {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 4px;
+  min-width: 220px;
+  max-width: 100%;
+}
+.audio-play-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fafafa;
+  color: #18181b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.12s var(--ease), background-color 0.12s var(--ease);
+}
+.audio-play-btn:active { transform: scale(0.92); }
+.audio-wave-bars {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 2.5px;
+  height: 24px;
+}
+.audio-bar {
+  flex: 1;
+  background: #52525b;
+  border-radius: 2px;
+  height: 6px;
+  transition: height 0.15s ease, background-color 0.15s ease;
+}
+.audio-bar.played { background: #fafafa; }
+.audio-time {
+  font-size: 11px;
+  color: #a1a1aa;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+/* ── AUDIO RECORDING COMPOSER HUD ── */
+.rec-hud {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  height: 42px;
+  padding: 0 12px;
+  border-radius: 12px;
+  background: #18181b;
+  border: 1px solid #3f3f46;
+}
+.rec-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  animation: rec-pulse 1s infinite alternate;
+}
+@keyframes rec-pulse {
+  from { opacity: 0.4; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1.15); }
+}
+.rec-timer {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fafafa;
+  font-variant-numeric: tabular-nums;
+}
+.rec-wave {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+  height: 18px;
+}
+.rec-wave-bar {
+  flex: 1;
+  max-width: 4px;
+  background: #a1a1aa;
+  border-radius: 2px;
+  height: 8px;
+  animation: wave-bounce 0.8s infinite ease-in-out alternate;
+}
+.rec-wave-bar:nth-child(2) { animation-delay: 0.15s; }
+.rec-wave-bar:nth-child(3) { animation-delay: 0.3s; }
+.rec-wave-bar:nth-child(4) { animation-delay: 0.45s; }
+.rec-wave-bar:nth-child(5) { animation-delay: 0.6s; }
+@keyframes wave-bounce {
+  from { height: 4px; }
+  to { height: 18px; }
+}
+
+/* ── ATTACHMENT PREVIEW DOCK ── */
+.attach-dock {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: #121215;
+  border-top: 1px solid var(--b0);
+  border-bottom: 1px solid var(--b0);
+}
+.attach-dock-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+.attach-dock-name {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #fafafa;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.attach-dock-size {
+  font-size: 11px;
+  color: #a1a1aa;
+  font-variant-numeric: tabular-nums;
+}

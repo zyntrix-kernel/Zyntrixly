@@ -348,36 +348,228 @@ function showUnsupportedFeature(){
   toast('File sharing is not available yet in this build.',3000);
 }
 
+
+/* ═══ ATTACHMENT STAGING & ZERO-KNOWLEDGE AUDIO NOTES ═══════════════ */
+let stagedFile = null;
+
+function cancelAttachment() {
+  stagedFile = null;
+  const dock = id('attach-dock');
+  if (dock) dock.classList.add('hidden');
+}
+
+let audioRecorder = null;
+let audioChunks = [];
+let audioRecInterval = null;
+let audioRecStartTime = 0;
+
+async function toggleAudioRecording() {
+  if (audioRecorder && audioRecorder.state === 'recording') {
+    discardAudioRecording();
+    return;
+  }
+  if (!CHAT) { toast('Open a chat first.'); return; }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    toast('Audio recording not supported in this browser.');
+    return;
+  }
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioChunks = [];
+    audioRecorder = new MediaRecorder(stream);
+    audioRecorder.ondataavailable = e => {
+      if (e.data && e.data.size > 0) audioChunks.push(e.data);
+    };
+
+    audioRecorder.start(100);
+    audioRecStartTime = Date.now();
+
+    const hud = id('audio-rec-hud');
+    const inp = id('msg-inp');
+    const emBtn = id('emoji-btn');
+    const recBtn = id('audio-rec-btn');
+    const sendBtn = document.querySelector('.composer .send-btn');
+    if (hud) hud.classList.remove('hidden');
+    if (inp) inp.style.display = 'none';
+    if (emBtn) emBtn.style.display = 'none';
+    if (recBtn) recBtn.style.display = 'none';
+    if (sendBtn) sendBtn.style.display = 'none';
+
+    audioRecInterval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - audioRecStartTime) / 1000);
+      const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+      const s = String(elapsed % 60).padStart(2, '0');
+      const timerEl = id('audio-rec-timer');
+      if (timerEl) timerEl.textContent = m + ':' + s;
+    }, 500);
+  } catch (err) {
+    toast('Microphone access denied: ' + (err.message || 'Permission denied'), 3500);
+  }
+}
+
+function resetAudioRecUI() {
+  if (audioRecInterval) { clearInterval(audioRecInterval); audioRecInterval = null; }
+  const hud = id('audio-rec-hud');
+  const inp = id('msg-inp');
+  const emBtn = id('emoji-btn');
+  const recBtn = id('audio-rec-btn');
+  const sendBtn = document.querySelector('.composer .send-btn');
+  if (hud) hud.classList.add('hidden');
+  if (inp) inp.style.display = '';
+  if (emBtn) emBtn.style.display = '';
+  if (recBtn) recBtn.style.display = '';
+  if (sendBtn) sendBtn.style.display = '';
+  const timerEl = id('audio-rec-timer');
+  if (timerEl) timerEl.textContent = '00:00';
+}
+
+function discardAudioRecording() {
+  if (audioRecorder) {
+    try {
+      audioRecorder.stop();
+      audioRecorder.stream.getTracks().forEach(t => t.stop());
+    } catch (_) {}
+    audioRecorder = null;
+  }
+  audioChunks = [];
+  resetAudioRecUI();
+  toast('Voice note discarded');
+}
+
+async function sendAudioRecording() {
+  if (!audioRecorder) return;
+  const elapsed = Math.max(1, Math.round((Date.now() - audioRecStartTime) / 1000));
+
+  audioRecorder.onstop = async () => {
+    const blob = new Blob(audioChunks, { type: 'audio/webm' });
+    try {
+      audioRecorder.stream.getTracks().forEach(t => t.stop());
+    } catch (_) {}
+    audioRecorder = null;
+    audioChunks = [];
+    resetAudioRecUI();
+
+    if (blob.size > 900 * 1024) {
+      toast('Voice note too large (max 900KB)', 3000);
+      return;
+    }
+
+    toast('Encrypting voice note…', 8000);
+    try {
+      const buf = await blob.arrayBuffer();
+      const arr = new Uint8Array(buf);
+      let binary = '';
+      for (let i = 0; i < arr.length; i++) binary += String.fromCharCode(arr[i]);
+      const encB64 = btoa(binary);
+
+      const payload = JSON.stringify({
+        __type: 'audio',
+        data: encB64,
+        duration: elapsed,
+        size: blob.size
+      });
+
+      if (CHAT.type === 'dm') await sendDMMsg(payload, null);
+      else await sendGrpMsg(payload, null);
+      toast('🎙 Voice note sent!');
+    } catch (e) {
+      toast('Failed to send voice note: ' + (e.message || 'Error'), 4000);
+    }
+  };
+
+  try {
+    audioRecorder.stop();
+  } catch (_) {
+    resetAudioRecUI();
+  }
+}
+
+let activeAudioInstance = null;
+let activeAudioBtn = null;
+
+function playAudioVoice(btn, inlineB64) {
+  if (activeAudioInstance) {
+    activeAudioInstance.pause();
+    if (activeAudioBtn) {
+      activeAudioBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+    }
+    if (activeAudioInstance._b64 === inlineB64) {
+      activeAudioInstance = null;
+      activeAudioBtn = null;
+      return;
+    }
+  }
+
+  try {
+    const binStr = atob(inlineB64);
+    const bytes = new Uint8Array(binStr.length);
+    for (let i = 0; i < binStr.length; i++) bytes[i] = binStr.charCodeAt(i);
+    const blob = new Blob([bytes.buffer], { type: 'audio/webm' });
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    audio._b64 = inlineB64;
+    activeAudioInstance = audio;
+    activeAudioBtn = btn;
+
+    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+
+    audio.onended = () => {
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+      activeAudioInstance = null;
+      activeAudioBtn = null;
+      URL.revokeObjectURL(url);
+    };
+
+    audio.play().catch(e => {
+      toast('Playback failed: ' + e.message);
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+    });
+  } catch (err) {
+    toast('Could not decode voice note: ' + err.message);
+  }
+}
+
 /* ═══ FILE SHARING ═══════════════════════════════ */
 function openFileShare(){
   if(!CHAT){toast('Open a chat first.');return;}
   const input=document.createElement('input');
   input.type='file'; input.accept='*/*';
-  input.onchange=async()=>{
+  input.onchange=()=>{
     const file=input.files?.[0]; if(!file)return;
     if(file.size>900*1024){toast('Max file size: 900KB for encrypted transfers',3000);return;}
-    toast('Encrypting & uploading…',12000);
-    try{
-      const key=await crypto.subtle.generateKey({name:'AES-GCM',length:256},true,['encrypt','decrypt']);
-      const iv=crypto.getRandomValues(new Uint8Array(12));
-      const buf=await file.arrayBuffer();
-      const enc=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,buf);
-      const rawKey=await crypto.subtle.exportKey('raw',key);
-      const keyHex=Array.from(new Uint8Array(rawKey)).map(b=>b.toString(16).padStart(2,'0')).join('');
-      const ivHex=Array.from(iv).map(b=>b.toString(16).padStart(2,'0')).join('');
-      // Store encrypted file as base64 inline in Firestore (max 900KB encrypted)
-      const encArr=new Uint8Array(enc);
-      let binary = ''; const len = encArr.byteLength; for (let i = 0; i < len; i++) { binary += String.fromCharCode(encArr[i]); } const encB64 = btoa(binary);
-      const payload=JSON.stringify({__type:'file',data:encB64,name:file.name,size:file.size,key:keyHex,iv:ivHex});
-      if(CHAT.type==='dm')await sendDMMsg(payload,null);
-      else await sendGrpMsg(payload,null);
-      toast('📎 File sent!');
-    }catch(e){
-      // Never log encryption keys
-      toast('Upload failed: '+(e.message||'Unknown error'),4000);
-    }
+    stagedFile = file;
+    const dock = id('attach-dock');
+    const nameEl = id('attach-dock-name');
+    const sizeEl = id('attach-dock-size');
+    const sz = file.size>1024*1024 ? (file.size/1024/1024).toFixed(1)+' MB' : Math.round(file.size/1024)+' KB';
+    if(nameEl) nameEl.textContent = file.name;
+    if(sizeEl) sizeEl.textContent = sz + ' · Ready to send encrypted';
+    if(dock) dock.classList.remove('hidden');
+    id('msg-inp')?.focus();
   };
   input.click();
+}
+
+async function uploadStagedFile(file){
+  toast('Encrypting & uploading…',12000);
+  try{
+    const key=await crypto.subtle.generateKey({name:'AES-GCM',length:256},true,['encrypt','decrypt']);
+    const iv=crypto.getRandomValues(new Uint8Array(12));
+    const buf=await file.arrayBuffer();
+    const enc=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,buf);
+    const rawKey=await crypto.subtle.exportKey('raw',key);
+    const keyHex=Array.from(new Uint8Array(rawKey)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    const ivHex=Array.from(iv).map(b=>b.toString(16).padStart(2,'0')).join('');
+    const encArr=new Uint8Array(enc);
+    let binary = ''; const len = encArr.byteLength; for (let i = 0; i < len; i++) { binary += String.fromCharCode(encArr[i]); } const encB64 = btoa(binary);
+    const payload=JSON.stringify({__type:'file',data:encB64,name:file.name,size:file.size,key:keyHex,iv:ivHex});
+    if(CHAT.type==='dm')await sendDMMsg(payload,null);
+    else await sendGrpMsg(payload,null);
+    toast('📎 File sent!');
+  }catch(e){
+    toast('Upload failed: '+(e.message||'Unknown error'),4000);
+  }
 }
 
 async function downloadFileMsg(url,name,keyHex,ivHex,inlineData){
@@ -1780,6 +1972,40 @@ async function decryptBubble(bub,data,mine,chatCtx=getChatContext()){
         bub.appendChild(card);
         return;
       }
+      if(parsed&&parsed.__type==='audio'){
+        const dur = parsed.duration || 0;
+        const m = String(Math.floor(dur / 60)).padStart(2, '0');
+        const s = String(dur % 60).padStart(2, '0');
+        const card = document.createElement('div');
+        card.className = 'audio-bubble';
+        card.innerHTML = `
+          <button class="audio-play-btn" type="button" title="Play voice note">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </button>
+          <div class="audio-wave-bars">
+            <div class="audio-bar" style="height:8px"></div>
+            <div class="audio-bar" style="height:14px"></div>
+            <div class="audio-bar" style="height:20px"></div>
+            <div class="audio-bar" style="height:12px"></div>
+            <div class="audio-bar" style="height:18px"></div>
+            <div class="audio-bar" style="height:22px"></div>
+            <div class="audio-bar" style="height:14px"></div>
+            <div class="audio-bar" style="height:10px"></div>
+            <div class="audio-bar" style="height:16px"></div>
+            <div class="audio-bar" style="height:6px"></div>
+          </div>
+          <span class="audio-time">${m}:${s}</span>
+        `;
+        const playBtn = card.querySelector('.audio-play-btn');
+        if (playBtn && parsed.data) {
+          playBtn.onclick = (e) => {
+            e.stopPropagation();
+            playAudioVoice(playBtn, parsed.data);
+          };
+        }
+        bub.appendChild(card);
+        return;
+      }
     }catch(_){}
     bub.textContent=plain;
   } catch(e){bub.textContent='🔒 Decryption failed';}
@@ -1832,8 +2058,14 @@ function renderReactions(el,reactions){
 function onMsgKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
 
 async function sendMsg(){
+  if(!CHAT||!ME)return;
+  if(stagedFile){
+    const fileToSend = stagedFile;
+    cancelAttachment();
+    await uploadStagedFile(fileToSend);
+  }
   const inp=id('msg-inp');const text=inp.value.trim();
-  if(!text||!CHAT||!ME)return;
+  if(!text)return;
   if(!ME.privKey&&CHAT.type==='dm'){toast('Encryption keys not loaded. Please re-login.',3500);return;}
   inp.value='';
   saveDraftText(CHAT.type,CHAT.id,'');
