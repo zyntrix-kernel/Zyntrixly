@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "ecc.install.v1",
+  "installedAt": "2026-10-31T12:35:17.506Z",
+  "target": {
+    "id": "gemini-project",
+    "target": "gemini",
+    "kind": "project",
+    "root": "C:\\Users\\USER\\Desktop\\Zyntrix\\Zyntrix OS\\Zyntrixly\\.gemini",
+    "installStatePath": "C:\\Users\\USER\\Desktop\\Zyntrix\\Zyntrix OS\\Zyntrixly\\.gemini\\ecc-install-state.json"
+  },
+  "request": {
+    "profile": "core",
+    "modules": [],
+    "includeComponents": [],
+    "excludeComponents": [],
+    "legacyLanguages": [],
+    "legacyMode": false,
+    "hookConsent": null
+  },
+  "resolution": {
+    "selectedModules": [
+      "platform-configs",
+      "shared-script-utils"
+    ],
+    "skippedModules": [
+      "rules-core",
+      "agents-core",
+      "commands-core",
+      "hooks-runtime",
+      "workflow-quality"
+    ]
+  },
+  "source": {
+    "repoVersion": "2.2.3",
+    "repoCommit": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+    "manifestVersion": 1
+  },
+  "operations": [
+    {
+      "kind": "copy-file",
+      "moduleId": "platform-configs",
+      "sourcePath": "C:\\Users\\USER\\AppData\\Local\\Temp\\ecc\\.gemini\\GEMINI.md",
+      "sourceRelativePath": ".gemini\\GEMINI.md",
+      "destinationPath": "C:\\Users\\USER\\Desktop\\Zyntrix\\Zyntrix OS\\Zyntrixly\\.gemini\\GEMINI.md",
+      "strategy": "sync-root-children",
+      "ownership": "managed",
+      "scaffoldOnly": false,
+      "contentSha256": "5dad34710a9c68e47beca5c734dcf8a74c244d39c235364df5fc0c06e83e5e5e"
+    },
+    {
+      "kind": "copy-file",
+      "moduleId": "platform-configs",
+      "sourcePath": "C:\\Users\\USER\\AppData\\Local\\Temp\\ecc\\mcp-configs\\mcp-servers.json",
+      "sourceRelativePath": "mcp-configs\\mcp-servers.json",
+      "destinationPath": "C:\\Users\\USER\\Desktop\\Zyntrix\\Zyntrix OS\\Zyntrixly\\.gemini\\mcp-configs\\mcp-servers.json",
+      "strategy": "preserve-relative-path",
+      "ownership": "managed",
+      "scaffoldOnly": false,
+      "contentSha256": "1424c0de0ee3efd13ebbb8e9724c26e6b7dc604b7edeff6616b2c71cb4c6bd46"
+    },
+    {
+      "kind": "copy-file",
+      "moduleId": "platform-configs",
+      "sourcePath": "C:\\Users\\USER\\AppData\\Local\\Temp\\ecc\\scripts\\auto-update.js",
+      "sourceRelativePath": "scripts/auto-update.js",
+      "destinationPath": "C:\\Users\\USER\\Desktop\\Zyntrix\\Zyntrix OS\\Zyntrixly\\.gemini\\scripts\\auto-update.js",
+      "strategy": "preserve-relative-path",
+      "ownership": "managed",
+      "scaffoldOnly": false,
+      "contentSha256": "86f6b3a9254a59d68e51c7066a8939c08e26f70a551dba6394a06fe4ddbc64e7"
+    },
+    {
+      "kind": "copy-file",
+      "moduleId": "platform-configs",
+      "sourcePath": "C:\\Users\\USER\\AppData\\Local\\Temp\\ecc\\scripts\\setup-package-manager.js",
+      "sourceRelativePath": "scripts/setup-package-manager.js",
+      "destinationPath": "C:\\Users\\USER\\Desktop\\Zyntrix\\Zyntrix OS\\Zyntrixly\\.gemini\\scripts\\setup-package-manager.js",
+      "strategy": "preserve-relative-path",
+      "ownership": "managed",
+      "scaffoldOnly": false,
+      "contentSha256": "499f38ef03b3f7f9896ad97229b8213df215544bb3c6bd6343e3889f023f6bda"
+    },
+    {
+      "kind": "copy-file",
+      "moduleId": "platform-configs",
+      "sourcePath": "C:\\Users\\USER\\AppData\\Local\\Temp\\ecc\\scripts\\lib\\package-manager.js",
+      "sourceRelativePath": "scripts/lib/package-manager.js",
+      "destinationPath": "C:\\Users\\USER\\Desktop\\Zyntrix\\Zyntrix OS\\Zyntrixly\\.gemini\\scripts\\lib\\package-manager.js",
+      "strategy": "preserve-relative-path",
+      "ownership": "managed",
+      "scaffoldOnly": false,
+      "contentSha256": "636f8bc8379ae0c26be1f7c5b61555cf2a274698a4f9fbd34e9eced9eacb3662"
+    },
+    {
+      "kind": "copy-file",
+      "moduleId": "shared-script-utils",
+      "sourcePath": "C:\\Users\\USER\\AppData\\Local\\Temp\\ecc\\scripts\\lib\\utils.js",
+      "sourceRelativePath": "scripts/lib/utils.js",
+      "destinationPath": "C:\\Users\\USER\\Desktop\\Zyntrix\\Zyntrix OS\\Zyntrixly\\.gemini\\scripts\\lib\\utils.js",
+      "strategy": "preserve-relative-path",
+      "ownership": "managed",
+      "scaffoldOnly": false,
+      "contentSha256": "9cd46ca7d5695a9f8be5afc8da618c29b58e65f4be1411531a64485684592710"
+    },
+    {
+      "kind": "copy-file",
+      "moduleId": "shared-script-utils",
+      "sourcePath": "C:\\Users\\USER\\AppData\\Local\\Temp\\ecc\\scripts\\lib\\agent-data-home.js",
+      "sourceRelativePath": "scripts/lib/agent-data-home.js",
+      "destinationPath": "C:\\Users\\USER\\Desktop\\Zyntrix\\Zyntrix OS\\Zyntrixly\\.gemini\\scripts\\lib\\agent-data-home.js",
+      "strategy": "preserve-relative-path",
+      "ownership": "managed",
+      "scaffoldOnly": false,
+      "contentSha256": "afc7d0ebe7b747345063f716c18816d6351e94cc1641303a4568fe70858e5710"
+    },
+    {
+      "kind": "copy-file",
+      "moduleId": "shared-script-utils",
+      "sourcePath": "C:\\Users\\USER\\AppData\\Local\\Temp\\ecc\\scripts\\lib\\path-safety.js",
+      "sourceRelativePath": "scripts/lib/path-safety.js",
+      "destinationPath": "C:\\Users\\USER\\Desktop\\Zyntrix\\Zyntrix OS\\Zyntrixly\\.gemini\\scripts\\lib\\path-safety.js",
+      "strategy": "preserve-relative-path",
+      "ownership": "managed",
+      "scaffoldOnly": false,
+      "contentSha256": "542126cf47247161dd26713a1f33d34af2881db46435ac8ecef76a8be31c062c"
+    }
+  ]
+}

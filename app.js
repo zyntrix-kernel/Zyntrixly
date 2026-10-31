@@ -56,7 +56,7 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('.sb-search-wrap'))document.getElementById('sb-search-drop').classList.add('hidden');
 });
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){
+  if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();id('sb-q')?.focus();return;}if(e.key==='Escape'){
     closeAllModals();cancelReply();closeCtx();closeRP();
   }
 });
@@ -534,7 +534,7 @@ function setupInstallPrompt(){
     localStorage.removeItem('zx_install_dismissed');
     hideInstallBanner();
     updateInstallUI();
-    toast('Zynix installed.',3000);
+    toast('Zyntrixly installed.',3000);
   });
 
   updateInstallUI();
@@ -551,7 +551,7 @@ function updateInstallUI(){
     if(canInstall){
       const iosOnly=!deferredInstallPrompt&&isIosPwaCandidate();
       label.textContent=iosOnly?'Add to Home Screen':'Install App';
-      sub.textContent=iosOnly?'Use Safari Share → Add to Home Screen.':'Open Zynix in its own window.';
+      sub.textContent=iosOnly?'Use Safari Share → Add to Home Screen.':'Open Zyntrixly in its own window.';
     }
   }
 
@@ -561,7 +561,7 @@ function updateInstallUI(){
     hideInstallBanner();
     return;
   }
-  id('install-banner-title').textContent=!deferredInstallPrompt&&isIosPwaCandidate()?'Add Zynix to Home Screen':'Install Zynix';
+  id('install-banner-title').textContent=!deferredInstallPrompt&&isIosPwaCandidate()?'Add Zyntrixly to Home Screen':'Install Zyntrixly';
   id('install-banner-sub').textContent=!deferredInstallPrompt&&isIosPwaCandidate()
     ?'On iPhone or iPad, use Safari Share → Add to Home Screen.'
     :'Install the web app for a standalone window and faster offline startup.';
@@ -623,7 +623,7 @@ function applyFont(style,save=true){
 function toggleAuthMode(){
   isSignIn=!isSignIn;
   id('auth-title').textContent=isSignIn?'Welcome back':'Create account';
-  id('auth-subtitle').textContent=isSignIn?'Sign in to continue to Zynix':'Private by default 🔒';
+  id('auth-subtitle').textContent=isSignIn?'Sign in to continue to Zyntrixly':'Private by default 🔒';
   id('auth-btn-label').textContent=isSignIn?'Sign in':'Create account';
   id('auth-toggle-label').textContent=isSignIn?'Create a new account':'Already have an account?';
   id('f-confirm-wrap').classList.toggle('hidden',isSignIn);
@@ -2172,7 +2172,7 @@ function sendNotif(data){
   if(Notification.permission!=='granted')return;
   if(CHAT&&isMuted(CHAT.type,CHAT.id))return;
   const who=CHAT.memberNames?.[data.senderUid]||CHAT.name||'Someone';
-  new Notification('Zynix · @'+who,{
+  new Notification('Zyntrixly · @'+who,{
     body:'🔒 New encrypted message',
     icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="%233b82f6"/><text x="16" y="22" text-anchor="middle" font-size="18" fill="white">Z</text></svg>',
     tag:'zx'
@@ -2345,7 +2345,7 @@ function goBack(){
 
   // Restore mobile header to list mode
   const mobTitle=id('mob-title');
-  if(mobTitle) mobTitle.innerHTML='<img src="zyntrixly-logo.png" alt="Zynix" class="brand-lockup-img"/><span class="brand-gradient">Zynix</span>';
+  if(mobTitle) mobTitle.innerHTML='<img src="zyntrixly-logo.png" alt="Zyntrixly" class="brand-lockup-img"/><span class="brand-gradient">Zyntrixly</span>';
   document.querySelectorAll('.mob-list-only').forEach(el=>el.style.display='flex');
   document.querySelectorAll('.mob-back-only').forEach(el=>el.style.display='none');
   updateMobileChatActions(null);

@@ -1,5 +1,5 @@
 // ════════════════════════════════════════════════
-//  ZYNIX — api/config.js
+//  ZYNTRIXLY — api/config.js
 //  Firebase config is now hardcoded in index.html.
 //  This endpoint kept for backwards compat but returns
 //  the same values so any existing fetch('/api/config')

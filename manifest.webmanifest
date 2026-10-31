@@ -1,12 +1,12 @@
 {
-  "name": "Zynix",
-  "short_name": "Zynix",
-  "description": "Dangerously beautiful encrypted messaging",
+  "name": "Zyntrixly",
+  "short_name": "Zyntrixly",
+  "description": "Zero-knowledge end-to-end encrypted messaging and calling",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#03050f",
-  "theme_color": "#03050f",
+  "background_color": "#05070a",
+  "theme_color": "#05070a",
   "orientation": "any",
   "icons": [
     {

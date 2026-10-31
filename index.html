@@ -6,39 +6,33 @@
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="theme-color" content="#03050f"/>
-  <meta name="description" content="Zynix — Private by default. End-to-end encrypted messaging."/>
-  <title>Zynix</title>
+  <meta name="description" content="Zyntrixly — Private by default. End-to-end encrypted messaging."/>
+  <title>Zyntrixly — Private by Default</title>
   <link rel="manifest" href="manifest.webmanifest"/>
   <link rel="icon" href="assets/app-icon-192.png" sizes="192x192"/>
   <link rel="icon" href="assets/app-icon-512.png" sizes="512x512"/>
   <link rel="shortcut icon" href="assets/app-icon-192.png"/>
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png"/>
   <link rel="stylesheet" href="vendor/fonts/google-fonts.css"/>
+  <link rel="stylesheet" href="shadcn.css"/>
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body class="font-modern">
 
 <!-- PARTICLE CANVAS (behind everything) -->
-<canvas id="zynix-canvas"></canvas>
+<canvas id="zyntrix-canvas"></canvas>
 
-<!-- STARTUP ANIMATION -->
+<!-- STARTUP ANIMATION (Minimalist shadcn Spotlight Lockup) -->
 <div id="startup" class="startup">
-  <div class="startup-bg-grad"></div>
-  <div class="startup-orb"></div>
-  <div class="startup-rings">
-    <div class="s-ring"></div>
-    <div class="s-ring"></div>
-    <div class="s-ring"></div>
-  </div>
+  <div class="spotlight-beam"></div>
   <div class="startup-content">
     <div class="startup-icon-wrap">
-      <div class="startup-icon-glow"></div>
-      <div class="startup-icon glass-panel-strong glow-blue">
-        <img src="app-icon.png" alt="Zynix app icon" class="brand-mark brand-mark-xl"/>
+      <div class="startup-icon">
+        <img src="app-icon.png" alt="Zyntrixly app icon" class="brand-mark brand-mark-xl"/>
       </div>
     </div>
-    <h1 class="startup-title"><span class="brand-gradient">Zynix</span></h1>
-    <p class="startup-sub"><span class="text-muted">Private</span><span class="text-primary-light glow-text-sm"> by default</span></p>
+    <h1 class="startup-title"><span class="brand-text">Zyntrixly</span></h1>
+    <p class="startup-sub"><span class="text-muted">Zero-Knowledge</span><span class="text-foreground"> Cryptographic Vault</span></p>
     <div class="startup-dots">
       <div class="typing-dot"></div>
       <div class="typing-dot"></div>
@@ -48,54 +42,51 @@
   <div class="startup-fade-out" id="startup-fade"></div>
 </div>
 
-<!-- AUTH SCREEN -->
+<!-- AUTH SCREEN (shadcn Card with Directional Lighting) -->
 <div id="auth-screen" class="screen hidden">
-  <div class="auth-bg-grad"></div>
-  <div class="auth-orb auth-orb1"></div>
-  <div class="auth-orb auth-orb2"></div>
-
+  <div class="spotlight-beam"></div>
   <div class="auth-center">
-    <div class="auth-card glass-panel-strong glow-blue">
+    <div class="auth-card shadcn-card">
       <!-- Header -->
       <div class="auth-header">
-        <div class="auth-icon glass-panel glow-blue">
-          <img src="app-icon.png" alt="Zynix app icon" class="brand-mark brand-mark-md"/>
+        <div class="auth-icon">
+          <img src="app-icon.png" alt="Zyntrixly app icon" class="brand-mark brand-mark-md"/>
         </div>
         <h1 id="auth-title" class="auth-title">Welcome back</h1>
-        <p id="auth-subtitle" class="auth-subtitle">Sign in to continue to Zynix</p>
+        <p id="auth-subtitle" class="auth-subtitle">Sign in to continue to Zyntrixly</p>
       </div>
 
       <!-- Form -->
       <form id="auth-form" class="auth-form" onsubmit="submitAuth(event)">
         <!-- Username -->
         <div class="field-wrap">
-          <div class="field-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M3 21v-1a9 9 0 0 1 18 0v1"/></svg></div>
-          <input id="f-user" type="text" placeholder="Username" autocapitalize="none" spellcheck="false" autocomplete="username" class="auth-input input-glow"/>
+          <div class="field-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M3 21v-1a9 9 0 0 1 18 0v1"/></svg></div>
+          <input id="f-user" type="text" placeholder="Username" autocapitalize="none" spellcheck="false" autocomplete="username" class="auth-input"/>
         </div>
 
         <!-- Password -->
         <div class="field-wrap">
-          <div class="field-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-          <input id="f-pass" type="password" placeholder="Password" autocomplete="current-password" class="auth-input input-glow"/>
+          <div class="field-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+          <input id="f-pass" type="password" placeholder="Password" autocomplete="current-password" class="auth-input"/>
           <button type="button" class="pw-toggle" onclick="togglePw('f-pass',this)">
-            <svg class="eye-off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-            <svg class="eye-on hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="eye-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            <svg class="eye-on hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
         </div>
 
         <!-- Confirm password (register only) -->
         <div id="f-confirm-wrap" class="field-wrap register-only hidden">
-          <div class="field-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-          <input id="f-confirm" type="password" placeholder="Confirm password" autocomplete="new-password" class="auth-input input-glow"/>
+          <div class="field-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <input id="f-confirm" type="password" placeholder="Confirm password" autocomplete="new-password" class="auth-input"/>
         </div>
 
         <!-- Error -->
         <p id="auth-err" class="auth-err hidden"></p>
 
         <!-- Submit -->
-        <button type="submit" id="auth-submit" class="auth-btn glow-blue-strong">
+        <button type="submit" id="auth-submit" class="auth-btn">
           <span id="auth-btn-label">Sign in</span>
-          <svg id="auth-btn-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          <svg id="auth-btn-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           <div id="auth-spinner" class="auth-spinner hidden"></div>
         </button>
       </form>
@@ -105,7 +96,7 @@
 
       <!-- Toggle -->
       <button onclick="toggleAuthMode()" class="auth-toggle">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 3H9l3-3z"/><path d="M12 22l-3-3h6l-3 3z"/><path d="M2 12l3-3v6l-3-3z"/><path d="M22 12l-3 3V9l3 3z"/></svg>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 3H9l3-3z"/><path d="M12 22l-3-3h6l-3 3z"/><path d="M2 12l3-3v6l-3-3z"/><path d="M22 12l-3 3V9l3 3z"/></svg>
         <span id="auth-toggle-label">Create a new account</span>
       </button>
 
@@ -138,8 +129,8 @@
 
     <!-- Title -->
     <div class="mob-brand" id="mob-title">
-      <img src="zyntrixly-logo.png" alt="Zynix" class="brand-lockup-img"/>
-      <span class="brand-gradient">Zynix</span>
+      <img src="zyntrixly-logo.png" alt="Zyntrixly" class="brand-lockup-img"/>
+      <span class="brand-text">Zyntrixly</span>
     </div>
 
     <!-- Right: new chat (list) or more options (chat) -->
@@ -161,11 +152,11 @@
   <div class="app-layout" id="app-layout">
 
     <!-- SIDEBAR -->
-    <aside class="sidebar glass-panel-strong" id="sidebar">
+    <aside class="sidebar" id="sidebar">
       <!-- Sidebar header -->
       <div class="sb-hdr">
         <div class="sb-hdr-left">
-          <img src="zyntrixly-logo.png" alt="Zynix" class="brand-lockup-img brand-lockup-sidebar"/>
+          <img src="zyntrixly-logo.png" alt="Zyntrixly" class="brand-lockup-img brand-lockup-sidebar"/>
           <div class="sb-av" id="sb-av" onclick="openSettings()">
             <div class="av-circle" id="sb-av-circle">?</div>
             <div class="av-status av-online" id="sb-status"></div>
@@ -195,7 +186,7 @@
       <div class="sb-search-wrap">
         <div class="sb-search-inner">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="sb-search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input id="sb-q" type="text" placeholder="Search chats..." class="sb-search-input input-glow" oninput="onSbSearch()"/>
+          <input id="sb-q" type="text" placeholder="Search chats..." class="sb-search-input" oninput="onSbSearch()"/>
           <button id="sb-clear" class="sb-clear hidden" onclick="clearSbSearch()">✕</button>
         </div>
         <div id="sb-search-drop" class="sb-search-drop hidden"></div>
@@ -221,20 +212,34 @@
     <main class="main-panel" id="main-panel">
 
       <!-- Empty state -->
-      <div id="empty-pane" class="empty-pane glass-panel">
+      <div id="empty-pane" class="empty-pane">
         <div class="ep-wrap">
-          <div class="ep-icon glass-panel-strong glow-blue">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-primary"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <div class="ep-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="3"/><path d="M12 14v3"/></svg>
           </div>
-          <h2 class="ep-title">Welcome to Zynix</h2>
-          <p class="ep-sub">Select a conversation to start messaging.<br/>All your chats are end-to-end encrypted.</p>
+          <h2 class="ep-title">Zyntrixly Security Vault</h2>
+          <p class="ep-sub">End-to-end encrypted communication. Cryptographic keys and plaintext never leave your device.</p>
+          <div class="ep-chips">
+            <button class="ep-chip" onclick="openNewChat()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+              <span>New Conversation</span>
+            </button>
+            <button class="ep-chip" onclick="openNewChat();ncTab('grp',document.querySelectorAll('.m-tab')[1])">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <span>Create Group</span>
+            </button>
+            <button class="ep-chip" onclick="openSettings()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+              <span>Security Vault</span>
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- Chat pane -->
-      <div id="chat-pane" class="chat-pane glass-panel hidden">
+      <div id="chat-pane" class="chat-pane hidden">
         <!-- Chat header -->
-        <div class="chat-hdr glass-panel-strong" id="chat-hdr">
+        <div class="chat-hdr" id="chat-hdr">
           <button class="chat-back-btn hidden" id="chat-back" onclick="goBack()">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
@@ -270,7 +275,7 @@
         <div id="chat-search-strip" class="reply-strip hidden">
           <div class="rs-bar"></div>
           <div class="rs-body">
-            <input id="chat-search-inp" type="text" class="compose-input input-glow" placeholder="Search in this chat..." oninput="searchInChat()"/>
+            <input id="chat-search-inp" type="text" class="compose-input" placeholder="Search in this chat..." oninput="searchInChat()"/>
           </div>
           <button class="rs-close" onclick="closeChatSearch()">✕</button>
         </div>
@@ -298,15 +303,15 @@
         </div>
 
         <!-- Composer -->
-        <div class="composer glass-panel-strong">
+        <div class="composer">
           <button class="compose-icon-btn" title="Attach" onclick="openFileShare()">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
           </button>
-          <input id="msg-inp" type="text" class="compose-input input-glow" placeholder="Type a message..." onkeydown="onMsgKey(event)" oninput="handleComposerInput()"/>
+          <input id="msg-inp" type="text" class="compose-input" placeholder="Type a message..." onkeydown="onMsgKey(event)" oninput="handleComposerInput()"/>
           <button class="compose-icon-btn" id="emoji-btn" title="Emoji" onclick="openEmojiPicker(event)">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>
           </button>
-          <button class="send-btn glow-blue-strong" onclick="sendMsg()">
+          <button class="send-btn" onclick="sendMsg()">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </button>
         </div>
@@ -319,7 +324,7 @@
 
 <!-- New chat modal -->
 <div id="nc-modal" class="modal-bg hidden" onclick="modalBgClick(event,'nc-modal')">
-  <div class="modal glass-panel-strong glow-blue">
+  <div class="modal">
     <div class="modal-hdr">
       <h3>New conversation</h3>
       <button class="modal-x" onclick="closeModal('nc-modal')">✕</button>
@@ -329,12 +334,12 @@
       <button class="m-tab" onclick="ncTab('grp',this)">New group</button>
     </div>
     <div id="nc-dm" class="nc-pane active">
-      <input id="nc-dm-q" type="text" class="modal-input input-glow" placeholder="Search username…" oninput="searchDM()" autocapitalize="none"/>
+      <input id="nc-dm-q" type="text" class="modal-input" placeholder="Search username…" oninput="searchDM()" autocapitalize="none"/>
       <div id="nc-dm-res" class="modal-list"></div>
     </div>
     <div id="nc-grp" class="nc-pane">
-      <input id="nc-grp-name" type="text" class="modal-input input-glow" placeholder="Group name…" style="margin-bottom:10px"/>
-      <input id="nc-grp-q" type="text" class="modal-input input-glow" placeholder="Add members (search)…" oninput="searchGrp()" autocapitalize="none"/>
+      <input id="nc-grp-name" type="text" class="modal-input" placeholder="Group name…" style="margin-bottom:10px"/>
+      <input id="nc-grp-q" type="text" class="modal-input" placeholder="Add members (search)…" oninput="searchGrp()" autocapitalize="none"/>
       <div id="nc-grp-res" class="modal-list"></div>
       <div id="nc-chips" class="chips-row"></div>
       <button class="modal-btn-primary" onclick="createGroup()" style="margin-top:10px;width:100%">Create group →</button>
@@ -345,7 +350,7 @@
 
 <!-- Settings panel -->
 <div id="settings-modal" class="modal-bg hidden">
-  <div class="modal settings-panel glass-panel-strong glow-blue">
+  <div class="modal settings-panel">
     <div class="modal-hdr">
       <h3 id="settings-title">Settings</h3>
       <button class="modal-x" onclick="closeSettings()">✕</button>
@@ -354,7 +359,7 @@
     <div id="sv-main" class="settings-view">
       <!-- Profile -->
       <div class="settings-section">
-        <div class="settings-profile glass-panel">
+        <div class="settings-profile">
           <div class="sp-av" id="sp-av-circle">?</div>
           <div class="sp-info">
             <span class="sp-name" id="sp-username">...</span>
@@ -373,7 +378,7 @@
       </div>
       <!-- E2E badge -->
       <div class="settings-section">
-        <div class="settings-e2e glass-panel">
+        <div class="settings-e2e">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           <div>
             <p class="se2-title">End-to-end encrypted</p>
@@ -396,14 +401,14 @@
     <!-- Appearance view -->
     <div id="sv-appearance" class="settings-view hidden">
       <div class="settings-back-hdr">
-        <button onclick="settingsBack()" class="settings-back-btn glass-panel">
+        <button onclick="settingsBack()" class="settings-back-btn">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <span>Appearance</span>
       </div>
       <div class="settings-section">
         <p class="settings-sec-label">Theme</p>
-        <div class="settings-item glass-panel">
+        <div class="settings-item">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
           <div class="si-info"><span>Dark Mode</span><span class="si-sub">Always enabled</span></div>
           <div class="toggle-on"><div class="toggle-knob"></div></div>
@@ -418,7 +423,7 @@
       </div>
       <div class="settings-section">
         <p class="settings-sec-label">Preview</p>
-        <div class="font-preview glass-panel" id="font-preview">
+        <div class="font-preview" id="font-preview">
           <p>The quick brown fox jumps over the lazy dog.</p>
           <p class="fp-sub">ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789</p>
         </div>
@@ -427,25 +432,25 @@
     <!-- About view -->
     <div id="sv-about" class="settings-view hidden">
       <div class="settings-back-hdr">
-        <button onclick="settingsBack()" class="settings-back-btn glass-panel">
+        <button onclick="settingsBack()" class="settings-back-btn">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <span>About</span>
       </div>
       <div class="about-center">
-        <div class="about-icon glass-panel-strong glow-blue">
+        <div class="about-icon">
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-primary"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         </div>
-        <h1 class="about-app-name"><span class="brand-gradient">Zynix</span></h1>
+        <h1 class="about-app-name"><span class="brand-text">Zyntrixly</span></h1>
         <p class="about-ver">Version 1.0.0</p>
         <p class="about-desc">Next-generation secure messaging platform with end-to-end encryption.</p>
-        <div class="about-oss glass-panel">
+        <div class="about-oss">
           <div class="about-oss-hdr">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/></svg>
             <span>Open Source</span>
           </div>
           <p class="about-oss-desc">This app is open source. View the code, contribute, or report issues on GitHub.</p>
-          <a href="https://github.com/zyntrix-kernel/zynix" target="_blank" class="about-gh-link">View on GitHub <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></a>
+          <a href="https://github.com/zyntrix-kernel/zyntrixly" target="_blank" class="about-gh-link">View on GitHub <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
         </div>
         <div class="about-credits">
           <p class="credits-built">Built with <svg width="16" height="16" viewBox="0 0 24 24" fill="red" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg> by</p>
@@ -460,11 +465,11 @@
     <!-- Notifications view -->
     <div id="sv-notif" class="settings-view hidden">
       <div class="settings-back-hdr">
-        <button onclick="settingsBack()" class="settings-back-btn glass-panel"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <button onclick="settingsBack()" class="settings-back-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
         <span>Notifications</span>
       </div>
       <div class="settings-section">
-        <button class="settings-item glass-panel" onclick="reqNotif()" style="width:100%;text-align:left">
+        <button class="settings-item" onclick="reqNotif()" style="width:100%;text-align:left">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
           <div class="si-info"><span>Browser notifications</span><span class="si-sub" id="notif-sub">Tap to enable</span></div>
           <div class="toggle" id="notif-tog"><div class="toggle-knob"></div></div>
@@ -474,19 +479,19 @@
     <!-- Privacy view -->
     <div id="sv-privacy" class="settings-view hidden">
       <div class="settings-back-hdr">
-        <button onclick="settingsBack()" class="settings-back-btn glass-panel"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <button onclick="settingsBack()" class="settings-back-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
         <span>Privacy & Security</span>
       </div>
       <div class="settings-section">
-        <div class="settings-e2e glass-panel">
+        <div class="settings-e2e">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           <div><p class="se2-title">RSA-OAEP + AES-GCM</p><p class="se2-sub">Military-grade end-to-end encryption</p></div>
         </div>
-        <div class="settings-item glass-panel" style="margin-top:8px">
+        <div class="settings-item" style="margin-top:8px">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           <div class="si-info"><span>Multi-device key sync</span><span class="si-sub">Keys encrypted with your password</span></div>
         </div>
-        <div class="settings-item glass-panel" style="margin-top:8px">
+        <div class="settings-item" style="margin-top:8px">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           <div class="si-info"><span>No email or phone required</span><span class="si-sub">Completely anonymous accounts</span></div>
         </div>
@@ -494,7 +499,7 @@
     </div>
     <div id="sv-starred" class="settings-view hidden">
       <div class="settings-back-hdr">
-        <button onclick="settingsBack()" class="settings-back-btn glass-panel"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <button onclick="settingsBack()" class="settings-back-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
         <span>Starred messages</span>
       </div>
       <div class="settings-section">
@@ -506,7 +511,7 @@
 
 <!-- Group panel -->
 <div class="grp-panel-bg hidden" id="gp-bg" onclick="closeGrpPanel()"></div>
-<div class="grp-panel glass-panel-strong hidden" id="grp-panel">
+<div class="grp-panel hidden" id="grp-panel">
   <div class="modal-hdr">
     <span>Group info</span>
     <button class="modal-x" onclick="closeGrpPanel()">✕</button>
@@ -515,7 +520,7 @@
 </div>
 
 <!-- CTX menu -->
-<div id="ctx" class="ctx glass-panel-strong hidden">
+<div id="ctx" class="ctx hidden">
   <button onclick="ctxDo('reply')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/></svg>Reply</button>
   <button onclick="ctxDo('react')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>React</button>
   <button onclick="ctxDo('copy')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span id="ctx-copy-label">Copy</span></button>
@@ -526,7 +531,7 @@
   <div id="ctx-del"><button onclick="ctxDo('delete')" class="ctx-del-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>Delete</button></div>
 </div>
 
-<div id="chat-menu" class="ctx glass-panel-strong hidden">
+<div id="chat-menu" class="ctx hidden">
   <button onclick="togglePinCurrent()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 17v5"/><path d="M5 8V3h14v5"/><path d="m19 8-7 9-7-9"/></svg><span id="chat-menu-pin-label">Pin chat</span></button>
   <button onclick="toggleMuteCurrent()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg><span id="chat-menu-mute-label">Mute chat</span></button>
   <button onclick="openChatSearch()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Search messages</button>
@@ -535,7 +540,7 @@
 </div>
 
 <!-- Reaction picker -->
-<div id="react-pick" class="react-pick glass-panel-strong hidden">
+<div id="react-pick" class="react-pick hidden">
   <button onclick="doReact('👍',event)">👍</button>
   <button onclick="doReact('❤️',event)">❤️</button>
   <button onclick="doReact('😂',event)">😂</button>
@@ -547,7 +552,7 @@
 <!-- KEY RESTORE MODAL -->
 <input type="hidden" id="kr-needs-setup" value="0"/>
 <div id="key-restore-modal" class="modal-bg hidden">
-  <div class="modal glass-panel-strong glow-blue" style="max-width:400px;text-align:center">
+  <div class="modal" style="max-width:400px;text-align:center">
     <div style="width:56px;height:56px;border-radius:16px;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);display:flex;align-items:center;justify-content:center;margin:0 auto 14px">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.5"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
     </div>
@@ -555,10 +560,10 @@
     <p id="kr-desc" style="font-size:13px;color:var(--muted-fg);line-height:1.65;margin-bottom:18px">This device does not have your encryption keys yet. Enter your password once — you won&apos;t be asked again.</p>
     <div class="field-wrap" style="margin-bottom:14px">
       <div class="field-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-      <input id="kr-pass" type="password" class="auth-input input-glow" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key===&apos;Enter&apos;)restoreKeys()"/>
+      <input id="kr-pass" type="password" class="auth-input" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key===&apos;Enter&apos;)restoreKeys()"/>
     </div>
     <p id="kr-err" class="auth-err hidden" style="margin-bottom:10px"></p>
-    <button onclick="restoreKeys()" class="auth-btn glow-blue-strong" style="margin-bottom:10px">
+    <button onclick="restoreKeys()" class="auth-btn" style="margin-bottom:10px">
       <span id="kr-label">Unlock messages</span>
       <svg id="kr-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       <div id="kr-spin" class="auth-spinner hidden"></div>
@@ -569,10 +574,10 @@
 
 <!-- CUSTOM CONFIRM MODAL (replaces browser confirm/prompt) -->
 <div id="confirm-modal" class="modal-bg hidden">
-  <div class="modal glass-panel-strong glow-blue" style="max-width:360px;text-align:center;gap:12px">
+  <div class="modal" style="max-width:360px;text-align:center;gap:12px">
     <h3 id="confirm-title" style="font-size:16px;font-weight:600"></h3>
     <p id="confirm-msg" style="font-size:13px;color:var(--muted-fg);line-height:1.6"></p>
-    <input id="confirm-inp" type="text" class="modal-input input-glow" placeholder="" style="display:none"/>
+    <input id="confirm-inp" type="text" class="modal-input" placeholder="" style="display:none"/>
     <div style="display:flex;gap:10px;margin-top:4px">
       <button onclick="confirmCancel()" class="btn-ghost" style="flex:1;padding:11px;border-radius:12px;font-size:14px">Cancel</button>
       <button onclick="confirmOk()" id="confirm-ok-btn" style="flex:1;padding:11px;border-radius:12px;font-size:14px;font-weight:600;background:var(--primary);color:var(--primary-fg)">OK</button>
@@ -581,22 +586,22 @@
 </div>
 
 <div id="forward-modal" class="modal-bg hidden" onclick="modalBgClick(event,'forward-modal')">
-  <div class="modal glass-panel-strong glow-blue">
+  <div class="modal">
     <div class="modal-hdr">
       <h3>Forward message</h3>
       <button class="modal-x" onclick="closeModal('forward-modal')">✕</button>
     </div>
-    <input id="fwd-q" type="text" class="modal-input input-glow" placeholder="Search chats…" oninput="renderForwardTargets()"/>
-    <div id="fwd-preview" class="forward-preview glass-panel"></div>
+    <input id="fwd-q" type="text" class="modal-input" placeholder="Search chats…" oninput="renderForwardTargets()"/>
+    <div id="fwd-preview" class="forward-preview"></div>
     <div id="fwd-res" class="modal-list"></div>
   </div>
 </div>
 
 <!-- Toast -->
-<div id="toast" class="toast glass-panel"><span id="toast-msg"></span></div>
-<div id="install-banner" class="install-banner glass-panel hidden">
+<div id="toast" class="toast"><span id="toast-msg"></span></div>
+<div id="install-banner" class="install-banner hidden">
   <div class="install-copy">
-    <p id="install-banner-title" class="install-title">Install Zynix</p>
+    <p id="install-banner-title" class="install-title">Install Zyntrixly</p>
     <p id="install-banner-sub" class="install-sub">Install for a faster, standalone experience.</p>
   </div>
   <div class="install-actions">
@@ -613,13 +618,10 @@
   const el = id => document.getElementById(id);
   const startup = el('startup');
   if (!startup) return;
-  setTimeout(() => startup.querySelector('.startup-bg-grad')?.classList.add('vis'), 50);
-  setTimeout(() => startup.querySelector('.startup-orb')?.classList.add('vis'), 50);
   setTimeout(() => {
-    startup.querySelector('.startup-icon-glow')?.classList.add('vis');
     startup.querySelector('.startup-icon')?.classList.add('vis');
     startup.querySelector('.startup-title')?.classList.add('vis');
-  }, 400);
+  }, 250);
   setTimeout(() => {
     startup.querySelector('.startup-sub')?.classList.add('vis');
     startup.querySelector('.startup-dots')?.classList.add('vis');
@@ -648,7 +650,7 @@
 <script src="vendor/firebase/firebase-app-compat.js"></script>
 <script src="vendor/firebase/firebase-auth-compat.js"></script>
 <script src="vendor/firebase/firebase-firestore-compat.js"></script>
-<!-- ═══ ZYNIX FIREBASE CONFIG — hardcoded, no .env needed ═══ -->
+<!-- ═══ ZYNTRIXLY FIREBASE CONFIG — hardcoded, no .env needed ═══ -->
 <script>
 // Initialise Firebase directly — no external config file required
 (function(){
@@ -730,7 +732,7 @@
   <div id="call-remote-grid" class="call-remote-grid"></div>
   <video id="call-local-video" class="call-local-video hidden" autoplay muted playsinline></video>
   <div id="screen-share-indicator" class="screen-share-indicator hidden">🖥 Screen sharing</div>
-  <div class="call-hud glass-panel-strong">
+  <div class="call-hud">
     <div id="call-status" class="call-status-text">Connecting…</div>
     <div id="call-timer" class="call-timer">00:00</div>
     <div class="call-controls">
@@ -751,7 +753,7 @@
 </div>
 
 <!-- ═══════════ INCOMING CALL ═══════════ -->
-<div id="call-incoming" class="call-incoming-box hidden glass-panel-strong">
+<div id="call-incoming" class="call-incoming-box hidden">
   <div id="call-incoming-who" class="call-incoming-who">Someone is calling…</div>
   <div class="call-incoming-btns">
     <button class="call-incoming-reject" onclick="ZxCall.rejectCall()">✕ Decline</button>
@@ -760,92 +762,73 @@
 </div>
 
 
-<!-- ZYNIX PARTICLE ENGINE -->
+<!-- ZYNTRIXLY CYBER-AMBIENT ILLUMINATION ENGINE -->
 <script>
-(function ZynixParticles(){
-  const canvas = document.getElementById('zynix-canvas');
+(function ZyntrixCyberAmbient(){
+  const canvas = document.getElementById('zyntrix-canvas') || document.getElementById('zynix-canvas');
   if(!canvas) return;
   const ctx = canvas.getContext('2d');
-  const COLORS = [
-    'rgba(79,142,247,','rgba(167,139,250,','rgba(34,211,238,','rgba(244,114,182,','rgba(52,211,153,',
-  ];
-  let W, H, particles = [], orbs = [], stars = [];
-  function resize(){ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
-  function mkP(){
-    const c = COLORS[Math.random()*COLORS.length|0];
-    return { x:Math.random()*W, y:Math.random()*H, r:Math.random()*1.8+0.4,
-      vx:(Math.random()-.5)*.22, vy:(Math.random()-.5)*.22, color:c,
-      alpha:Math.random()*.55+.1, life:1, decay:Math.random()*.0007+.0002,
-      pulse:Math.random()*Math.PI*2, ps:Math.random()*.02+.005 };
+  if(!ctx) return;
+
+  let W = 0, H = 0;
+  const mouse = { x: 0.5, y: 0.25, tx: 0.5, ty: 0.25 };
+  let time = 0;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function resize(){
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
   }
-  function mkOrb(){
-    return { x:Math.random()*W, y:Math.random()*H, r:Math.random()*90+30,
-      vx:(Math.random()-.5)*.1, vy:(Math.random()-.5)*.1,
-      color:COLORS[Math.random()*COLORS.length|0], alpha:Math.random()*.055+.018 };
-  }
-  function mkStar(){
-    const a=Math.random()*Math.PI*.5-Math.PI*.125, spd=Math.random()*9+4;
-    return { x:Math.random()*W*.75, y:Math.random()*H*.5, vx:Math.cos(a)*spd, vy:Math.sin(a)*spd,
-      color:COLORS[Math.random()*COLORS.length|0], alpha:1, decay:Math.random()*.022+.014 };
-  }
-  function init(){ resize(); particles=Array.from({length:110},mkP); orbs=Array.from({length:6},mkOrb); }
-  function drawOrb(o){
-    const g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);
-    g.addColorStop(0,o.color+o.alpha+')'); g.addColorStop(1,o.color+'0)');
-    ctx.beginPath(); ctx.arc(o.x,o.y,o.r,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
-  }
-  function drawP(p){
-    const pulse=Math.sin(p.pulse)*.32+.68, a=p.alpha*p.life;
-    // core dot
-    ctx.beginPath(); ctx.arc(p.x,p.y,p.r*pulse,0,Math.PI*2);
-    ctx.fillStyle=p.color+(Math.min(a*1.4,0.9))+')'; ctx.fill();
-    // glow halo — bigger and brighter so they look through glass
-    const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*pulse*5);
-    g.addColorStop(0,p.color+(a*.5)+')'); g.addColorStop(1,p.color+'0)');
-    ctx.beginPath(); ctx.arc(p.x,p.y,p.r*pulse*5,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
-  }
-  function drawConnections(){
-    const D=95;
-    for(let i=0;i<particles.length;i++){
-      for(let j=i+1;j<particles.length;j++){
-        const dx=particles[i].x-particles[j].x, dy=particles[i].y-particles[j].y;
-        const d=Math.sqrt(dx*dx+dy*dy);
-        if(d<D){ ctx.beginPath(); ctx.moveTo(particles[i].x,particles[i].y);
-          ctx.lineTo(particles[j].x,particles[j].y);
-          ctx.strokeStyle='rgba(79,142,247,'+(1-d/D)*.1+')'; ctx.lineWidth=.5; ctx.stroke(); }
-      }
+
+  window.addEventListener('resize', resize, { passive: true });
+  window.addEventListener('pointermove', e => {
+    mouse.tx = e.clientX / Math.max(1, W);
+    mouse.ty = e.clientY / Math.max(1, H);
+  }, { passive: true });
+
+  resize();
+  mouse.x = mouse.tx;
+  mouse.y = mouse.ty;
+
+  function render(){
+    if(document.hidden){
+      requestAnimationFrame(render);
+      return;
     }
+    time += reducedMotion ? 0.001 : 0.004;
+
+    // Smooth inertia tracking
+    mouse.x += (mouse.tx - mouse.x) * 0.05;
+    mouse.y += (mouse.ty - mouse.y) * 0.05;
+
+    ctx.clearRect(0, 0, W, H);
+
+    // 1. Directional Overhead Ambient Beam (shadcn / Linear Top Spotlight)
+    const beamY = -H * 0.1;
+    const beamRadius = Math.max(W, H) * 0.85;
+    const beamGrad = ctx.createRadialGradient(W * 0.5, beamY, 0, W * 0.5, beamY, beamRadius);
+    beamGrad.addColorStop(0, 'rgba(255, 255, 255, 0.045)');
+    beamGrad.addColorStop(0.35, 'rgba(255, 255, 255, 0.015)');
+    beamGrad.addColorStop(0.7, 'rgba(255, 255, 255, 0.003)');
+    beamGrad.addColorStop(1, 'rgba(9, 9, 11, 0)');
+    ctx.fillStyle = beamGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    // 2. Interactive Photometric Cursor Spotlight
+    const curX = mouse.x * W;
+    const curY = mouse.y * H;
+    const curRadius = 550;
+    const curGrad = ctx.createRadialGradient(curX, curY, 0, curX, curY, curRadius);
+    curGrad.addColorStop(0, 'rgba(255, 255, 255, 0.025)');
+    curGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.008)');
+    curGrad.addColorStop(1, 'rgba(9, 9, 11, 0)');
+    ctx.fillStyle = curGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    requestAnimationFrame(render);
   }
-  function drawStar(s){
-    ctx.beginPath(); ctx.moveTo(s.x,s.y);
-    ctx.lineTo(s.x-s.vx*5,s.y-s.vy*5);
-    const g=ctx.createLinearGradient(s.x,s.y,s.x-s.vx*5,s.y-s.vy*5);
-    g.addColorStop(0,s.color+s.alpha+')'); g.addColorStop(1,s.color+'0)');
-    ctx.strokeStyle=g; ctx.lineWidth=1.5; ctx.stroke();
-  }
-  function loop(){
-    ctx.clearRect(0,0,W,H);
-    orbs.forEach(o=>{
-      o.x+=o.vx; o.y+=o.vy;
-      if(o.x<-o.r)o.x=W+o.r; if(o.x>W+o.r)o.x=-o.r;
-      if(o.y<-o.r)o.y=H+o.r; if(o.y>H+o.r)o.y=-o.r;
-      drawOrb(o);
-    });
-    drawConnections();
-    for(let i=particles.length-1;i>=0;i--){
-      const p=particles[i]; p.x+=p.vx; p.y+=p.vy; p.pulse+=p.ps; p.life-=p.decay;
-      if(p.life<=0||p.x<-10||p.x>W+10||p.y<-10||p.y>H+10) particles[i]=mkP();
-      else drawP(p);
-    }
-    for(let i=stars.length-1;i>=0;i--){
-      const s=stars[i]; s.x+=s.vx; s.y+=s.vy; s.alpha-=s.decay;
-      if(s.alpha<=0) stars.splice(i,1); else drawStar(s);
-    }
-    if(Math.random()<.004&&stars.length<5) stars.push(mkStar());
-    requestAnimationFrame(loop);
-  }
-  window.addEventListener('resize', resize);
-  init(); loop();
+
+  requestAnimationFrame(render);
 })();
 </script>
 
