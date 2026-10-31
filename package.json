@@ -6,8 +6,12 @@
   "scripts": {
     "build:css": "tailwindcss -i ./src/shadcn.css -o ./shadcn.css --minify",
     "watch:css": "tailwindcss -i ./src/shadcn.css -o ./shadcn.css --watch",
-    "test:visual": "node take_screenshots.js",
-    "test": "node --check app.js"
+    "test": "node tests/run_all_tests.js",
+    "test:unit": "node --test tests/crypto.test.js tests/security.test.js tests/dom_integrity.test.js tests/webrtc.test.js",
+    "test:e2e": "node --test tests/e2e_features.test.js",
+    "test:all": "node tests/run_all_tests.js",
+    "test:syntax": "node --check app.js",
+    "test:visual": "node take_screenshots.js"
   },
   "repository": {
     "type": "git",
