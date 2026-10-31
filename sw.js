@@ -79,3 +79,41 @@ self.addEventListener('fetch',e=>{
     );
   }
 });
+
+/* ═════════════════════════════════════════════════
+   FCM BACKGROUND MESSAGES
+   Shows a system notification when a push arrives while the tab is closed
+   or backgrounded. Uses the same public Firebase web config (apiKey is
+   public by design; Firestore rules are the real gate).
+══════════════════════════════════════════════════ */
+importScripts('https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/11.4.0/firebase-messaging-compat.js');
+
+(function(){
+  const firebaseConfig = {
+    apiKey:            "AIzaSyADe7-8VV6flXLwRc3pQtVpallWScxbY90",
+    authDomain:        "zyntrixly.firebaseapp.com",
+    projectId:         "zyntrixly",
+    storageBucket:     "zyntrixly.firebasestorage.app",
+    messagingSenderId: "663603557838",
+    appId:             "1:663603557838:web:634138b6999cf849d5e79f"
+  };
+  try{
+    firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
+    messaging.onBackgroundMessage((payload)=>{
+      const n = payload.notification || {};
+      const data = payload.data || {};
+      const title = n.title || 'Zynix — New message';
+      const body  = n.body  || 'New encrypted message';
+      self.registration.showNotification(title,{
+        body,
+        icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="%233b82f6"/><text x="16" y="22" text-anchor="middle" font-size="18" fill="white">Z</text></svg>',
+        tag:'zx-msg',
+        data:{senderUid:data.senderUid, chatName:n.title, body:n.body}
+      });
+    });
+  }catch(e){
+    console.warn('[Zyntrixly SW] FCM background setup failed:', e);
+  }
+})();

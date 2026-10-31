@@ -834,6 +834,7 @@ async function bootApp(user){
     setInterval(()=>setOnline(true),60000);
 
     updateMeUI();
+    await initFirebaseMessaging();
     _authResolved=true;
     window._authResolved=true;
     showScreen('app-screen');
@@ -2155,27 +2156,79 @@ function msgCol(){
 /* ════════════════════════════════════════════════
    NOTIFICATIONS
 ════════════════════════════════════════════════ */
+/* Push / desktop notifications (FCM).
+ * Foreground: onMessage -> sendNotif while the tab is open & focused.
+ * Background: sw.js handles onBackgroundMessage and shows a system notification.
+ * The FCM registration token is stored on the user's Firestore doc so the
+ * server (or a future admin panel) can send targeted push messages.
+ */
+let messaging = null;
+let fcmInit = false;
+
+async function initFirebaseMessaging(){
+  if(fcmInit) return;
+  fcmInit = true;
+  if(!firebase || !firebase.messaging) return;
+  try{
+    messaging = firebase.messaging();
+    // Foreground messages (tab open & focused)
+    firebase.messaging().onMessage((payload)=>{
+      const n = payload.notification || {};
+      sendNotif({
+        senderUid: (payload.data && payload.data.senderUid) || null,
+        chatName: n.title || 'Zynix',
+        body: n.body || 'New encrypted message'
+      });
+    });
+  }catch(e){
+    console.warn('[Zyntrixly] FCM init failed:', e);
+  }
+}
+
 async function reqNotif(){
   if(!('Notification' in window)){toast('Not supported in this browser.');return;}
-  if(Notification.permission==='granted'){toast('Notifications already enabled!');return;}
+  if(Notification.permission==='granted'){
+    await ensureFcmToken();
+    toast('Notifications already enabled!');return;
+  }
   const r=await Notification.requestPermission();
+  await initFirebaseMessaging();
+  if(r==='granted') await ensureFcmToken();
   updateNotifUI();
-  toast(r==='granted'?'Notifications enabled 🔔':'Permission denied.');
+  toast(r==='granted'?'Notifications enabled':'Permission denied.');
 }
+
+async function ensureFcmToken(){
+  if(!messaging) return;
+  try{
+    const token = await firebase.messaging().getToken({vapidKey: null});
+    if(token && ME){
+      await db.collection('users').doc(ME.uid).update({fcmToken: token});
+    }
+  }catch(e){
+    // getToken can fail if permission not yet granted — that's OK
+    console.warn('[Zyntrixly] FCM token not stored:', e);
+  }
+}
+
 function updateNotifUI(){
   const tok=id('notif-tog');const sub=id('notif-sub');if(!tok)return;
   const ok=Notification.permission==='granted';
   tok.classList.toggle('on',ok);
   if(sub)sub.textContent=ok?'Enabled':Notification.permission==='denied'?'Blocked by browser':'Tap to enable';
 }
+
 function sendNotif(data){
   if(Notification.permission!=='granted')return;
   if(CHAT&&isMuted(CHAT.type,CHAT.id))return;
-  const who=CHAT.memberNames?.[data.senderUid]||CHAT.name||'Someone';
-  new Notification('Zynix · @'+who,{
-    body:'🔒 New encrypted message',
+  const who = data.senderUid && CHAT && CHAT.memberNames
+    ? CHAT.memberNames[data.senderUid]
+    : (data.chatName || 'Someone');
+  new Notification('Zynix — New message from '+who,{
+    body: data.body || 'New encrypted message',
     icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="%233b82f6"/><text x="16" y="22" text-anchor="middle" font-size="18" fill="white">Z</text></svg>',
-    tag:'zx'
+    tag:'zx-msg',
+    requireInteraction:false
   });
 }
 
