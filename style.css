@@ -96,8 +96,14 @@
   --duration-fast: 150ms;
   --duration-norm: 200ms;
 
-  --f1: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --f2: 'JetBrains Mono', monospace;
+  --f1: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Inter", -apple-system-subheadline, "Helvetica Neue", sans-serif;
+  --f2: "SF Mono", SFMono-Regular, ui-monospace, Menlo, Monaco, Consolas, monospace;
+  --apple-separator: rgba(84, 84, 88, 0.45);
+  --apple-tint-blue: #007aff;
+  --apple-tint-blue-hover: #0a84ff;
+  --apple-tint-green: #30d158;
+  --apple-tint-red: #ff453a;
+  --apple-spring: cubic-bezier(0.32, 0.72, 0, 1);
   --f3: 'Inter', sans-serif;
 
   --sb-w:  320px;
@@ -251,10 +257,10 @@ p, .bubble, .ci-preview, .about-desc, .settings-desc, .empty-card p {
 }
 
 /* ── 44PX TOUCH HIT AREAS ── */
-.sb-icon-btn, .mob-icon-btn, .compose-icon-btn, .modal-x, .chat-call-btn {
+.sb-icon-btn, .mob-icon-btn, .compose-icon-btn, .modal-x, .chat-call-btn, .send-btn {
   position: relative;
 }
-.sb-icon-btn::after, .mob-icon-btn::after, .compose-icon-btn::after, .modal-x::after, .chat-call-btn::after {
+.sb-icon-btn::after, .mob-icon-btn::after, .compose-icon-btn::after, .modal-x::after, .chat-call-btn::after, .send-btn::after {
   content: '';
   position: absolute;
   top: 50%;
@@ -725,10 +731,10 @@ p, .bubble, .ci-preview, .about-desc, .settings-desc, .empty-card p {
   width: var(--sb-w);
   display: flex;
   flex-direction: column;
-  background: var(--surface-base);
-  backdrop-filter: blur(var(--blur-lg)) saturate(180%);
-  -webkit-backdrop-filter: blur(var(--blur-lg)) saturate(180%);
-  border-right: 1px solid var(--b0);
+  background: rgba(18, 18, 20, 0.82);
+  backdrop-filter: blur(20px) saturate(190%);
+  -webkit-backdrop-filter: blur(20px) saturate(190%);
+  border-right: 0.5px solid var(--apple-separator);
   box-shadow: var(--rim-highlight);
   flex-shrink: 0;
   overflow: hidden;
@@ -741,7 +747,10 @@ p, .bubble, .ci-preview, .about-desc, .settings-desc, .empty-card p {
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px;
-  border-bottom: 1px solid var(--b0);
+  border-bottom: 0.5px solid var(--apple-separator);
+  background: rgba(24, 24, 27, 0.82);
+  backdrop-filter: blur(20px) saturate(190%);
+  -webkit-backdrop-filter: blur(20px) saturate(190%);
   flex-shrink: 0;
   min-height: var(--hdr-h);
 }
@@ -1118,10 +1127,11 @@ p, .bubble, .ci-preview, .about-desc, .settings-desc, .empty-card p {
   position: relative;
   z-index: 5;
   min-height: var(--hdr-h);
-  background: var(--surface-base);
-  backdrop-filter: blur(var(--blur-md));
-  -webkit-backdrop-filter: blur(var(--blur-md));
-  box-shadow: var(--rim-highlight);
+  background: rgba(24, 24, 27, 0.85);
+  backdrop-filter: blur(20px) saturate(190%);
+  -webkit-backdrop-filter: blur(20px) saturate(190%);
+  border-bottom: 0.5px solid var(--apple-separator);
+  box-shadow: none;
 }
 .chat-hdr-av   { position: relative; flex-shrink: 0; }
 .chat-hdr-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
@@ -1243,19 +1253,21 @@ p, .bubble, .ci-preview, .about-desc, .settings-desc, .empty-card p {
 .bubble:active { transform: scale(0.98); }
 
 .msg-row.mine .bubble {
-  background-color: #27272a;
-  color: #fafafa;
-  border-radius: 12px 12px 3px 12px;
-  border: 1px solid #3f3f46;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  background-color: #007aff;
+  color: #ffffff;
+  border-radius: 18px 18px 4px 18px;
+  border: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  padding: 9px 14px;
 }
 
 .msg-row.theirs .bubble {
-  background-color: #18181b;
-  color: #fafafa;
-  border-radius: 12px 12px 12px 3px;
-  border: 1px solid #27272a;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+  background-color: #2c2c2e;
+  color: #ffffff;
+  border-radius: 18px 18px 18px 4px;
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  padding: 9px 14px;
 }
 .bubble.deleted { font-style: italic; color: var(--fg3); opacity: 0.6; }
 
@@ -1332,10 +1344,11 @@ p, .bubble, .ci-preview, .about-desc, .settings-desc, .empty-card p {
   padding: 10px 16px;
   padding-bottom: calc(10px + var(--safe-b));
   border-top: 1px solid var(--b0);
-  background: var(--surface-base);
-  backdrop-filter: blur(var(--blur-md));
-  -webkit-backdrop-filter: blur(var(--blur-md));
-  box-shadow: var(--rim-highlight);
+  background: rgba(20, 20, 22, 0.85);
+  backdrop-filter: blur(20px) saturate(190%);
+  -webkit-backdrop-filter: blur(20px) saturate(190%);
+  border-top: 0.5px solid var(--apple-separator);
+  box-shadow: none;
   flex-shrink: 0;
 }
 .compose-icon-btn {
@@ -1357,12 +1370,12 @@ p, .bubble, .ci-preview, .about-desc, .settings-desc, .empty-card p {
 
 .compose-input {
   flex: 1;
-  height: 42px;
-  padding: 0 14px;
-  border-radius: 12px;
-  font-size: 14px;
-  background: #09090b;
-  border: 1px solid var(--b0);
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 19px;
+  font-size: 14.5px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 0.5px solid rgba(255, 255, 255, 0.14);
   color: var(--fg);
   transition: border-color 0.16s var(--ease), background-color 0.16s var(--ease), box-shadow 0.16s var(--ease);
   min-width: 0;
@@ -1377,24 +1390,24 @@ p, .bubble, .ci-preview, .about-desc, .settings-desc, .empty-card p {
 .compose-input::placeholder { color: var(--fg3); }
 
 .send-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 6px;
-  background-color: #fafafa;
-  color: #18181b;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #007aff;
+  color: #ffffff;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.4);
+  border: none;
+  box-shadow: 0 1px 3px rgba(0, 122, 255, 0.4);
   cursor: pointer;
-  transition: background-color 0.15s ease, transform 0.12s ease;
+  transition: background-color 0.14s var(--ease), transform 0.12s var(--ease);
 }
 .send-btn:hover {
-  transform: scale(1.04);
-  background-color: #f4f4f5;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 2px 8px rgba(0, 0, 0, 0.5);
+  transform: scale(1.06);
+  background-color: #0a84ff;
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.5);
 }
 .send-btn:active { transform: scale(0.92); }
 
@@ -1406,11 +1419,11 @@ p, .bubble, .ci-preview, .about-desc, .settings-desc, .empty-card p {
   padding: 0 14px;
   height: calc(54px + var(--safe-t));
   padding-top: var(--safe-t);
-  border-bottom: 1px solid var(--b0);
-  background: var(--surface-overlay);
-  backdrop-filter: blur(var(--blur-lg)) saturate(180%);
-  -webkit-backdrop-filter: blur(var(--blur-lg)) saturate(180%);
-  box-shadow: var(--rim-highlight);
+  background: rgba(28, 28, 30, 0.85);
+  backdrop-filter: blur(20px) saturate(190%);
+  -webkit-backdrop-filter: blur(20px) saturate(190%);
+  border-bottom: 0.5px solid var(--apple-separator);
+  box-shadow: none;
   flex-shrink: 0;
   position: relative;
   z-index: 50;
@@ -1625,19 +1638,19 @@ p, .bubble, .ci-preview, .about-desc, .settings-desc, .empty-card p {
 .settings-section {
   display: flex;
   flex-direction: column;
-  margin-bottom: 8px;
-  border-radius: 8px;
+  margin-bottom: 14px;
+  border-radius: 12px;
   overflow: hidden;
-  background: #18181b;
-  border: 1px solid #27272a;
+  background: #1c1c1e;
+  border: 0.5px solid var(--apple-separator);
 }
 .settings-sec-label {
-  font-size: 10.5px;
-  font-weight: 700;
-  color: var(--fg3);
+  font-size: 11.5px;
+  font-weight: 500;
+  color: rgba(235, 235, 245, 0.6);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 12px 14px 6px;
+  letter-spacing: 0.05em;
+  padding: 12px 16px 6px;
 }
 .settings-profile {
   display: flex;
@@ -1672,13 +1685,13 @@ p, .bubble, .ci-preview, .about-desc, .settings-desc, .empty-card p {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 13px 14px;
+  padding: 13px 16px;
   cursor: pointer;
-  transition: background 0.13s;
-  border-top: 1px solid var(--b0);
+  transition: background-color 0.12s var(--ease);
+  position: relative;
+  border: none;
 }
-.settings-item:hover { background: var(--surface-hover); }
-.settings-item:first-child { border-top: none; }
+.settings-item:hover { background: #2c2c2e; }
 .si-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; font-size: 14px; }
 .si-sub  { font-size: 11px; color: var(--fg3); }
 
@@ -1687,22 +1700,30 @@ p, .bubble, .ci-preview, .about-desc, .settings-desc, .empty-card p {
   align-items: center;
   gap: 12px;
   width: 100%;
-  padding: 12px 14px;
+  min-height: 44px;
+  padding: 11px 16px;
   background: transparent;
   border: none;
-  border-top: 1px solid #27272a;
-  color: #fafafa;
-  font-size: 13.5px;
-  font-weight: 500;
+  color: #ffffff;
+  font-size: 14.5px;
+  font-weight: 450;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background-color 0.12s var(--ease);
   text-align: left;
+  position: relative;
 }
-.settings-row-btn:first-child {
-  border-top: none;
+.settings-row-btn + .settings-row-btn::before,
+.settings-item + .settings-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 48px;
+  right: 0;
+  height: 0.5px;
+  background: var(--apple-separator);
 }
 .settings-row-btn:hover:not(:disabled) {
-  background: #27272a;
+  background: #2c2c2e;
 }
 .settings-row-btn:disabled {
   opacity: 0.5;
@@ -1710,34 +1731,35 @@ p, .bubble, .ci-preview, .about-desc, .settings-desc, .empty-card p {
 }
 
 /* Custom Sliders & Toggles */
-.toggle {
-  width: 38px;
-  height: 22px;
-  border-radius: 11px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid var(--b1);
+.toggle, .toggle-on {
+  width: 51px;
+  height: 31px;
+  border-radius: 15.5px;
+  background: rgba(120, 120, 128, 0.32);
   position: relative;
-  transition: background-color 0.2s var(--ease), border-color 0.2s var(--ease);
+  transition: background-color 0.25s var(--apple-spring);
   flex-shrink: 0;
+  cursor: pointer;
 }
-.toggle-on {
-  background: #fafafa;
+.toggle-on,
+.toggle.on {
+  background: #30d158;
 }
-.toggle-on .toggle-knob {
-  background: #18181b;
-}
-.toggle-knob, .toggle-on .toggle-knob {
+.toggle-knob, .toggle-on .toggle-knob, .toggle.on .toggle-knob {
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 16px;
-  height: 16px;
+  width: 27px;
+  height: 27px;
   border-radius: 50%;
-  background: #fff;
-  transition: transform 0.2s var(--spring), background-color 0.2s var(--spring);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  background: #ffffff;
+  transition: transform 0.25s var(--apple-spring);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3), 0 1px 1px rgba(0, 0, 0, 0.15);
 }
-.toggle-on .toggle-knob { transform: translateX(16px); }
+.toggle-on .toggle-knob,
+.toggle.on .toggle-knob {
+  transform: translateX(20px);
+}
 
 /* Font Options */
 .font-options { display: flex; gap: 8px; padding: 8px 14px; }
@@ -2312,8 +2334,40 @@ p, .bubble, .ci-preview, .about-desc, .settings-desc, .empty-card p {
   .grp-panel { width: 100%; z-index: 500; }
   .toast     { max-width: calc(100vw - 24px); white-space: normal; text-align: center; }
   
-  .modal-bg  { padding: 12px; }
-  .modal     { max-width: 100%; border-radius: 20px 20px 16px 16px; }
+  .modal-bg {
+    align-items: flex-end;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(16px) saturate(190%);
+    -webkit-backdrop-filter: blur(16px) saturate(190%);
+  }
+  .modal {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 20px 20px 0 0;
+    border: none;
+    border-top: 0.5px solid rgba(255, 255, 255, 0.16);
+    background: #1c1c1e;
+    max-height: 92dvh;
+    padding: 10px 18px calc(16px + var(--safe-b)) 18px;
+    animation: apple-sheet-up 0.32s var(--apple-spring);
+    position: relative;
+  }
+  .modal::before {
+    content: '';
+    display: block;
+    position: relative;
+    inset: auto;
+    width: 36px;
+    height: 5px;
+    border-radius: 2.5px;
+    background: rgba(255, 255, 255, 0.28);
+    margin: 2px auto 14px auto;
+  }
+  @keyframes apple-sheet-up {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
   .settings-panel { max-height: 90dvh; }
   .install-banner { left: 10px; right: 10px; bottom: 10px; width: auto; transform: none; padding: 12px; border-radius: 14px; }
   .install-actions { flex-direction: column; }
@@ -2422,6 +2476,20 @@ p, .bubble, .ci-preview, .about-desc, .settings-desc, .empty-card p {
   color: #a1a1aa;
   font-weight: 500;
   flex-shrink: 0;
+}
+/* In .msg-row.mine bubbles, override audio note colors for high contrast against Apple Blue */
+.msg-row.mine .audio-time {
+  color: rgba(255, 255, 255, 0.85);
+}
+.msg-row.mine .audio-bar {
+  background: rgba(255, 255, 255, 0.35);
+}
+.msg-row.mine .audio-bar.played {
+  background: #ffffff;
+}
+.msg-row.mine .audio-play-btn {
+  background: #ffffff;
+  color: #007aff;
 }
 
 /* ── AUDIO RECORDING COMPOSER HUD ── */
