@@ -2345,7 +2345,7 @@ function goBack(){
 
   // Restore mobile header to list mode
   const mobTitle=id('mob-title');
-  if(mobTitle) mobTitle.innerHTML='<img src="zyntrixly-logo.png" alt="Zyntrixly" class="brand-lockup-img"/><span class="brand-gradient">Zyntrixly</span>';
+  if(mobTitle) mobTitle.innerHTML='<img src="zyntrixly-logo.svg" alt="Zyntrixly" class="brand-lockup-img"/><span class="brand-gradient">Zyntrixly</span>';
   document.querySelectorAll('.mob-list-only').forEach(el=>el.style.display='flex');
   document.querySelectorAll('.mob-back-only').forEach(el=>el.style.display='none');
   updateMobileChatActions(null);
@@ -2355,7 +2355,7 @@ function makeConvEl(type,docId,name,sub,color,av,onclickFn,unread=0,previewMode=
   const el=document.createElement('button'); // button fires click reliably on iOS
   el.className='conv-item';el.id='conv-'+docId;el.type='button';
   const previewClass=previewMode==='draft'?'ci-preview draft-preview':previewMode==='typing'?'ci-preview typing-preview':'ci-preview';
-  const pin=isPinned(type,docId)?'<span class="ci-pin">📌</span>':'';
+  const pin=isPinned(type,docId)?'<span class="ci-pin"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#a1a1aa"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg></span>':'';
   el.innerHTML=`
     <div class="av-circle" style="background:${color};width:40px;height:40px;font-size:15px;flex-shrink:0">${esc(av)}</div>
     <div class="ci-info">

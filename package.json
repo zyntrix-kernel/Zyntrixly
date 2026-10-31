@@ -6,7 +6,8 @@
   "scripts": {
     "build:css": "tailwindcss -i ./src/shadcn.css -o ./shadcn.css --minify",
     "watch:css": "tailwindcss -i ./src/shadcn.css -o ./shadcn.css --watch",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test:visual": "node take_screenshots.js",
+    "test": "node --check app.js"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,7 @@
   "devDependencies": {
     "autoprefixer": "^10.6.2",
     "postcss": "^8.5.32",
+    "puppeteer-core": "^25.16.0",
     "tailwindcss": "^3.4.17",
     "tailwindcss-animate": "^1.0.7"
   },

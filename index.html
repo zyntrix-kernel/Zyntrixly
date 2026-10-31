@@ -28,7 +28,7 @@
   <div class="startup-content">
     <div class="startup-icon-wrap">
       <div class="startup-icon">
-        <img src="app-icon.png" alt="Zyntrixly app icon" class="brand-mark brand-mark-xl"/>
+        <img src="zyntrixly-logo.svg" alt="Zyntrixly app icon" class="brand-mark brand-mark-xl"/>
       </div>
     </div>
     <h1 class="startup-title"><span class="brand-text">Zyntrixly</span></h1>
@@ -50,7 +50,7 @@
       <!-- Header -->
       <div class="auth-header">
         <div class="auth-icon">
-          <img src="app-icon.png" alt="Zyntrixly app icon" class="brand-mark brand-mark-md"/>
+          <img src="zyntrixly-logo.svg" alt="Zyntrixly app icon" class="brand-mark brand-mark-md"/>
         </div>
         <h1 id="auth-title" class="auth-title">Welcome back</h1>
         <p id="auth-subtitle" class="auth-subtitle">Sign in to continue to Zyntrixly</p>
@@ -95,10 +95,7 @@
       <div class="auth-divider"><div class="divider-line"></div><span class="divider-or">or</span><div class="divider-line"></div></div>
 
       <!-- Toggle -->
-      <button onclick="toggleAuthMode()" class="auth-toggle btn-secondary">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 3H9l3-3z"/><path d="M12 22l-3-3h6l-3 3z"/><path d="M2 12l3-3v6l-3-3z"/><path d="M22 12l-3 3V9l3 3z"/></svg>
-        <span id="auth-toggle-label">Create a new account</span>
-      </button>
+      <button onclick="toggleAuthMode()" class="auth-toggle btn-secondary"><span id="auth-toggle-label">Create a new account</span></button>
 
       <!-- E2E badge -->
       <div class="auth-badge">
@@ -129,7 +126,7 @@
 
     <!-- Title -->
     <div class="mob-brand" id="mob-title">
-      <img src="zyntrixly-logo.png" alt="Zyntrixly" class="brand-lockup-img"/>
+      <img src="zyntrixly-logo.svg" alt="Zyntrixly" class="brand-lockup-img"/>
       <span class="brand-text">Zyntrixly</span>
     </div>
 
@@ -156,7 +153,7 @@
       <!-- Sidebar header -->
       <div class="sb-hdr">
         <div class="sb-hdr-left">
-          <img src="zyntrixly-logo.png" alt="Zyntrixly" class="brand-lockup-img brand-lockup-sidebar"/>
+          
           <div class="sb-av" id="sb-av" onclick="openSettings()">
             <div class="av-circle" id="sb-av-circle">?</div>
             <div class="av-status av-online" id="sb-status"></div>
@@ -215,22 +212,18 @@
       <div id="empty-pane" class="empty-pane">
         <div class="ep-wrap">
           <div class="ep-icon">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="3"/><path d="M12 14v3"/></svg>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </div>
-          <h2 class="ep-title">Zyntrixly Security Vault</h2>
-          <p class="ep-sub">End-to-end encrypted communication. Cryptographic keys and plaintext never leave your device.</p>
+          <h2 class="ep-title">No conversation selected</h2>
+          <p class="ep-sub">All messages and keys are protected by client-side zero-knowledge encryption. Choose a conversation from the sidebar or start a new encrypted direct message.</p>
           <div class="ep-chips">
-            <button class="ep-chip" onclick="openNewChat()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+            <button class="btn btn-default" onclick="openNewChat()" style="height:36px;padding:0 14px;gap:6px">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
               <span>New Conversation</span>
             </button>
-            <button class="ep-chip" onclick="openNewChat();ncTab('grp',document.querySelectorAll('.m-tab')[1])">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <button class="btn btn-secondary" onclick="openNewChat();ncTab('grp',document.querySelectorAll('.m-tab')[1])" style="height:36px;padding:0 14px;gap:6px">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               <span>Create Group</span>
-            </button>
-            <button class="ep-chip" onclick="openSettings()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-              <span>Security Vault</span>
             </button>
           </div>
         </div>
