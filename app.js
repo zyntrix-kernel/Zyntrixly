@@ -102,7 +102,7 @@ function setCachedProfile(uid,data){
     localStorage.setItem('zx_me_'+uid,JSON.stringify({
       uid,
       username:data.username,
-      color:data.color||'#3b82f6',
+      color:data.color||'#27272a',
       publicKey:data.publicKey||null
     }));
   }catch(e){}
@@ -426,13 +426,13 @@ function openEmojiPicker(e){
   if(!picker){
     picker=document.createElement('div');
     picker.id='full-emoji-pick';
-    picker.className='glass-panel-strong';
-    picker.style.cssText='position:fixed;z-index:9999;padding:8px;display:flex;flex-wrap:wrap;width:224px;gap:2px;border-radius:14px;border:1px solid rgba(59,130,246,.25);box-shadow:0 8px 32px rgba(0,0,0,.5)';
+    picker.className='shadcn-popover';
+    picker.style.cssText='position:fixed;z-index:9999;padding:6px;display:flex;flex-wrap:wrap;width:224px;gap:4px;border-radius:8px;background:#18181b;border:1px solid #27272a;box-shadow:0 10px 25px -5px rgba(0,0,0,.8),inset 0 1px 0 0 rgba(255,255,255,.08)';
     EMOJI_SET.forEach(em=>{
       const btn=document.createElement('button');
       btn.textContent=em;
       btn.style.cssText='width:32px;height:32px;font-size:18px;border-radius:8px;border:none;background:none;cursor:pointer;transition:background .1s';
-      btn.onmouseover=()=>btn.style.background='rgba(59,130,246,.15)';
+      btn.onmouseover=()=>btn.style.background='#27272a';
       btn.onmouseout=()=>btn.style.background='none';
       btn.onclick=()=>insertEmoji(em);
       picker.appendChild(btn);
@@ -683,7 +683,7 @@ async function doRegister(username,pass){
     const wrapped=await Crypto.wrapKey(privateKeyJwk,pass);
 
     await db.collection('users').doc(uid).set({
-      uid,username,color:'#3b82f6',
+      uid,username,color:'#27272a',
       publicKey:publicKeyJwk,
       wrappedPrivKey:wrapped,
       online:true,
@@ -827,7 +827,7 @@ async function bootApp(user){
     }
     sessionStorage.removeItem('zx_p');
 
-    ME={uid:user.uid,username:data.username,color:data.color||'#3b82f6',privKey,publicKey:data.publicKey};
+    ME={uid:user.uid,username:data.username,color:data.color||'#27272a',privKey,publicKey:data.publicKey};
 
     setOnline(true);
     window.addEventListener('beforeunload',()=>setOnline(false));
@@ -868,7 +868,7 @@ async function bootApp(user){
     const cachedProfile=getCachedProfile(user.uid);
     if(cachedProfile){
       const privKey=Crypto.loadLocal(user.uid);
-      ME={uid:user.uid,username:cachedProfile.username,color:cachedProfile.color||'#3b82f6',privKey,publicKey:cachedProfile.publicKey||null};
+      ME={uid:user.uid,username:cachedProfile.username,color:cachedProfile.color||'#27272a',privKey,publicKey:cachedProfile.publicKey||null};
       updateMeUI();
       _authResolved=true;
       window._authResolved=true;
@@ -1117,8 +1117,8 @@ async function onSbSearch(){
     const snap=await db.collection('users').get();
     const users=snap.docs.map(d=>d.data()).filter(u=>u.uid!==ME.uid&&u.username&&u.username.toLowerCase().includes(q));
     drop.innerHTML=users.length
-      ?users.map(u=>`<div class="sr-item" onclick="startDM('${u.uid}','${escQ(u.username)}','${u.color||'#3b82f6'}');clearSbSearch()">
-          <div class="av-circle sm" style="background:${u.color||'#3b82f6'}">${u.username[0].toUpperCase()}</div>
+      ?users.map(u=>`<div class="sr-item" onclick="startDM('${u.uid}','${escQ(u.username)}','${u.color||'#27272a'}');clearSbSearch()">
+          <div class="av-circle sm" style="background:${u.color||'#27272a'}">${u.username[0].toUpperCase()}</div>
           <div class="sr-info"><span class="sr-name">@${esc(u.username)}</span><span class="sr-sub">${u.online?'● Online':'Offline'}</span></div>
         </div>`).join('')
       :'<div class="sr-sl">No chats or users found</div>';
@@ -1140,7 +1140,7 @@ async function startDM(otherUid,otherUsername,otherColor){
   clearChatWatchers();
 
   const docId=dmDocId(ME.uid,otherUid);
-  const color=otherColor||'#3b82f6';
+  const color=otherColor||'#27272a';
 
   // ── SHOW UI IMMEDIATELY (no awaits before this) ──
   // Same as openGroup — instant slide on mobile
@@ -1202,7 +1202,7 @@ function startDMListener(){
         const other=d.members?.find(x=>x!==ME.uid);
         if(!other)return;
         const name=d.memberNames?.[other]||'?';
-        const color=d.memberColors?.[other]||'#3b82f6';
+        const color=d.memberColors?.[other]||'#27272a';
         const isArch=(d.archived?.[ME.uid]===true)||isArchived('dm',doc.id);
         const preview=getPreviewData('dm',doc.id,d,'Tap to open');
         const unread=isMuted('dm',doc.id)?0:getUnreadCount('dm',doc.id,d);
@@ -1402,8 +1402,8 @@ async function searchDM(){
     const snap=await db.collection('users').get();
     const users=snap.docs.map(d=>d.data()).filter(u=>u.uid!==ME.uid&&u.username&&u.username.toLowerCase().includes(q));
     el.innerHTML=users.length
-      ?users.map(u=>`<div class="sr-item" onclick="startDM('${u.uid}','${escQ(u.username)}','${u.color||'#3b82f6'}');closeModal('nc-modal')">
-          <div class="av-circle sm" style="background:${u.color||'#3b82f6'}">${u.username[0].toUpperCase()}</div>
+      ?users.map(u=>`<div class="sr-item" onclick="startDM('${u.uid}','${escQ(u.username)}','${u.color||'#27272a'}');closeModal('nc-modal')">
+          <div class="av-circle sm" style="background:${u.color||'#27272a'}">${u.username[0].toUpperCase()}</div>
           <div class="sr-info"><span class="sr-name">@${esc(u.username)}</span><span class="sr-sub">${u.online?'● Online':'Offline'}</span></div>
         </div>`).join('')
       :'<div class="sr-sl">No users found</div>';
@@ -1417,8 +1417,8 @@ async function searchGrp(){
     const snap=await db.collection('users').get();
     const users=snap.docs.map(d=>d.data()).filter(u=>u.uid!==ME.uid&&u.username&&u.username.toLowerCase().includes(q)&&!grpMembers.find(m=>m.uid===u.uid));
     el.innerHTML=users.length
-      ?users.map(u=>`<div class="sr-item" onclick="addGM('${u.uid}','${escQ(u.username)}','${u.color||'#3b82f6'}')">
-          <div class="av-circle sm" style="background:${u.color||'#3b82f6'}">${u.username[0].toUpperCase()}</div>
+      ?users.map(u=>`<div class="sr-item" onclick="addGM('${u.uid}','${escQ(u.username)}','${u.color||'#27272a'}')">
+          <div class="av-circle sm" style="background:${u.color||'#27272a'}">${u.username[0].toUpperCase()}</div>
           <div class="sr-info"><span class="sr-name">@${esc(u.username)}</span></div>
         </div>`).join('')
       :'<div class="sr-sl">No users found</div>';
@@ -1481,14 +1481,14 @@ function startGroupListener(){
         const preview=getPreviewData('group',doc.id,d,`${d.members.length} members`);
         const unread=isMuted('group',doc.id)?0:getUnreadCount('group',doc.id,d);
         storeConv('group',doc.id,{
-          name:d.name,color:'linear-gradient(135deg,#6366f1,#3b82f6)',av:'#',
+          name:d.name,color:'#27272a',av:'#',
           preview:preview.text,
           sortAt:(d.lastMsgAt?.seconds||d.createdAt?.seconds||0),
           raw:d
         });
         const isArch=isArchived('group',doc.id);
         const el=makeConvEl('group',doc.id,d.name,preview.text,
-          'linear-gradient(135deg,#6366f1,#3b82f6)','#',()=>openGroup(doc.id,d),unread,preview.mode);
+          '#27272a','#',()=>openGroup(doc.id,d),unread,preview.mode);
         if(!isArch) list.appendChild(el);
       });
     });
@@ -1505,7 +1505,7 @@ function openGroup(gid,data){
     admins:data.admins||[data.createdBy]
   };
   const av=id('chat-av-circle');
-  av.textContent='#';av.style.background='linear-gradient(135deg,#6366f1,#3b82f6)';
+  av.textContent='#';av.style.background='#27272a';
   showChatPane(data.name,null,'#','group');
   restoreDraft();
   presenceStatusText='';
@@ -1526,13 +1526,13 @@ function openGrpPanel(){
   const body=id('gp-body');
   body.innerHTML=`
     <div style="text-align:center;padding:16px 0 20px">
-      <div style="width:60px;height:60px;border-radius:16px;background:linear-gradient(135deg,#6366f1,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;margin:0 auto 10px">#</div>
+      <div style="width:60px;height:60px;border-radius:16px;background:#27272a;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;margin:0 auto 10px">#</div>
       <div style="font-size:18px;font-weight:600">${esc(CHAT.name)}</div>
       <div style="font-size:12px;color:var(--muted-fg);margin-top:2px">${CHAT.members.length} members</div>
     </div>
     ${isAdmin?`<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
       <button class="modal-btn-primary" onclick="renameGrp()" style="justify-content:center">Rename group</button>
-      <button onclick="toggleAddMemUI()" style="padding:10px;border-radius:12px;border:1px solid rgba(59,130,246,0.25);color:var(--muted-fg);font-size:13px;transition:background .1s" onmouseover="this.style.background='rgba(59,130,246,.07)'" onmouseout="this.style.background=''">Add members</button>
+      <button onclick="toggleAddMemUI()" style="padding:8px 12px;border-radius:6px;border:1px solid #27272a;background:#18181b;color:#a1a1aa;font-size:13px;font-weight:500;transition:all .15s" onmouseover="this.style.background='#27272a';this.style.color='#fafafa'" onmouseout="this.style.background='#18181b';this.style.color='#a1a1aa'" >Add members</button>
     </div>
     <div id="add-mem-ui" style="display:none;flex-direction:column;gap:8px;margin-bottom:10px">
       <input id="add-mem-q" class="modal-input" type="text" placeholder="Search username…" oninput="searchAddMem()"/>
@@ -1542,13 +1542,13 @@ function openGrpPanel(){
     <div style="display:flex;flex-direction:column;gap:2px">
       ${CHAT.members.map(uid=>{
         const name=CHAT.memberNames?.[uid]||uid;
-        const color=CHAT.memberColors?.[uid]||'#3b82f6';
+        const color=CHAT.memberColors?.[uid]||'#27272a';
         const isAdm=CHAT.admins?.includes(uid);
         const canRm=isAdmin&&uid!==ME.uid;
-        return`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(59,130,246,.1)">
+        return`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #27272a">
           <div class="av-circle sm" style="background:${color}">${name[0].toUpperCase()}</div>
-          <div style="flex:1;font-size:13px">@${esc(name)} ${isAdm?'<span style="font-size:10px;color:var(--primary);background:rgba(59,130,246,.1);padding:1px 7px;border-radius:10px">admin</span>':''}</div>
-          ${canRm?`<div style="display:flex;gap:4px">${!isAdm?`<button onclick="promoteAdmin('${uid}','${escQ(name)}')" style="font-size:11px;color:var(--primary);padding:3px 8px;border:1px solid rgba(59,130,246,.3);border-radius:6px;cursor:pointer" onmouseover="this.style.background='rgba(59,130,246,.07)'" onmouseout="this.style.background=''">Promote</button>`:`<button onclick="demoteAdmin('${uid}','${escQ(name)}')" style="font-size:11px;color:orange;padding:3px 8px;border:1px solid rgba(255,165,0,.3);border-radius:6px;cursor:pointer" onmouseover="this.style.background='rgba(255,165,0,.07)'" onmouseout="this.style.background=''">Demote</button>`}<button onclick="kickMem('${uid}','${escQ(name)}')" style="font-size:11px;color:var(--destructive);padding:3px 8px;border:1px solid rgba(220,50,47,.3);border-radius:6px;cursor:pointer" onmouseover="this.style.background='rgba(220,50,47,.07)'" onmouseout="this.style.background=''">Remove</button></div>`:''}
+          <div style="flex:1;font-size:13px">@${esc(name)} ${isAdm?'<span style="font-size:10px;color:#fafafa;background:#27272a;border:1px solid #3f3f46;padding:1px 7px;border-radius:9999px;font-weight:500">admin</span>':''}</div>
+          ${canRm?`<div style="display:flex;gap:4px">${!isAdm?`<button onclick="promoteAdmin('${uid}','${escQ(name)}')" style="font-size:11px;color:#fafafa;padding:3px 8px;border:1px solid #27272a;background:#18181b;border-radius:6px;cursor:pointer" onmouseover="this.style.background='#27272a'" onmouseout="this.style.background='#18181b'" >Promote</button>`:`<button onclick="demoteAdmin('${uid}','${escQ(name)}')" style="font-size:11px;color:orange;padding:3px 8px;border:1px solid rgba(255,165,0,.3);border-radius:6px;cursor:pointer" onmouseover="this.style.background='rgba(255,165,0,.07)'" onmouseout="this.style.background=''">Demote</button>`}<button onclick="kickMem('${uid}','${escQ(name)}')" style="font-size:11px;color:var(--destructive);padding:3px 8px;border:1px solid rgba(220,50,47,.3);border-radius:6px;cursor:pointer" onmouseover="this.style.background='rgba(220,50,47,.07)'" onmouseout="this.style.background=''">Remove</button></div>`:''}
         </div>`;
       }).join('')}
     </div>
@@ -1575,8 +1575,8 @@ async function searchAddMem(){
   if(!q){el.innerHTML='';return;}
   const snap=await db.collection('users').get();
   const users=snap.docs.map(d=>d.data()).filter(u=>!CHAT.members.includes(u.uid)&&u.username&&u.username.toLowerCase().includes(q));
-  el.innerHTML=users.length?users.map(u=>`<div class="sr-item" onclick="addToGrp('${u.uid}','${escQ(u.username)}','${u.color||'#3b82f6'}')">
-    <div class="av-circle sm" style="background:${u.color||'#3b82f6'}">${u.username[0].toUpperCase()}</div>
+  el.innerHTML=users.length?users.map(u=>`<div class="sr-item" onclick="addToGrp('${u.uid}','${escQ(u.username)}','${u.color||'#27272a'}')">
+    <div class="av-circle sm" style="background:${u.color||'#27272a'}">${u.username[0].toUpperCase()}</div>
     <span style="font-size:13px">@${esc(u.username)}</span></div>`).join(''):'<div class="sr-sl">No users found</div>';
 }
 async function addToGrp(uid,username,color){
@@ -1669,7 +1669,7 @@ async function renderMsg(msgId,data,chatCtx=getChatContext()){
   // Group sender name
   if(!mine&&chatCtx?.type==='group'){
     const sn=document.createElement('div');sn.className='msg-sender';
-    const sc=chatCtx.memberColors?.[data.senderUid]||'#3b82f6';
+    const rawColor=chatCtx.memberColors?.[data.senderUid]; const sc=(!rawColor||rawColor==='#27272a'||rawColor==='#18181b')?'#fafafa':rawColor;
     sn.innerHTML=`<span style="color:${sc}">@${esc(chatCtx.memberNames?.[data.senderUid]||'?')}</span>`;
     row.appendChild(sn);
   }
@@ -1770,7 +1770,7 @@ async function decryptBubble(bub,data,mine,chatCtx=getChatContext()){
           );
         };
         const fileLabel=parsed.data?'Encrypted · Tap to decrypt':'Tap to download';
-        card.innerHTML=`<div style="width:38px;height:38px;border-radius:10px;background:rgba(59,130,246,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        card.innerHTML=`<div style="width:38px;height:38px;border-radius:10px;background:#18181b;border:1px solid #27272a;display:flex;align-items:center;justify-content:center;flex-shrink:0">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           </div>
           <div style="min-width:0">
@@ -1868,7 +1868,7 @@ async function sendDMMsg(text,rp){
   await ref.set({
     members:[ME.uid,CHAT.otherUid],
     memberNames:{[ME.uid]:ME.username,[CHAT.otherUid]:CHAT.name},
-    memberColors:{[ME.uid]:ME.color,[CHAT.otherUid]:CHAT.color||'#3b82f6'},
+    memberColors:{[ME.uid]:ME.color,[CHAT.otherUid]:CHAT.color||'#27272a'},
     archived:{[ME.uid]:false,[CHAT.otherUid]:false},
     lastMsg:text.substring(0,60),
     lastMsgAt:firebase.firestore.FieldValue.serverTimestamp(),
@@ -2174,7 +2174,7 @@ function sendNotif(data){
   const who=CHAT.memberNames?.[data.senderUid]||CHAT.name||'Someone';
   new Notification('Zyntrixly · @'+who,{
     body:'🔒 New encrypted message',
-    icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="%233b82f6"/><text x="16" y="22" text-anchor="middle" font-size="18" fill="white">Z</text></svg>',
+    icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="%2318181b"/><text x="16" y="22" text-anchor="middle" font-size="18" fill="white">Z</text></svg>',
     tag:'zx'
   });
 }
@@ -2421,7 +2421,7 @@ function zConfirm(title,msg,okLabel='Confirm',danger=false){
     id('confirm-inp').value='';
     const btn=id('confirm-ok-btn');
     btn.textContent=okLabel;
-    btn.style.background=danger?'var(--destructive)':'var(--primary)';
+    btn.className=danger?'btn btn-destructive':'btn btn-default';
     id('confirm-modal').classList.remove('hidden');
     setTimeout(()=>id('confirm-ok-btn').focus(),100);
   });
@@ -2437,7 +2437,7 @@ function zPrompt(title,msg,placeholder='',defaultVal=''){
     inp.placeholder=placeholder;
     inp.value=defaultVal;
     id('confirm-ok-btn').textContent='OK';
-    id('confirm-ok-btn').style.background='var(--primary)';
+    id('confirm-ok-btn').className='btn btn-default';
     id('confirm-modal').classList.remove('hidden');
     setTimeout(()=>inp.focus(),100);
   });

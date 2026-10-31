@@ -84,7 +84,7 @@
         <p id="auth-err" class="auth-err hidden"></p>
 
         <!-- Submit -->
-        <button type="submit" id="auth-submit" class="auth-btn">
+        <button type="submit" id="auth-submit" class="auth-btn btn-default">
           <span id="auth-btn-label">Sign in</span>
           <svg id="auth-btn-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           <div id="auth-spinner" class="auth-spinner hidden"></div>
@@ -95,7 +95,7 @@
       <div class="auth-divider"><div class="divider-line"></div><span class="divider-or">or</span><div class="divider-line"></div></div>
 
       <!-- Toggle -->
-      <button onclick="toggleAuthMode()" class="auth-toggle">
+      <button onclick="toggleAuthMode()" class="auth-toggle btn-secondary">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 3H9l3-3z"/><path d="M12 22l-3-3h6l-3 3z"/><path d="M2 12l3-3v6l-3-3z"/><path d="M22 12l-3 3V9l3 3z"/></svg>
         <span id="auth-toggle-label">Create a new account</span>
       </button>
@@ -124,7 +124,7 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
     <button class="mob-icon-btn mob-list-only" id="mob-av-btn" onclick="openSettings()" style="display:flex">
-      <div class="av-circle" id="mob-av-mini" style="width:30px;height:30px;font-size:12px;background:#3b82f6">?</div>
+      <div class="av-circle" id="mob-av-mini" style="width:30px;height:30px;font-size:12px;background:#27272a;border:1px solid #3f3f46;color:#fafafa">?</div>
     </button>
 
     <!-- Title -->
@@ -323,7 +323,7 @@
 <!-- ═══════════ MODALS ═══════════ -->
 
 <!-- New chat modal -->
-<div id="nc-modal" class="modal-bg hidden" onclick="modalBgClick(event,'nc-modal')">
+<div id="nc-modal" class="modal-bg shadcn-dialog-overlay hidden" onclick="modalBgClick(event,'nc-modal')">
   <div class="modal">
     <div class="modal-hdr">
       <h3>New conversation</h3>
@@ -342,14 +342,14 @@
       <input id="nc-grp-q" type="text" class="modal-input" placeholder="Add members (search)…" oninput="searchGrp()" autocapitalize="none"/>
       <div id="nc-grp-res" class="modal-list"></div>
       <div id="nc-chips" class="chips-row"></div>
-      <button class="modal-btn-primary" onclick="createGroup()" style="margin-top:10px;width:100%">Create group →</button>
+      <button class="modal-btn-primary btn-default" onclick="createGroup()" style="margin-top:10px;width:100%">Create group →</button>
     </div>
     <p id="nc-err" class="modal-err"></p>
   </div>
 </div>
 
 <!-- Settings panel -->
-<div id="settings-modal" class="modal-bg hidden">
+<div id="settings-modal" class="modal-bg shadcn-dialog-overlay hidden">
   <div class="modal settings-panel">
     <div class="modal-hdr">
       <h3 id="settings-title">Settings</h3>
@@ -551,9 +551,9 @@
 
 <!-- KEY RESTORE MODAL -->
 <input type="hidden" id="kr-needs-setup" value="0"/>
-<div id="key-restore-modal" class="modal-bg hidden">
+<div id="key-restore-modal" class="modal-bg shadcn-dialog-overlay hidden">
   <div class="modal" style="max-width:400px;text-align:center">
-    <div style="width:56px;height:56px;border-radius:16px;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);display:flex;align-items:center;justify-content:center;margin:0 auto 14px">
+    <div style="width:48px;height:48px;border-radius:10px;background:#18181b;border:1px solid #27272a;box-shadow:inset 0 1px 0 0 rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;margin:0 auto 14px">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.5"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
     </div>
     <h3 id="kr-title" style="font-size:17px;font-weight:600;margin-bottom:8px">Restore encryption keys</h3>
@@ -563,7 +563,7 @@
       <input id="kr-pass" type="password" class="auth-input" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key===&apos;Enter&apos;)restoreKeys()"/>
     </div>
     <p id="kr-err" class="auth-err hidden" style="margin-bottom:10px"></p>
-    <button onclick="restoreKeys()" class="auth-btn" style="margin-bottom:10px">
+    <button onclick="restoreKeys()" class="auth-btn btn-default" style="margin-bottom:10px">
       <span id="kr-label">Unlock messages</span>
       <svg id="kr-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       <div id="kr-spin" class="auth-spinner hidden"></div>
@@ -573,19 +573,19 @@
 </div>
 
 <!-- CUSTOM CONFIRM MODAL (replaces browser confirm/prompt) -->
-<div id="confirm-modal" class="modal-bg hidden">
+<div id="confirm-modal" class="modal-bg shadcn-dialog-overlay hidden">
   <div class="modal" style="max-width:360px;text-align:center;gap:12px">
     <h3 id="confirm-title" style="font-size:16px;font-weight:600"></h3>
     <p id="confirm-msg" style="font-size:13px;color:var(--muted-fg);line-height:1.6"></p>
-    <input id="confirm-inp" type="text" class="modal-input" placeholder="" style="display:none"/>
+    <input id="confirm-inp" type="text" class="modal-input shadcn-input" placeholder="" style="display:none"/>
     <div style="display:flex;gap:10px;margin-top:4px">
-      <button onclick="confirmCancel()" class="btn-ghost" style="flex:1;padding:11px;border-radius:12px;font-size:14px">Cancel</button>
-      <button onclick="confirmOk()" id="confirm-ok-btn" style="flex:1;padding:11px;border-radius:12px;font-size:14px;font-weight:600;background:var(--primary);color:var(--primary-fg)">OK</button>
+      <button onclick="confirmCancel()" class="btn btn-outline" style="flex:1;height:38px;font-size:13px">Cancel</button>
+      <button onclick="confirmOk()" id="confirm-ok-btn" class="btn btn-default" style="flex:1;height:38px;font-size:13px">OK</button>
     </div>
   </div>
 </div>
 
-<div id="forward-modal" class="modal-bg hidden" onclick="modalBgClick(event,'forward-modal')">
+<div id="forward-modal" class="modal-bg shadcn-dialog-overlay hidden" onclick="modalBgClick(event,'forward-modal')">
   <div class="modal">
     <div class="modal-hdr">
       <h3>Forward message</h3>

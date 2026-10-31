@@ -4,43 +4,219 @@
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    --background: 240 10% 3.9%;   /* #09090b - Zinc 950 */
+    --foreground: 0 0% 98%;       /* #fafafa - Zinc 50 */
 
-    --card: 240 10% 3.9%;
+    --card: 240 5.9% 10%;         /* #18181b - Zinc 900 */
     --card-foreground: 0 0% 98%;
 
-    --popover: 240 10% 3.9%;
+    --popover: 240 5.9% 10%;      /* #18181b - Zinc 900 */
     --popover-foreground: 0 0% 98%;
 
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
+    --primary: 0 0% 98%;          /* #fafafa - Crisp High-Contrast Action */
+    --primary-foreground: 240 5.9% 10%; /* #18181b */
 
-    --secondary: 240 3.7% 15.9%;
+    --secondary: 240 3.7% 15.9%;  /* #27272a - Zinc 800 */
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 240 3.7% 15.9%;      /* #27272a */
+    --muted-foreground: 240 5% 64.9%; /* #a1a1aa - Zinc 400 */
 
-    --accent: 240 3.7% 15.9%;
+    --accent: 240 3.7% 15.9%;     /* #27272a */
     --accent-foreground: 0 0% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62.8% 30.6%; /* #7f1d1d */
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --border: 240 3.7% 15.9%;     /* #27272a - 1px Precision Border */
+    --input: 240 3.7% 15.9%;      /* #27272a */
+    --ring: 240 4.9% 83.9%;       /* #d4d4d8 - 1px Sharp Ring */
 
-    --radius: 0.5rem;
+    --radius: 0.5rem;             /* 8px base radius */
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* ── 1. SHADCN BUTTON SYSTEM ── */
+  .btn, .shadcn-btn {
+    @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 select-none;
+  }
+  .btn-default, .btn-primary {
+    @apply bg-primary text-primary-foreground shadow hover:bg-primary/90 active:scale-[0.98] border border-white/20;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.4);
+  }
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 border border-border active:scale-[0.98];
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+  }
+  .btn-destructive {
+    @apply bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 active:scale-[0.98];
+  }
+  .btn-outline {
+    @apply border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground active:scale-[0.98];
+  }
+  .btn-ghost {
+    @apply hover:bg-accent hover:text-accent-foreground active:scale-[0.98];
+  }
+  .btn-sm {
+    @apply h-8 rounded-md px-3 text-xs;
+  }
+  .btn-md {
+    @apply h-9 px-4 py-2;
+  }
+  .btn-lg {
+    @apply h-10 rounded-md px-8 text-base;
+  }
+  .btn-icon {
+    @apply h-9 w-9 p-0;
+  }
+
+  /* ── 2. SHADCN CARD SYSTEM ── */
+  .shadcn-card {
+    @apply rounded-xl border border-border bg-card text-card-foreground shadow-md relative overflow-hidden;
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  }
+  .shadcn-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.15) 50%, transparent 100%);
+    pointer-events: none;
+  }
+  .shadcn-card-header {
+    @apply flex flex-col space-y-1.5 p-6;
+  }
+  .shadcn-card-title {
+    @apply font-semibold leading-none tracking-tight text-foreground text-lg;
+  }
+  .shadcn-card-description {
+    @apply text-sm text-muted-foreground;
+  }
+  .shadcn-card-content {
+    @apply p-6 pt-0;
+  }
+  .shadcn-card-footer {
+    @apply flex items-center p-6 pt-0;
+  }
+
+  /* ── 3. SHADCN INPUT SYSTEM ── */
+  .shadcn-input {
+    @apply flex h-9 w-full rounded-md border border-input bg-[#09090b] px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50 text-foreground;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+  .shadcn-textarea {
+    @apply flex min-h-[60px] w-full rounded-md border border-input bg-[#09090b] px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 text-foreground;
+  }
+
+  /* ── 4. SHADCN BADGE SYSTEM ── */
+  .shadcn-badge {
+    @apply inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2;
+  }
+  .shadcn-badge-default {
+    @apply border-transparent bg-primary text-primary-foreground shadow hover:bg-primary/80;
+  }
+  .shadcn-badge-secondary {
+    @apply border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80;
+  }
+  .shadcn-badge-destructive {
+    @apply border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80;
+  }
+  .shadcn-badge-outline {
+    @apply text-foreground border-border;
+  }
+
+  /* ── 5. SHADCN TABS SYSTEM ── */
+  .shadcn-tabs-list {
+    @apply inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground border border-border/40;
+  }
+  .shadcn-tabs-trigger {
+    @apply inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-muted-foreground hover:text-foreground cursor-pointer;
+  }
+  .shadcn-tabs-trigger.active, .shadcn-tabs-trigger[data-state="active"] {
+    @apply bg-background text-foreground shadow-sm;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  }
+
+  /* ── 6. SHADCN AVATAR SYSTEM ── */
+  .shadcn-avatar {
+    @apply relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full border border-border/60 bg-secondary;
+  }
+  .shadcn-avatar-fallback {
+    @apply flex h-full w-full items-center justify-center rounded-full bg-secondary font-semibold text-xs text-foreground select-none;
+  }
+
+  /* ── 7. SHADCN DIALOG SYSTEM ── */
+  .shadcn-dialog-overlay {
+    @apply fixed inset-0 z-50 bg-black/80 backdrop-blur-sm;
+  }
+  .shadcn-dialog-content {
+    @apply fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-border bg-card p-6 shadow-2xl rounded-xl;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.95), 0 0 0 1px #27272a, inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  }
+  .shadcn-dialog-header {
+    @apply flex flex-col space-y-1.5 text-center sm:text-left;
+  }
+  .shadcn-dialog-title {
+    @apply text-lg font-semibold leading-none tracking-tight text-foreground;
+  }
+  .shadcn-dialog-description {
+    @apply text-sm text-muted-foreground;
+  }
+
+  /* ── 8. SHADCN DROPDOWN / CONTEXT MENU SYSTEM ── */
+  .shadcn-popover {
+    @apply z-50 min-w-[8rem] overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-xl;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.8), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  }
+  .shadcn-popover-item {
+    @apply relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground text-foreground;
+  }
+
+  /* ── 9. SHADCN SEPARATOR SYSTEM ── */
+  .shadcn-separator {
+    @apply shrink-0 bg-border h-[1px] w-full;
+  }
+
+  /* ── 10. COMPATIBILITY EXTENSIONS FOR APP COMPONENTS ── */
+  .modal-box, .modal {
+    @apply rounded-xl border border-border bg-card text-card-foreground shadow-2xl;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.95), 0 0 0 1px #27272a, inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  }
+  .modal-bg {
+    @apply fixed inset-0 z-50 bg-black/80 backdrop-blur-sm;
+  }
+  .modal-input, .auth-input {
+    @apply flex h-10 w-full rounded-md border border-input bg-[#09090b] px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-foreground;
+  }
+  .modal-btn-primary, .auth-btn {
+    @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all bg-primary text-primary-foreground shadow hover:bg-primary/90 active:scale-[0.98] border border-white/20 select-none;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.4);
+  }
+  .modal-tabs {
+    @apply inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground border border-border/40;
+  }
+  .m-tab {
+    @apply inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 text-muted-foreground hover:text-foreground cursor-pointer;
+  }
+  .m-tab.active {
+    @apply bg-background text-foreground shadow-sm;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  }
+  .ctx, .react-pick {
+    @apply z-50 min-w-[8rem] overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-xl;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.8), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  }
+  .ctx button {
+    @apply relative flex w-full cursor-pointer select-none items-center rounded-sm px-2.5 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground text-foreground;
   }
 }
