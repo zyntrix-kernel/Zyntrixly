@@ -46,7 +46,9 @@ const ZxCall = (() => {
   function log(...a) { /* intentionally silent in production */ }
 
   // Safe accessor for ME — avoids crashes if called before app.js sets ME
-  function getMe() { return window.ME || null; }
+  function getMe() {
+    return (typeof window !== 'undefined' && window.ME) ? window.ME : (typeof ME !== 'undefined' ? ME : null);
+  }
 
   function safeClose(pc) {
     try { pc.close(); } catch(_) {}
@@ -171,6 +173,7 @@ const ZxCall = (() => {
 
     pc.onconnectionstatechange = () => {
       if (pc.connectionState === 'connected') {
+        clearTimeout(ringtoneTimer); ringtoneTimer = null;
         setStatus('Connected');
         startCallTimer();
       } else if (['failed','disconnected'].includes(pc.connectionState)) {
@@ -183,7 +186,7 @@ const ZxCall = (() => {
 
   // ── Listen for remote ICE candidates ──
   function listenICE(remoteUid) {
-    if (!callDoc || !ME) return;
+    if (!callDoc || !getMe()) return;
     const colName = 'ice_' + remoteUid + '_to_' + getMe()?.uid;
     const unsub = callDoc.collection(colName).orderBy('ts')
       .onSnapshot(snap => {
@@ -234,6 +237,13 @@ const ZxCall = (() => {
 
     showOverlay(mode);
     setStatus('Ringing…');
+    clearTimeout(ringtoneTimer);
+    ringtoneTimer = setTimeout(() => {
+      if (callId && callRole === 'caller') {
+        toast('User is unavailable.');
+        endCall();
+      }
+    }, 35000);
     attachLocalVideo(localStream);
 
     // Build PC and create offer
@@ -377,6 +387,8 @@ const ZxCall = (() => {
 
     clearInterval(callTimer);
     callTimer   = null;
+    clearTimeout(ringtoneTimer);
+    ringtoneTimer = null;
     callSeconds = 0;
 
     // Clean up UI

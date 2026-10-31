@@ -6,6 +6,7 @@ const testSuites = [
   { name: 'Security & Sanitization (Logger, KeyStore, SessionGuard)', file: 'tests/security.test.js' },
   { name: 'DOM Integrity & Architecture (146 Baseline Element IDs)', file: 'tests/dom_integrity.test.js' },
   { name: 'WebRTC Calling & Media State Machine', file: 'tests/webrtc.test.js' },
+  { name: 'Calling Authentication & Timeout Lifecycles', file: 'tests/calling_auth.test.js' },
   { name: 'Full E2E Browser Features (Puppeteer Headless Chrome)', file: 'tests/e2e_features.test.js' }
 ];
 

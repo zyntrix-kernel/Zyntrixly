@@ -9,6 +9,7 @@ const K2E=Object.fromEntries(Object.entries(E2K).map(([e,k])=>[k,e]));
 
 /* ── STATE ── */
 let ME=null;            // {uid,username,color,privKey}
+window.ME=null;
 let CHAT=null;          // active chat object
 let msgUnsub=null;      // firestore listener unsubscribe
 let replyTo=null;       // {msgId,senderName,text}
@@ -955,7 +956,7 @@ auth.onAuthStateChanged(async user=>{
     await bootApp(user);
   } else {
     _booted=false;
-    ME=null;CHAT=null;
+    ME=null;CHAT=null;window.ME=null;
     _authResolved=true;
     window._authResolved=true;
     showScreen('auth-screen');
@@ -1020,6 +1021,7 @@ async function bootApp(user){
     sessionStorage.removeItem('zx_p');
 
     ME={uid:user.uid,username:data.username,color:data.color||'#27272a',privKey,publicKey:data.publicKey};
+    window.ME=ME;
 
     setOnline(true);
     window.addEventListener('beforeunload',()=>setOnline(false));
@@ -1061,6 +1063,7 @@ async function bootApp(user){
     if(cachedProfile){
       const privKey=Crypto.loadLocal(user.uid);
       ME={uid:user.uid,username:cachedProfile.username,color:cachedProfile.color||'#27272a',privKey,publicKey:cachedProfile.publicKey||null};
+      window.ME=ME;
       updateMeUI();
       _authResolved=true;
       window._authResolved=true;
@@ -1142,6 +1145,7 @@ async function restoreKeys(){
     // Save key locally and activate
     Crypto.saveLocal(ME.uid,privKey);
     ME.privKey=privKey;
+    window.ME=ME;
     id('key-restore-modal').classList.add('hidden');
     id('kr-pass').value='';
 
@@ -1231,7 +1235,7 @@ async function deleteAccount(){
     const fbUser=auth.currentUser;
     if(fbUser) await fbUser.delete();
 
-    ME=null;CHAT=null;_booted=false;
+    ME=null;CHAT=null;_booted=false;window.ME=null;
     closeAllModals();
     toast('Account deleted.');
     showScreen('auth-screen');
@@ -1254,7 +1258,7 @@ function doSignOut(){
   if(groupListUnsub){groupListUnsub();groupListUnsub=null;}
   _booted=false;
   _authResolved=true;
-  ME=null;CHAT=null;
+  ME=null;CHAT=null;window.ME=null;
   closeAllModals();
   auth.signOut();
 }
