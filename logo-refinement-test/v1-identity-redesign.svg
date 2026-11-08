@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Zyntrixly</title>
+  <desc id="desc">A precision-faceted silver Z monogram on an obsidian rounded-square field.</desc>
+  <defs>
+    <linearGradient id="shell" x1="18" y1="12" x2="110" y2="118" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#29292F"/>
+      <stop offset=".48" stop-color="#111115"/>
+      <stop offset="1" stop-color="#050507"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="16" y1="12" x2="112" y2="116" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity=".42"/>
+      <stop offset=".52" stop-color="#A1A1AA" stop-opacity=".16"/>
+      <stop offset="1" stop-color="#52525B" stop-opacity=".5"/>
+    </linearGradient>
+    <linearGradient id="silver" x1="34" y1="28" x2="96" y2="101" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset=".38" stop-color="#E4E4E7"/>
+      <stop offset=".72" stop-color="#A1A1AA"/>
+      <stop offset="1" stop-color="#D4D4D8"/>
+    </linearGradient>
+    <linearGradient id="facet" x1="38" y1="37" x2="83" y2="82" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity=".78"/>
+      <stop offset="1" stop-color="#71717A" stop-opacity=".18"/>
+    </linearGradient>
+    <linearGradient id="core" x1="57" y1="55" x2="71" y2="72" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#D4D4D8"/>
+    </linearGradient>
+    <filter id="shadow" x="17" y="18" width="94" height="94" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+    <clipPath id="mark-clip">
+      <path d="M29 31.5C29 30.12 30.12 29 31.5 29H96.5C97.88 29 99 30.12 99 31.5V40.1C99 40.82 98.69 41.5 98.15 41.98L47.2 86.5H96.5C97.88 86.5 99 87.62 99 89V97C99 98.38 97.88 99.5 96.5 99.5H31.5C30.12 99.5 29 98.38 29 97V88.2C29 87.49 29.3 86.81 29.83 86.33L80.8 42H31.5C30.12 42 29 40.88 29 39.5V31.5Z"/>
+    </clipPath>
+  </defs>
+
+  <rect x="3" y="3" width="122" height="122" rx="31" fill="url(#shell)"/>
+  <rect x="3.75" y="3.75" width="120.5" height="120.5" rx="30.25" stroke="url(#rim)" stroke-width="1.5"/>
+  <path d="M18 29.5C18 23.15 23.15 18 29.5 18H98.5" stroke="#FFFFFF" stroke-opacity=".055" stroke-width="1.2" stroke-linecap="round"/>
+
+  <path d="M29 31.5C29 30.12 30.12 29 31.5 29H96.5C97.88 29 99 30.12 99 31.5V40.1C99 40.82 98.69 41.5 98.15 41.98L47.2 86.5H96.5C97.88 86.5 99 87.62 99 89V97C99 98.38 97.88 99.5 96.5 99.5H31.5C30.12 99.5 29 98.38 29 97V88.2C29 87.49 29.3 86.81 29.83 86.33L80.8 42H31.5C30.12 42 29 40.88 29 39.5V31.5Z" fill="#000000" opacity=".32" filter="url(#shadow)" transform="translate(0 3)"/>
+
+  <g clip-path="url(#mark-clip)">
+    <path d="M29 29H99V42H29V29Z" fill="url(#silver)"/>
+    <path d="M29 29H99L83.7 42H29V29Z" fill="url(#facet)" opacity=".58"/>
+    <path d="M29 42H99L47.2 86.5H29.8L80.8 42H29Z" fill="url(#silver)"/>
+    <path d="M80.8 42H99L47.2 86.5H30.2L80.8 42Z" fill="url(#facet)" opacity=".42"/>
+    <path d="M29 86.5H99V99.5H29V86.5Z" fill="url(#silver)"/>
+    <path d="M47.2 86.5H99V99.5H32L47.2 86.5Z" fill="url(#facet)" opacity=".35"/>
+    <path d="M29 42H80.8" stroke="#FFFFFF" stroke-opacity=".62" stroke-width=".8"/>
+    <path d="M47.2 86.5H99" stroke="#FFFFFF" stroke-opacity=".3" stroke-width=".8"/>
+  </g>
+
+  <circle cx="64" cy="64" r="7.2" fill="#09090B" fill-opacity=".65"/>
+  <circle cx="64" cy="64" r="4.15" fill="url(#core)"/>
+  <circle cx="62.7" cy="62.6" r="1.05" fill="#FFFFFF" fill-opacity=".9"/>
+</svg>
