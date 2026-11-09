@@ -227,3 +227,108 @@ document.addEventListener('securitypolicyviolation', e => {
     console.warn('[CSP Violation]', e.violatedDirective, e.blockedURI);
   }
 });
+
+/* ── 5. UNIVERSAL STRICT DOM & TEXT SANITIZER ────
+   Prevents HTML/XSS injection in reaction keys,
+   usernames, and rich message fragments.
+─────────────────────────────────────────────── */
+const ZxSanitizer = (() => {
+  const ESC_MAP = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  };
+
+  function escapeHtml(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/[&<>"']/g, c => ESC_MAP[c]);
+  }
+
+  function sanitizeReactionKey(rawKey, knownKeyMap = {}) {
+    if (typeof rawKey !== 'string') return '👍';
+    if (knownKeyMap[rawKey]) return knownKeyMap[rawKey];
+    const emojiRegex = /^[\p{Emoji}\p{Extended_Pictographic}\uFE0F\u200D\s]+$/u;
+    if (emojiRegex.test(rawKey.trim())) {
+      return rawKey.trim();
+    }
+    return '👍';
+  }
+
+  function isSafeUrl(url) {
+    if (typeof url !== 'string') return false;
+    const trimmed = url.trim().toLowerCase();
+    if (trimmed.startsWith('javascript:') || trimmed.startsWith('data:text/html') || trimmed.startsWith('vbscript:')) {
+      return false;
+    }
+    return (
+      trimmed.startsWith('https://') ||
+      trimmed.startsWith('http://') ||
+      trimmed.startsWith('mailto:') ||
+      trimmed.startsWith('blob:')
+    );
+  }
+
+  function sanitizeHtml(html) {
+    if (typeof html !== 'string') return '';
+    if (typeof document === 'undefined' || !document.createElement) {
+      return escapeHtml(html);
+    }
+
+    try {
+      const template = document.createElement('template');
+      template.innerHTML = html;
+      const docFrag = template.content;
+
+      const ALLOWED_TAGS = new Set([
+        'b', 'strong', 'i', 'em', 'u', 's', 'span', 'p', 'br',
+        'code', 'pre', 'blockquote', 'a', 'ul', 'ol', 'li'
+      ]);
+      const ALLOWED_ATTRS = new Set(['href', 'title', 'class', 'target', 'rel']);
+
+      function cleanNode(node) {
+        const children = Array.from(node.childNodes);
+        for (const child of children) {
+          if (child.nodeType === 3) continue;
+          if (child.nodeType === 1) {
+            const tagName = child.tagName.toLowerCase();
+            if (!ALLOWED_TAGS.has(tagName)) {
+              const textNode = document.createTextNode(child.textContent || '');
+              node.replaceChild(textNode, child);
+              continue;
+            }
+            const attrs = Array.from(child.attributes);
+            for (const attr of attrs) {
+              const attrName = attr.name.toLowerCase();
+              if (attrName.startsWith('on') || !ALLOWED_ATTRS.has(attrName)) {
+                child.removeAttribute(attr.name);
+              } else if (attrName === 'href' && !isSafeUrl(attr.value)) {
+                child.removeAttribute('href');
+              }
+            }
+            if (tagName === 'a') {
+              child.setAttribute('rel', 'noopener noreferrer');
+            }
+            cleanNode(child);
+          } else {
+            node.removeChild(child);
+          }
+        }
+      }
+
+      cleanNode(docFrag);
+      const div = document.createElement('div');
+      div.appendChild(docFrag.cloneNode(true));
+      return div.innerHTML;
+    } catch (_) {
+      return escapeHtml(html);
+    }
+  }
+
+  return { escapeHtml, sanitizeReactionKey, isSafeUrl, sanitizeHtml };
+})();
+
+if (typeof window !== 'undefined') {
+  window.ZxSanitizer = ZxSanitizer;
+}

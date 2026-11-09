@@ -1,0 +1,28 @@
+:80 {
+    root * /srv
+    file_server
+
+    # Security Headers
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "camera=(self), microphone=(self), display-capture=(self), geolocation=()"
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' blob: data:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com; frame-src 'none'; object-src 'none';"
+    }
+
+    # Static asset caching
+    @static {
+        path *.css *.js *.svg *.png *.jpg *.woff2 *.webmanifest
+    }
+    header @static Cache-Control "public, max-age=604800, immutable"
+
+    # HTML and root caching
+    @html {
+        path / *.html
+    }
+    header @html Cache-Control "no-cache, must-revalidate"
+
+    encode zstd gzip
+}

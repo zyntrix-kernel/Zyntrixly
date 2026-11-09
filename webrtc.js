@@ -176,8 +176,11 @@ const ZxCall = (() => {
         clearTimeout(ringtoneTimer); ringtoneTimer = null;
         setStatus('Connected');
         startCallTimer();
-      } else if (['failed','disconnected'].includes(pc.connectionState)) {
+      } else if (['failed', 'disconnected'].includes(pc.connectionState)) {
         setStatus('Connection lost…');
+        if (typeof pc.restartIce === 'function') {
+          try { pc.restartIce(); } catch(_) {}
+        }
       }
     };
 
@@ -358,9 +361,26 @@ const ZxCall = (() => {
 
   // ── End / clean up ──
   async function endCall() {
-    if (!callId) return; // already ended
-    // Notify remote
+    if (!callId) return;
     const docToEnd = callDoc;
+    const duration = callSeconds;
+    const recordedMode = callMode;
+    const recordedRole = callRole;
+
+    // Log call privately to local IndexedDB
+    try {
+      if (typeof ZxStorage !== 'undefined' && ZxStorage.addCallLog) {
+        ZxStorage.addCallLog({
+          callId: docToEnd?.id || ('call_' + Date.now()),
+          peerUid: recordedRole === 'caller' ? (peers ? Object.keys(peers)[0] : 'unknown') : 'caller',
+          peerName: (recordedRole === 'caller' ? 'Outgoing' : 'Incoming') + ' ' + (recordedMode || 'call'),
+          type: recordedMode || 'voice',
+          direction: recordedRole === 'caller' ? 'outgoing' : 'incoming',
+          status: duration > 0 ? 'connected' : 'declined',
+          durationSeconds: duration
+        }).catch(() => {});
+      }
+    } catch(_) {}
     callId = null; // prevent re-entry
     if (docToEnd) {
       await docToEnd.update({ status: 'ended' }).catch(() => {});

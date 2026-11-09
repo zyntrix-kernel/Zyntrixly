@@ -201,3 +201,83 @@ test('CRY-08: LocalStorage Persistence & Corrupted Data Handling', async () => {
   // Assert: Gracefully returns null
   assert.strictEqual(corrupted, null, 'Corrupted local data must return null safely');
 });
+
+test('CRY-09: Multi-Device Identity & Key Versioning (Zyntrixly 2.0)', async () => {
+  const device = await Crypto.generateDeviceIdentity('macbook_pro_m3', 'Alice MacBook');
+  assert.strictEqual(device.deviceId, 'macbook_pro_m3');
+  assert.strictEqual(device.deviceName, 'Alice MacBook');
+  assert.strictEqual(device.keyVersion, 2);
+  assert.strictEqual(device.trustStatus, 'trusted');
+  assert.strictEqual(device.revoked, false);
+  assert.ok(device.publicKeyJwk, 'Public key must be present');
+  assert.ok(device.privateKeyJwk, 'Private key must be present');
+});
+
+test('CRY-10: Deterministic Safety Numbers & Fingerprints (SHA-512)', async () => {
+  const alice = await Crypto.generateKeyPair();
+  const bob = await Crypto.generateKeyPair();
+
+  // Act 1: Alice calculates safety number with Bob
+  const safetyAlice = await Crypto.calculateSafetyNumber(alice.publicKeyJwk, bob.publicKeyJwk, 'alice_uid', 'bob_uid');
+  // Act 2: Bob calculates safety number with Alice (reverse argument order)
+  const safetyBob = await Crypto.calculateSafetyNumber(bob.publicKeyJwk, alice.publicKeyJwk, 'bob_uid', 'alice_uid');
+
+  // Assert
+  assert.strictEqual(safetyAlice.fingerprint.length, 60, 'Safety number must be 60 decimal digits');
+  assert.strictEqual(safetyAlice.fingerprint, safetyBob.fingerprint, 'Safety numbers must match bidirectionally regardless of parameter order');
+  assert.strictEqual(safetyAlice.blocks.length, 12, 'Must format into 12 blocks of 5 digits');
+  assert.strictEqual(safetyAlice.formatted, safetyBob.formatted);
+});
+
+test('CRY-11: Group Key Epochs with Forward & Backward Secrecy', async () => {
+  const member1 = await Crypto.generateKeyPair();
+  const member2 = await Crypto.generateKeyPair();
+  const evicted = await Crypto.generateKeyPair();
+
+  // Create Epoch 1 with members 1 & 2 (evicted is excluded)
+  const membersMap = {
+    m1: member1.publicKeyJwk,
+    m2: member2.publicKeyJwk
+  };
+  const epoch = await Crypto.generateGroupEpoch(1, membersMap);
+
+  assert.strictEqual(epoch.epochId, 1);
+  assert.ok(epoch.wrappedKeys['m1'], 'Member 1 has wrapped epoch key');
+  assert.ok(epoch.wrappedKeys['m2'], 'Member 2 has wrapped epoch key');
+  assert.strictEqual(epoch.wrappedKeys['evicted'], undefined, 'Evicted member must NOT receive epoch key');
+
+  // Member 1 unwraps epoch key using their private key
+  const subtle = globalThis.crypto.subtle;
+  const rawDecryptedEpochKey = await subtle.decrypt(
+    { name: 'RSA-OAEP' },
+    await subtle.importKey('jwk', member1.privateKeyJwk, { name: 'RSA-OAEP', hash: 'SHA-256' }, false, ['decrypt']),
+    Buffer.from(epoch.wrappedKeys['m1'], 'base64')
+  );
+  const epochKeyB64 = Buffer.from(rawDecryptedEpochKey).toString('base64');
+  assert.strictEqual(epochKeyB64, epoch.rawEpochKey, 'Unwrapped key matches raw epoch key');
+
+  // Encrypt and decrypt a message for Epoch 1
+  const secretText = 'Zero-knowledge group epoch transmission 🛡️';
+  const enc = await Crypto.encryptWithEpochKey(secretText, epochKeyB64);
+  const dec = await Crypto.decryptWithEpochKey(enc.encMsg, enc.iv, epochKeyB64);
+  assert.strictEqual(dec, secretText, 'Message decrypted correctly using epoch key');
+});
+
+test('CRY-12: Out-of-band Recovery Keys (128-bit Hex Phrase)', async () => {
+  const kp = await Crypto.generateKeyPair();
+  const rec = Crypto.generateRecoveryKey();
+
+  assert.strictEqual(rec.recoveryKey.length, 32, '128-bit key is 32 hex chars');
+  assert.ok(rec.formatted.includes('-'), 'Formatted recovery key has user-friendly dashes');
+
+  // Wrap and unwrap key with recovery key
+  const wrapped = await Crypto.wrapKeyWithRecovery(kp.privateKeyJwk, rec.recoveryKey);
+  const unwrapped = await Crypto.unwrapKeyWithRecovery(wrapped, rec.formatted); // formatted with dashes should work seamlessly
+
+  assert.ok(unwrapped, 'Key unwrapped with recovery key');
+  assert.strictEqual(unwrapped.d, kp.privateKeyJwk.d, 'Private exponent preserved');
+
+  // Fails with wrong recovery key
+  const failed = await Crypto.unwrapKeyWithRecovery(wrapped, '0000-0000-0000-0000-0000-0000-0000-0000');
+  assert.strictEqual(failed, null, 'Unwrapping with bad recovery key fails safely');
+});

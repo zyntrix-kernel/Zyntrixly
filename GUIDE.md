@@ -185,38 +185,231 @@ Now your Firebase key only works on YOUR website. Even if someone sees the key, 
 ### Step 2 — Set Firestore Security Rules
 1. Go back to [console.firebase.google.com](https://console.firebase.google.com)
 2. Click **"Firestore Database"** → **"Rules"** tab
-3. Delete all the existing text and paste this:
+3. Copy the production security rules from the `firestore.rules` file in this repository (which enforces strict participant authorization, DM immutability, call authorization, and zero-knowledge data isolation) and paste them into the console:
 
-```
+```javascript
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // ── Helper Functions ───────────────────────────────────────────
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function dmMember() {
+      return signedIn() && request.auth.uid in resource.data.members;
+    }
+
+    function dmMemberAfterWrite() {
+      return signedIn() && request.auth.uid in request.resource.data.members;
+    }
+
+    function groupMember() {
+      return signedIn() && request.auth.uid in resource.data.members;
+    }
+
+    function groupAdmin() {
+      return groupMember() && (
+        (resource.data.admins != null && request.auth.uid in resource.data.admins) ||
+        (resource.data.roles != null && resource.data.roles[request.auth.uid] in ['owner', 'admin']) ||
+        resource.data.createdBy == request.auth.uid
+      );
+    }
+
+    function dmParentMember(dmId) {
+      return signedIn()
+        && request.auth.uid in get(/databases/$(database)/documents/dms/$(dmId)).data.members;
+    }
+
+    function groupParentMember(groupId) {
+      return signedIn()
+        && request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members;
+    }
+
+    function groupParentAdmin(groupId) {
+      return signedIn() && (
+        (get(/databases/$(database)/documents/groups/$(groupId)).data.admins != null
+          && request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.admins) ||
+        (get(/databases/$(database)/documents/groups/$(groupId)).data.roles != null
+          && get(/databases/$(database)/documents/groups/$(groupId)).data.roles[request.auth.uid] in ['owner', 'admin']) ||
+        get(/databases/$(database)/documents/groups/$(groupId)).data.createdBy == request.auth.uid
+      );
+    }
+
+    function reactionOnlyUpdate() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions']);
+    }
+
+    function starredOnlyUpdate() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['starred']);
+    }
+
+    function callParticipant() {
+      return signedIn() && (
+        (resource.data.participants != null && request.auth.uid in resource.data.participants) ||
+        (resource.data.callerId == request.auth.uid || resource.data.calleeId == request.auth.uid)
+      );
+    }
+
+    function callParticipantAfterWrite() {
+      return signedIn() && (
+        (request.resource.data.participants != null && request.auth.uid in request.resource.data.participants) ||
+        (request.resource.data.callerId == request.auth.uid || request.resource.data.calleeId == request.auth.uid)
+      );
+    }
+
+    function callParentParticipant(callId) {
+      return signedIn() && (
+        (get(/databases/$(database)/documents/calls/$(callId)).data.participants != null
+          && request.auth.uid in get(/databases/$(database)/documents/calls/$(callId)).data.participants) ||
+        get(/databases/$(database)/documents/calls/$(callId)).data.callerId == request.auth.uid ||
+        get(/databases/$(database)/documents/calls/$(callId)).data.calleeId == request.auth.uid
+      );
+    }
+
+    // ── Users Collection & Subcollections ──────────────────────────
     match /users/{uid} {
-      allow read: if request.auth != null;
-      allow write: if request.auth.uid == uid;
+      // Public directory read for contacts
+      allow read: if signedIn();
+      allow create: if isSelf(uid)
+        && request.resource.data.uid == uid
+        && request.resource.data.username is string
+        && request.resource.data.publicKey != null;
+      allow update: if isSelf(uid)
+        // Disallow tampering with uid
+        && request.resource.data.uid == uid;
+      allow delete: if isSelf(uid);
+
+      // Public profile subcollection
+      match /publicProfile/{docId} {
+        allow read: if signedIn();
+        allow write: if isSelf(uid);
+      }
+
+      // Private account data: strictly owner only
+      match /privateAccount/{docId} {
+        allow read, write: if isSelf(uid);
+      }
+
+      // Multi-device registration: strictly owner only
+      match /devices/{deviceId} {
+        allow read, write: if isSelf(uid);
+      }
+
+      // Encrypted key backups: strictly owner only (never exposed publicly)
+      match /keyBackups/{backupId} {
+        allow read, write: if isSelf(uid);
+      }
     }
-    match /dms/{docId} {
-      allow read, write: if request.auth.uid in resource.data.members;
-      allow create: if request.auth != null;
+
+    // ── Direct Messages (DMs) ──────────────────────────────────────
+    match /dms/{dmId} {
+      allow read: if dmMember();
+      allow create: if dmMemberAfterWrite()
+        && request.resource.data.members is list
+        && request.resource.data.members.size() == 2;
+      // DMs are strictly between the 2 initial participants: members cannot be changed
+      allow update: if dmMember()
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['members', 'createdAt']);
+      allow delete: if false;
+
+      match /messages/{messageId} {
+        allow read: if dmParentMember(dmId);
+        allow create: if dmParentMember(dmId)
+          && request.resource.data.senderUid == request.auth.uid;
+        allow update: if dmParentMember(dmId)
+          && (
+            // Message sender can update content or mark deleted within reason
+            (resource.data.senderUid == request.auth.uid
+              && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['senderUid', 'sentAt']))
+            || reactionOnlyUpdate()
+            || starredOnlyUpdate()
+          );
+        allow delete: if false;
+      }
     }
-    match /dms/{docId}/{sub=**} {
-      allow read, write: if request.auth != null;
+
+    // ── Groups Collection ──────────────────────────────────────────
+    match /groups/{groupId} {
+      allow read: if groupMember();
+      allow create: if signedIn()
+        && request.resource.data.createdBy == request.auth.uid
+        && request.auth.uid in request.resource.data.members
+        && (
+          (request.resource.data.admins != null && request.auth.uid in request.resource.data.admins) ||
+          (request.resource.data.roles != null && request.resource.data.roles[request.auth.uid] in ['owner', 'admin'])
+        );
+      
+      // Updates permitted to group admins, or metadata updates by members,
+      // or a member securely leaving (removing only themselves)
+      allow update: if groupAdmin()
+        || (groupMember() && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'typing', 'lastMsgAt', 'lastSenderUid', 'currentEpoch'
+          ]))
+        || (groupMember()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members', 'memberNames', 'memberColors'])
+          && request.resource.data.members.size() == resource.data.members.size() - 1
+          && !(request.auth.uid in request.resource.data.members)
+          && resource.data.members.removeAll([request.auth.uid]) == request.resource.data.members
+        );
+      allow delete: if groupAdmin();
+
+      match /messages/{messageId} {
+        allow read: if groupParentMember(groupId);
+        allow create: if groupParentMember(groupId)
+          && request.resource.data.senderUid == request.auth.uid;
+        allow update: if groupParentMember(groupId)
+          && (
+            (resource.data.senderUid == request.auth.uid
+              && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['senderUid', 'sentAt']))
+            || reactionOnlyUpdate()
+            || starredOnlyUpdate()
+            || groupParentAdmin(groupId) // Admins can moderate / delete
+          );
+        allow delete: if groupParentAdmin(groupId);
+      }
+
+      // Group Key Epochs for cryptographic forward/backward secrecy
+      match /epochs/{epochId} {
+        allow read: if groupParentMember(groupId);
+        allow write: if groupParentAdmin(groupId);
+      }
+
+      // Expiring group invitation links
+      match /invitations/{invId} {
+        allow read: if signedIn();
+        allow create, delete: if groupParentAdmin(groupId);
+        // Joining user increments useCount
+        allow update: if signedIn()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['useCount', 'usedBy']);
+      }
     }
-    match /groups/{docId} {
-      allow read, write: if request.auth.uid in resource.data.members;
-      allow create: if request.auth != null;
-    }
-    match /groups/{docId}/{sub=**} {
-      allow read, write: if request.auth != null;
-    }
-    match /calls/{docId} {
-      allow read, write: if request.auth != null;
-    }
-    match /calls/{docId}/{sub=**} {
-      allow read, write: if request.auth != null;
+
+    // ── WebRTC Calls Signalling ────────────────────────────────────
+    match /calls/{callId} {
+      allow read: if callParticipant();
+      allow create: if callParticipantAfterWrite();
+      allow update: if callParticipant();
+      allow delete: if callParticipant();
+
+      // Signals (offers, answers, renegotiations)
+      match /signals/{signalId} {
+        allow read, write: if callParentParticipant(callId);
+      }
+
+      // ICE candidates subcollections (e.g. ice_uid1_to_uid2)
+      match /{iceCollection}/{candidateId} {
+        allow read, write: if callParentParticipant(callId);
+      }
     }
   }
 }
+
 ```
 
 4. Click **"Publish"**

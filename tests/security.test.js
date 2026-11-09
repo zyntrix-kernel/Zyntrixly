@@ -36,8 +36,8 @@ console.log = function(...args) {
 
 // Read and execute security.js in our configured environment
 const securitySource = fs.readFileSync('security.js', 'utf8');
-const loadSecurity = new Function(securitySource + '; return ZxKeyStore;');
-const ZxKeyStore = loadSecurity();
+const loadSecurity = new Function(securitySource + '; return { ZxKeyStore, ZxSanitizer: typeof ZxSanitizer !== "undefined" ? ZxSanitizer : null };');
+const { ZxKeyStore, ZxSanitizer } = loadSecurity();
 
 test('SEC-01: Safe Logger Redacts Hex, Base64, Bearer, and JWK Exponents', () => {
   capturedLogs = [];
@@ -154,6 +154,37 @@ test('SEC-05: Session Guard Clears Password on pagehide', () => {
 
   // Assert
   assert.strictEqual(global.sessionStorage.getItem('zx_p'), null, 'Password must be wiped on page unload');
+});
+
+
+test('SEC-06: ZxSanitizer Neutralizes HTML and XSS Script Injection', () => {
+  assert.ok(ZxSanitizer, 'ZxSanitizer should be defined');
+  const dirty = '<script>alert(1)</script><img src=x onerror=alert(2)>Hello & Welcome!';
+  const escaped = ZxSanitizer.escapeHtml(dirty);
+  assert.ok(!escaped.includes('<script>'), 'Must escape script tags');
+  assert.ok(escaped.includes('&lt;script&gt;'), 'Must convert to &lt;script&gt;');
+  assert.ok(escaped.includes('&amp;'), 'Must escape ampersand');
+
+  assert.strictEqual(ZxSanitizer.isSafeUrl('javascript:alert(1)'), false);
+  assert.strictEqual(ZxSanitizer.isSafeUrl('https://zyntrixly.app'), true);
+  assert.strictEqual(ZxSanitizer.isSafeUrl('data:text/html,<script>alert(1)</script>'), false);
+});
+
+test('SEC-07: ZxSanitizer Rejects Reaction Injections and Validates Unicode Emojis', () => {
+  assert.ok(ZxSanitizer, 'ZxSanitizer should be defined');
+  const knownMap = { thumb: '👍', heart: '❤️' };
+  
+  // Known codes
+  assert.strictEqual(ZxSanitizer.sanitizeReactionKey('heart', knownMap), '❤️');
+  
+  // Direct valid unicode emojis
+  assert.strictEqual(ZxSanitizer.sanitizeReactionKey('🚀'), '🚀');
+  assert.strictEqual(ZxSanitizer.sanitizeReactionKey('🔥'), '🔥');
+  
+  // Dangerous XSS injection payloads must be safely stripped and fall back
+  const attackPayload = '<img src=x onerror=alert("hacked")>';
+  const sanitized = ZxSanitizer.sanitizeReactionKey(attackPayload, knownMap);
+  assert.strictEqual(sanitized, '👍', 'Malicious string must be rejected and fall back safely');
 });
 
 test.after(() => {

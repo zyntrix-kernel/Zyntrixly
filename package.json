@@ -1,9 +1,10 @@
 {
   "name": "zyntrixly",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "<div align=\"center\">",
   "main": "app.js",
   "scripts": {
+    "setup:check": "node scripts/validate_setup.js",
     "build:css": "tailwindcss -i ./src/shadcn.css -o ./shadcn.css --minify",
     "watch:css": "tailwindcss -i ./src/shadcn.css -o ./shadcn.css --watch",
     "test": "node tests/run_all_tests.js",

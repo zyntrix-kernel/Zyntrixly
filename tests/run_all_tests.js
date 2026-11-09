@@ -4,9 +4,15 @@ const path = require('path');
 const testSuites = [
   { name: 'Cryptographic Engine (RSA-OAEP, AES-GCM, PBKDF2)', file: 'tests/crypto.test.js' },
   { name: 'Security & Sanitization (Logger, KeyStore, SessionGuard)', file: 'tests/security.test.js' },
+  { name: 'Firestore Security Rules & Authorization Architecture', file: 'tests/firestore_rules.test.js' },
+  { name: 'Communication Engine 2.0 & Offline Storage Pipeline', file: 'tests/messaging_pipeline.test.js' },
   { name: 'DOM Integrity & Architecture (146 Baseline Element IDs)', file: 'tests/dom_integrity.test.js' },
   { name: 'WebRTC Calling & Media State Machine', file: 'tests/webrtc.test.js' },
   { name: 'Calling Authentication & Timeout Lifecycles', file: 'tests/calling_auth.test.js' },
+  { name: 'IETF MLS RFC 9420 TreeKEM Ratchet Engine', file: 'tests/mls_treekem.test.js' },
+  { name: 'WebAuthn PRF Hardware Passkey Vault', file: 'tests/webauthn_prf.test.js' },
+  { name: 'Communities, Spaces Hierarchy & 64-bit RBAC', file: 'tests/spaces_hierarchy.test.js' },
+  { name: 'Real-Time Canvas, On-Device AI & Voice Stage', file: 'tests/canvas_and_ai.test.js' },
   { name: 'Full E2E Browser Features (Puppeteer Headless Chrome)', file: 'tests/e2e_features.test.js' }
 ];
 
