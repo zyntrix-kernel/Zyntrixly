@@ -493,7 +493,7 @@ async function sendAudioRecording() {
 
       if (CHAT.type === 'dm') await sendDMMsg(payload, null);
       else await sendGrpMsg(payload, null);
-      toast('🎙 Voice note sent!');
+      toast('Voice note sent');
     } catch (e) {
       toast('Failed to send voice note: ' + (e.message || 'Error'), 4000);
     }
@@ -587,7 +587,7 @@ async function uploadStagedFile(file){
     const payload=JSON.stringify({__type:'file',data:encB64,name:file.name,size:file.size,key:keyHex,iv:ivHex});
     if(CHAT.type==='dm')await sendDMMsg(payload,null);
     else await sendGrpMsg(payload,null);
-    toast('📎 File sent!');
+    toast('File sent');
   }catch(e){
     toast('Upload failed: '+(e.message||'Unknown error'),4000);
   }
@@ -621,7 +621,7 @@ async function downloadFileMsg(url,name,keyHex,ivHex,inlineData){
     const a=document.createElement('a');
     a.href=URL.createObjectURL(new Blob([decBuf]));
     a.download=name; a.click();
-    toast('✅ File saved!');
+    toast('File saved');
   }catch(e){
     toast('Download failed: '+e.message,4000);
   }
@@ -836,7 +836,7 @@ function applyFont(style,save=true){
 function toggleAuthMode(){
   isSignIn=!isSignIn;
   id('auth-title').textContent=isSignIn?'Welcome back':'Create account';
-  id('auth-subtitle').textContent=isSignIn?'Sign in to continue to Zyntrixly':'Private by default 🔒';
+  id('auth-subtitle').textContent=isSignIn?'Sign in to continue to Zyntrixly':'Private by default';
   id('auth-btn-label').textContent=isSignIn?'Sign in':'Create account';
   id('auth-toggle-label').textContent=isSignIn?'Create a new account':'Already have an account?';
   id('f-confirm-wrap').classList.toggle('hidden',isSignIn);
@@ -905,7 +905,7 @@ async function doRegister(username,pass){
     });
 
     _registering=false;
-    toast('Account created! Welcome 🎉');
+    toast('Account created. Welcome');
     // Manually boot the app — onAuthStateChanged was blocked
     await bootApp(cred.user);
   } catch(err){
@@ -935,7 +935,7 @@ async function doRegister(username,pass){
         localStorage.setItem('zx_local_user_' + username, JSON.stringify({ uid, wrapped }));
 
         _registering = false;
-        toast('Account created! Sovereign Local Vault active 🛡️');
+        toast('Account created. Sovereign Local Vault active');
         const mockUser = { uid, email: toEmail(username), displayName: username };
         await bootApp(mockUser);
         setAuthLoading(false);
@@ -1101,7 +1101,7 @@ async function bootApp(user){
             const newWrapped=await Crypto.wrapKey(privKey,tmpPass);
             await db.collection('users').doc(user.uid).update({wrappedPrivKey:newWrapped});
           }
-          toast('🔑 Keys restored!');
+          toast('Keys restored successfully.');
         }
       }
     }
@@ -1237,9 +1237,9 @@ async function restoreKeys(){
     id('kr-pass').value='';
 
     if(needsSetup){
-      toast('✅ Encryption keys set up! New messages will now work.');
+      toast('Encryption keys set up. New messages will now work.');
     } else {
-      toast('🔑 Keys restored! All messages will now decrypt.');
+      toast('Keys restored successfully. All messages will now decrypt.');
       if(CHAT&&msgUnsub){msgUnsub();msgUnsub=null;listenMsgs();}
     }
 
@@ -1985,7 +1985,7 @@ async function renderMsg(msgId,data,chatCtx=getChatContext()){
   const bub=document.createElement('div');
   bub.className='bubble'+(data.deleted?' deleted':'');
   if(data.deleted){
-    bub.textContent='🚫 This message was deleted';
+    bub.textContent='This message was deleted';
   } else {
     bub.textContent='…';
     decryptBubble(bub,data,mine,chatCtx);
@@ -2031,17 +2031,17 @@ async function renderMsg(msgId,data,chatCtx=getChatContext()){
 
 async function decryptBubble(bub,data,mine,chatCtx=getChatContext()){
   try{
-    if(!ME.privKey){bub.textContent='🔒 Sign out and back in to restore keys.';return;}
+    if(!ME.privKey){bub.textContent='Sign out and back in to restore keys.';return;}
     let plain;
     if(chatCtx?.type==='dm'){
       const encKey=mine?data.myEncKey:data.encKey;
       const encMsg=mine?data.myEncMsg:data.encMsg;
       const iv=mine?data.myIv:data.iv;
-      if(!encKey||!encMsg){bub.textContent='🔒 Encrypted';return;}
+      if(!encKey||!encMsg){bub.textContent='Encrypted message';return;}
       plain=await Crypto.decryptMsg(encMsg,encKey,iv,ME.privKey); if(chatCtx?.id) setLocalPreview('dm',chatCtx.id,plain);
     } else {
       const myKey=data.keys?.[ME.uid];
-      if(!myKey){bub.textContent='🔒 Not encrypted for you';return;}
+      if(!myKey){bub.textContent='Not encrypted for you';return;}
       plain=await Crypto.decryptMsg(data.encMsg,myKey,data.iv,ME.privKey); if(chatCtx?.id) setLocalPreview('group',chatCtx.id,plain);
     }
     // Detect file message payload
@@ -2115,7 +2115,7 @@ async function decryptBubble(bub,data,mine,chatCtx=getChatContext()){
       }
     }catch(_){}
     bub.textContent=plain;
-  } catch(e){bub.textContent='🔒 Decryption failed';}
+  } catch(e){bub.textContent='Decryption failed';}
 }
 
 function updateMsgEl(msgId,data){
@@ -2125,7 +2125,7 @@ function updateMsgEl(msgId,data){
   const bub=row.querySelector('.bubble');
   const foot=row.querySelector('.msg-foot');
   if(bub&&data.deleted&&!bub.classList.contains('deleted')){
-    bub.textContent='🚫 This message was deleted';bub.classList.add('deleted');
+    bub.textContent='This message was deleted';bub.classList.add('deleted');
   }
   if(bub&&!data.deleted) decryptBubble(bub,data,data.senderUid===ME.uid,getChatContext());
   if(foot){
@@ -2193,7 +2193,7 @@ async function sendMsg(){
       wrap.appendChild(row);
       wrap.scrollTop=wrap.scrollHeight;
     }
-    toast('Message sent to #'+activeChannel.name+' (MLS RFC 9420) 🛡️');
+    toast('Message sent to #'+activeChannel.name+' (MLS RFC 9420)');
     return;
   }
 
@@ -2225,7 +2225,7 @@ async function sendMsg(){
       wrap.appendChild(row);
       wrap.scrollTop=wrap.scrollHeight;
     }
-    toast('Message sent locally 🛡️');
+    toast('Message sent locally');
   }
 }
 
@@ -2544,7 +2544,7 @@ async function reqNotif(){
   if(Notification.permission==='granted'){toast('Notifications already enabled!');return;}
   const r=await Notification.requestPermission();
   updateNotifUI();
-  toast(r==='granted'?'Notifications enabled 🔔':'Permission denied.');
+  toast(r==='granted'?'Notifications enabled':'Permission denied.');
 }
 function updateNotifUI(){
   const tok=id('notif-tog');const sub=id('notif-sub');if(!tok)return;
@@ -2557,7 +2557,7 @@ function sendNotif(data){
   if(CHAT&&isMuted(CHAT.type,CHAT.id))return;
   const who=CHAT.memberNames?.[data.senderUid]||CHAT.name||'Someone';
   new Notification('Zyntrixly · @'+who,{
-    body:'🔒 New encrypted message',
+    body:'New encrypted message',
     icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="%2318181b"/><text x="16" y="22" text-anchor="middle" font-size="18" fill="white">Z</text></svg>',
     tag:'zx'
   });
@@ -2895,13 +2895,13 @@ window.startChatCall = function(mode) {
 
 /* ── COMMAND PALETTE (Cmd+K / Ctrl+K) ────────────────────────── */
 const CMD_ITEMS = [
-  { id: 'new-dm', label: 'Start New Direct Message', icon: '💬', action: () => { openModal('nc-modal'); switchMTab(0); } },
-  { id: 'new-group', label: 'Create New Group Conversation', icon: '👥', action: () => { openModal('nc-modal'); switchMTab(1); } },
-  { id: 'settings', label: 'Open Settings', icon: '⚙️', action: () => openSettings() },
-  { id: 'appearance', label: 'Appearance & Themes', icon: '🎨', action: () => { openSettings(); openSettingsView('appearance'); } },
-  { id: 'devices', label: 'Linked Devices & Sessions', icon: '💻', action: () => { openSettings(); openSettingsView('devices'); } },
-  { id: 'safety-num', label: 'Copy Cryptographic Safety Number', icon: '🛡️', action: () => copySafetyNumber() },
-  { id: 'clear-cache', label: 'Purge Decrypted Local Cache', icon: '🧹', action: () => purgeLocalCache() }
+  { id: 'new-dm', label: 'Start New Direct Message', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>', action: () => { openModal('nc-modal'); switchMTab(0); } },
+  { id: 'new-group', label: 'Create New Group Conversation', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>', action: () => { openModal('nc-modal'); switchMTab(1); } },
+  { id: 'settings', label: 'Open Settings', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>', action: () => openSettings() },
+  { id: 'appearance', label: 'Appearance & Themes', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 0 0 20v-20z"/></svg>', action: () => { openSettings(); openSettingsView('appearance'); } },
+  { id: 'devices', label: 'Linked Devices & Sessions', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>', action: () => { openSettings(); openSettingsView('devices'); } },
+  { id: 'safety-num', label: 'Copy Cryptographic Safety Number', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', action: () => copySafetyNumber() },
+  { id: 'clear-cache', label: 'Purge Decrypted Local Cache', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/></svg>', action: () => purgeLocalCache() }
 ];
 
 function openCommandPalette() {
@@ -2952,7 +2952,7 @@ function renderCommandList(items) {
 function copySafetyNumber() {
   if (navigator.clipboard) {
     navigator.clipboard.writeText('84920 18274 91823 84729 19284 82710 49281 92837 40192 84720 19284 72910').then(() => {
-      toast('Copied safety number to clipboard 🛡️');
+      toast('Copied safety number to clipboard');
     });
   } else {
     toast('Safety Number: 84920 18274 91823 84729');
@@ -3039,7 +3039,7 @@ function initZyntrixlyApex() {
       id: 'space_core',
       name: 'Zyntrix Apex Community',
       ownerId: ME ? ME.uid : 'founder',
-      icon: '🛡️',
+      icon: 'shield',
       isPublic: true
     });
     activeSpace = null; // null means Home / DMs
@@ -3066,7 +3066,9 @@ function renderSpacesRail() {
     btn.onclick = () => switchToSpace(space.id);
     btn.innerHTML = `
       <div class="rail-active-pill"></div>
-      <div class="rail-icon-wrap">${space.icon || '🌐'}</div>
+      <div class="rail-icon-wrap">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </div>
     `;
     list.appendChild(btn);
   });
@@ -3118,7 +3120,9 @@ function switchToSpace(spaceId) {
   navHeader.classList.remove('hidden');
   navHeader.innerHTML = `
     <div class="space-title-wrap">
-      <span class="space-icon-badge">${space.icon || '🌐'}</span>
+      <span class="space-icon-badge">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </span>
       <span class="space-title-text">${esc(space.name)}</span>
     </div>
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a1a1aa" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
@@ -3165,11 +3169,16 @@ function renderChannelsList(space, container) {
       const row = document.createElement('a');
       row.className = 'channel-row' + (activeChannel && activeChannel.id === ch.id ? ' active' : '');
       row.href = '#';
-      let icon = '#';
-      if (ch.type === 'announcement') icon = '📢';
-      else if (ch.type === 'voice_stage') icon = '🔊';
-      else if (ch.type === 'canvas') icon = '🎨';
-      else if (ch.type === 'forum') icon = '💬';
+      let icon = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>';
+      if (ch.type === 'announcement') {
+        icon = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
+      } else if (ch.type === 'voice_stage') {
+        icon = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';
+      } else if (ch.type === 'canvas') {
+        icon = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 19 7-7 3 3-7 7-3-3z"/><path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>';
+      } else if (ch.type === 'forum') {
+        icon = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+      }
 
       row.innerHTML = `<span class="channel-icon">${icon}</span><span class="channel-name">${esc(ch.name)}</span>`;
       row.onclick = (e) => {
@@ -3194,6 +3203,14 @@ function selectChannel(channelId) {
 
   id('empty-pane')?.classList.add('hidden');
 
+  // Mobile layout synchronization
+  const layout = id('app-layout');
+  if (layout) layout.classList.add('mob-chat-open');
+  const mobTitle = id('mob-title');
+  if (mobTitle) mobTitle.textContent = '#' + ch.name;
+  document.querySelectorAll('.mob-list-only').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.mob-back-only').forEach(el => el.style.display = 'flex');
+
   if (ch.type === 'canvas') {
     id('chat-pane')?.classList.add('hidden');
     id('stage-hud')?.classList.add('hidden');
@@ -3204,7 +3221,7 @@ function selectChannel(channelId) {
     id('canvas-pane')?.classList.add('hidden');
     id('stage-hud')?.classList.remove('hidden');
     const titleEl = id('stage-channel-title');
-    if (titleEl) titleEl.textContent = '🔊 ' + ch.name;
+    if (titleEl) titleEl.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:-3px;margin-right:6px"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>' + esc(ch.name);
   } else {
     id('canvas-pane')?.classList.add('hidden');
     id('stage-hud')?.classList.add('hidden');
@@ -3212,9 +3229,11 @@ function selectChannel(channelId) {
     id('chat-hdr-name').textContent = '#' + ch.name;
     id('chat-hdr-sub').textContent = ch.topic || 'MLS RFC 9420 Encrypted Channel';
     id('msgs-wrap').innerHTML = `
-      <div style="padding:24px;text-align:center;color:#71717a;font-size:13px">
-        <div style="font-size:32px;margin-bottom:8px">🔒</div>
-        <strong>Welcome to #${esc(ch.name)}</strong><br/>
+      <div style="padding:28px 16px;text-align:center;color:#71717a;font-size:13px">
+        <div style="display:flex;justify-content:center;margin-bottom:12px">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#a1a1aa" stroke-width="1.75"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+        </div>
+        <strong style="color:#fafafa;font-size:15px">Welcome to #${esc(ch.name)}</strong><br/>
         This channel is encrypted with IETF RFC 9420 TreeKEM Ratchet epochs.
       </div>
     `;
@@ -3269,7 +3288,7 @@ function exportCanvasPng() {
   a.href = data;
   a.download = `zyntrixly_canvas_${Date.now()}.png`;
   a.click();
-  toast('Whiteboard canvas exported as PNG 🎨');
+  toast('Whiteboard canvas exported as PNG');
 }
 
 async function triggerCatchUpAI() {
@@ -3315,7 +3334,9 @@ function toggleRaiseHand() {
   isHandRaised = !isHandRaised;
   const btn = id('stage-raise-hand-btn');
   if (btn) {
-    btn.innerHTML = isHandRaised ? '<span>✋ Hand Raised (Waiting for host)</span>' : '<span>✋ Raise Hand</span>';
+    btn.innerHTML = isHandRaised
+      ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 11V6a2 2 0 0 0-4 0v4"/><path d="M14 10V4a2 2 0 0 0-4 0v7"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-16 0v-2"/></svg><span>Hand Raised (Waiting for host)</span>'
+      : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 11V6a2 2 0 0 0-4 0v4"/><path d="M14 10V4a2 2 0 0 0-4 0v7"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-16 0v-2"/></svg><span>Raise Hand</span>';
     btn.classList.toggle('btn-primary', isHandRaised);
   }
   toast(isHandRaised ? 'Hand raised to speak on stage' : 'Hand lowered');
@@ -3325,7 +3346,9 @@ function toggleStageMute() {
   isStageMuted = !isStageMuted;
   const btn = id('stage-mute-btn');
   if (btn) {
-    btn.innerHTML = isStageMuted ? '<span>🔇 Unmute</span>' : '<span>🎙 Mute</span>';
+    btn.innerHTML = isStageMuted
+      ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="2" x2="22" y2="22"/><path d="M18.89 13.23A7.12 7.12 0 0 0 19 12v-2"/><path d="M5 10v2a7 7 0 0 0 12 5"/><path d="M15 9.34V5a3 3 0 0 0-5.68-1.33"/><line x1="12" y1="19" x2="12" y2="22"/></svg><span>Unmute</span>'
+      : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg><span>Mute</span>';
   }
   toast(isStageMuted ? 'Muted' : 'Microphone unmuted');
 }
@@ -3345,7 +3368,7 @@ function closeNewSpaceModal() {
 
 function createSpaceSubmit() {
   const name = g('new-space-name');
-  const icon = g('new-space-icon') || '🌐';
+  const icon = g('new-space-icon') || 'space-grid';
   if (!name) {
     toast('Please enter a space name');
     return;
@@ -3359,12 +3382,12 @@ function createSpaceSubmit() {
     renderSpacesRail();
     closeNewSpaceModal();
     switchToSpace(space.id);
-    toast(`Community space "${name}" created! 🚀`);
+    toast(`Community space "${name}" created successfully!`);
   }
 }
 
 function openExploreSpaces() {
-  toast('Discovery: Connecting to decentralized community spaces… 🌐');
+  toast('Discovery: Connecting to decentralized community spaces...');
 }
 
 async function enrollWebAuthnPasskey() {
@@ -3374,9 +3397,9 @@ async function enrollWebAuthnPasskey() {
   }
   const prf = new WebAuthnPRF();
   try {
-    toast('Prompting Touch ID / Windows Hello / YubiKey…');
+    toast('Prompting Touch ID / Windows Hello / YubiKey...');
     await prf.registerHardwarePasskey(ME ? ME.username : 'current_user');
-    toast('Hardware Passkey Vault linked successfully! 🔑');
+    toast('Hardware Passkey Vault linked successfully!');
   } catch(e) {
     toast('Passkey setup error: ' + e.message);
   }

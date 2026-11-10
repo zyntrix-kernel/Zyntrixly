@@ -58,10 +58,10 @@ class OnDeviceAI {
       .map(m => `• **${m.sender}**: ${m.text}`);
 
     const summaryText = [
-      `### 📋 Catch-Up Summary (${messages.length} messages from ${participants.join(', ')})`,
+      `### Catch-Up Summary (${messages.length} messages from ${participants.join(', ')})`,
       `\n**Key Discussion Points:**`,
       significantMessages.length > 0 ? significantMessages.join('\n') : '• General discussion and greetings.',
-      actionItems.length > 0 ? `\n**⚡ Identified Action Items (${actionItems.length}):**\n` + actionItems.map(a => `• ${a}`).join('\n') : ''
+      actionItems.length > 0 ? `\n**Identified Action Items (${actionItems.length}):**\n` + actionItems.map(a => `• ${a}`).join('\n') : ''
     ].filter(Boolean).join('\n');
 
     return {

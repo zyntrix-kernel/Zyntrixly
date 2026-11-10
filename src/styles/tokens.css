@@ -1,0 +1,157 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ZYNTRIXLY V4 (Quality of Life) — DESIGN TOKENS & SYSTEM FOUNDATION
+   Architecture: Apple HIG + shadcn Zinc OLED Dark Design System
+   Interaction Engineering: Micro-Spring Physics & Concentric Radii
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Core OLED Palette (Apple + Zinc 950) ── */
+  --bg-app: #09090b;
+  --bg-surface: #121215;
+  --bg-surface-raised: #18181b;
+  --bg-surface-floating: #1f1f23;
+  --bg-surface-hover: rgba(255, 255, 255, 0.04);
+  --bg-surface-active: rgba(255, 255, 255, 0.08);
+
+  /* ── Apple HIG System Colors ── */
+  --system-blue: #007aff;
+  --system-blue-hover: #0066d6;
+  --system-blue-gradient: linear-gradient(180deg, #007aff 0%, #0062cc 100%);
+  --system-green: #34c759;
+  --system-orange: #ff9500;
+  --system-red: #ff3b30;
+  --system-purple: #af52de;
+
+  /* ── Typographic Tiers ── */
+  --text-primary: #fafafa;
+  --text-muted: #a1a1aa;
+  --text-subdued: #71717a;
+  --text-disabled: #3f3f46;
+
+  /* ── Specular Hairlines & Hairline Borders ── */
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-normal: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --border-focus: rgba(0, 122, 255, 0.6);
+  --rim-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+  --rim-highlight-subtle: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+
+  /* ── Concentric Radii Hierarchy ── */
+  --radius-outer: 16px;
+  --radius-card: 12px;
+  --radius-button: 10px;
+  --radius-pill: 9999px;
+  --radius-tag: 6px;
+
+  /* ── Depths & Shadows ── */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), var(--rim-highlight-subtle);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5), var(--rim-highlight);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.7), var(--rim-highlight);
+  --shadow-blue: 0 4px 14px rgba(0, 122, 255, 0.35);
+
+  /* ── Spring Motions & Transitions ── */
+  --spring-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --spring-bounce: cubic-bezier(0.34, 1.45, 0.64, 1);
+  --anim-fast: 140ms;
+  --anim-normal: 200ms;
+
+  /* ── Typography Stack ── */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", -apple-system-subheadline, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "SF Mono", SFMono-Regular, ui-monospace, Menlo, Consolas, monospace;
+}
+
+/* ── Base Reset & Font Smoothing ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  user-select: none;
+}
+
+/* Optical Number Alignment */
+.tabular-nums, .msg-time, .ci-unread, .call-timer, .rec-timer, .status-counter {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Balanced Headings */
+h1, h2, h3, .brand-text, .auth-title, .ep-title {
+  text-wrap: balance;
+}
+
+p, .ep-sub, .auth-subtitle, .about-desc {
+  text-wrap: pretty;
+}
+
+/* Modern Minimalist Scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* Background Ambient Canvas */
+#zyntrix-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.noise-overlay {
+  display: none;
+}
+
+/* Utility Hidden & Active states */
+.hidden {
+  display: none !important;
+}
+
+/* Tactile button feel across app */
+button, [role="button"] {
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  transition: transform var(--anim-fast) var(--spring-ease),
+              background-color var(--anim-fast) ease,
+              border-color var(--anim-fast) ease,
+              box-shadow var(--anim-fast) ease,
+              opacity var(--anim-fast) ease;
+}
+
+button:active, [role="button"]:active {
+  transform: scale(0.97);
+}
+
+button:focus-visible, input:focus-visible {
+  outline: 2px solid var(--system-blue);
+  outline-offset: 2px;
+}

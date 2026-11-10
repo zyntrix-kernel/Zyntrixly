@@ -37,7 +37,7 @@ class SpaceManager {
   /**
    * Create a new Community Space with default channels
    */
-  createSpace({ id, name, ownerId, icon = '🌐', isPublic = false }) {
+  createSpace({ id, name, ownerId, icon = 'space-grid', isPublic = false }) {
     const spaceId = id || `space_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     
     // Default roles
