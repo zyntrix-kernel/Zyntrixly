@@ -14,6 +14,7 @@ const testSuites = [
   { name: 'Communities, Spaces Hierarchy & 64-bit RBAC', file: 'tests/spaces_hierarchy.test.js' },
   { name: 'Real-Time Canvas, On-Device AI & Voice Stage', file: 'tests/canvas_and_ai.test.js' },
   { name: 'Full E2E Browser Features (Puppeteer Headless Chrome)', file: 'tests/e2e_features.test.js' }
+  ,{ name: 'QoL Reliability Regression Guards', file: 'tests/qol_regressions.test.js' }
 ];
 
 console.log('===============================================================');
