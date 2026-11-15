@@ -1681,32 +1681,21 @@ async function searchDM(){
   const q=g('nc-dm-q').toLowerCase();const el=id('nc-dm-res');
   if(!q){el.innerHTML='';return;}
   el.innerHTML='<div class="sr-sl">Searching…</div>';
+  let snap;
   try{
-    const snap=await db.collection('users').get();
-    const users=snap.docs.map(d=>d.data()).filter(u=>u.uid!==ME.uid&&u.username&&u.username.toLowerCase().includes(q));
-    if(users.length > 0){
-      el.innerHTML=users.map(u=>`<div class="sr-item" onclick="startDM('${u.uid}','${escQ(u.username)}','${u.color||'#27272a'}');closeModal('nc-modal')">
-          <div class="av-circle sm" style="background:${u.color||'#27272a'}">${u.username[0].toUpperCase()}</div>
-          <div class="sr-info"><span class="sr-name">@${esc(u.username)}</span><span class="sr-sub">${u.online?'● Online':'Offline'}</span></div>
-        </div>`).join('');
-      return;
-    }
-  } catch(err){}
-
-  const demoUsers = [
-    { uid: 'demo_alice', username: 'alice', color: '#007aff', online: true },
-    { uid: 'demo_bob', username: 'bob', color: '#10b981', online: true },
-    { uid: 'demo_charlie', username: 'charlie', color: '#f59e0b', online: false }
-  ].filter(u => u.username.includes(q) && u.uid !== ME?.uid);
-
-  if (demoUsers.length > 0) {
-    el.innerHTML = demoUsers.map(u => `<div class="sr-item" onclick="startDM('${u.uid}','${escQ(u.username)}','${u.color}');closeModal('nc-modal')">
-        <div class="av-circle sm" style="background:${u.color}">${u.username[0].toUpperCase()}</div>
-        <div class="sr-info"><span class="sr-name">@${esc(u.username)}</span><span class="sr-sub">${u.online?'● Online':'Offline'}</span></div>
-      </div>`).join('');
-  } else {
-    el.innerHTML = '<div class="sr-sl">No users found</div>';
+    snap=await db.collection('users').get();
+  } catch(err){
+    console.error('User discovery failed:',err);
+    el.innerHTML='<div class="sr-sl" style="color:var(--destructive)">Could not search users. Check your connection and try again.</div>';
+    return;
   }
+  const users=snap.docs.map(d=>d.data()).filter(u=>u.uid!==ME.uid&&u.username&&u.username.toLowerCase().includes(q));
+  el.innerHTML=users.length
+    ?users.map(u=>`<div class="sr-item" onclick="startDM('${u.uid}','${escQ(u.username)}','${u.color||'#27272a'}');closeModal('nc-modal')">
+        <div class="av-circle sm" style="background:${u.color||'#27272a'}">${u.username[0].toUpperCase()}</div>
+        <div class="sr-info"><span class="sr-name">@${esc(u.username)}</span><span class="sr-sub">${u.online?'● Online':'Offline'}</span></div>
+      </div>`).join('')
+    :'<div class="sr-sl">No users found</div>';
 }
 async function searchGrp(){
   const q=g('nc-grp-q').toLowerCase();const el=id('nc-grp-res');
@@ -2179,21 +2168,11 @@ async function sendMsg(){
   const inp=id('msg-inp');const text=inp.value.trim();
   if(!text)return;
 
-  // 1. Channel in Space (MLS TreeKEM v3 Encrypted)
+  // Spaces channel persistence is not wired into this composer yet.
+  // Do not render an optimistic message or claim delivery until the encrypted
+  // Firestore/MLS send path is implemented and acknowledged.
   if(activeChannel){
-    inp.value='';
-    const wrap=id('msgs-wrap');
-    if(wrap){
-      const row=document.createElement('div');
-      row.className='msg-row mine';
-      row.innerHTML=`
-        <div class="bubble">${esc(text)}</div>
-        <div class="msg-foot"><span class="msg-time">Just now · MLS TreeKEM v3</span></div>
-      `;
-      wrap.appendChild(row);
-      wrap.scrollTop=wrap.scrollHeight;
-    }
-    toast('Message sent to #'+activeChannel.name+' (MLS RFC 9420)');
+    toast('Channel messaging is not available yet. Your message remains in the composer.',4000);
     return;
   }
 
@@ -2205,43 +2184,42 @@ async function sendMsg(){
     await uploadStagedFile(fileToSend);
   }
   if(!ME.privKey&&CHAT.type==='dm'){toast('Encryption keys not loaded. Please re-login.',3500);return;}
-  inp.value='';
-  saveDraftText(CHAT.type,CHAT.id,'');
-  setTyping(false);
+  const sendContext={type:CHAT.type,id:CHAT.id};
   const rp=replyTo?{...replyTo}:null;
+  inp.value='';
+  saveDraftText(sendContext.type,sendContext.id,'');
+  setTyping(false);
   cancelReply();
   try{
-    CHAT.type==='dm'?await sendDMMsg(text,rp):await sendGrpMsg(text,rp);
+    if(sendContext.type==='dm') await sendDMMsg(text,rp);
+    else await sendGrpMsg(text,rp);
   } catch(e){
     console.error('Send error:',e);
-    const wrap=id('msgs-wrap');
-    if(wrap){
-      const row=document.createElement('div');
-      row.className='msg-row mine';
-      row.innerHTML=`
-        <div class="bubble">${esc(text)}</div>
-        <div class="msg-foot"><span class="msg-time">Just now (Local)</span></div>
-      `;
-      wrap.appendChild(row);
-      wrap.scrollTop=wrap.scrollHeight;
+    // The server did not confirm delivery. Restore the exact text instead of
+    // rendering a fake sent bubble or implying that the message was delivered.
+    if(CHAT?.type===sendContext.type && CHAT?.id===sendContext.id){
+      const currentDraft=inp.value.trim();
+      const restoredText=currentDraft?text+'\n'+currentDraft:text;
+      inp.value=restoredText;
+      saveDraftText(sendContext.type,sendContext.id,restoredText);
+      if(rp&&!replyTo) setReply(rp.msgId,rp.senderName,rp.text);
+    } else {
+      saveDraftText(sendContext.type,sendContext.id,text);
     }
-    toast('Message sent locally');
+    toast('Message not sent. Your draft was restored. Please retry.',4000);
   }
 }
 
 async function sendDMMsg(text,rp){
-  // Guard: otherPubKey might still be loading (background fetch in startDM)
+  // Resolve the recipient's real public key. Never substitute a locally
+  // generated key: that would create ciphertext the recipient cannot decrypt.
   if(!CHAT.otherPubKey){
-    // Try fetching it now
-    try{
-      const udoc=await db.collection('users').doc(CHAT.otherUid).get();
-      CHAT.otherPubKey=udoc.data().publicKey;
-    } catch(e){
-      if(!CHAT.otherPubKey){
-        const dummyKey = await Crypto.generateKeyPair();
-        CHAT.otherPubKey = dummyKey.publicKeyJwk;
-      }
+    const udoc=await db.collection('users').doc(CHAT.otherUid).get();
+    const recipient=udoc.exists?udoc.data():null;
+    if(!recipient?.publicKey){
+      throw new Error('Recipient encryption key is unavailable. Ask them to sign in and try again.');
     }
+    CHAT.otherPubKey=recipient.publicKey;
   }
   // Use cached ME.publicKey — no Firestore round-trip on every send
   const myPub=ME.publicKey;
@@ -3307,8 +3285,8 @@ async function triggerCatchUpAI() {
   });
 
   if (msgs.length === 0) {
-    msgs.push({ sender: 'Tanay', text: 'Zyntrixly 3.0 Apex is live with RFC 9420 TreeKEM, WebAuthn PRF and Spaces!' });
-    msgs.push({ sender: 'System', text: 'Action: verify all tests pass and ensure zero IP leaks.' });
+    content.textContent = 'There are no messages to summarize in this conversation yet.';
+    return;
   }
 
   const ai = ZxAIInstance || (typeof OnDeviceAI !== 'undefined' ? new OnDeviceAI() : null);
