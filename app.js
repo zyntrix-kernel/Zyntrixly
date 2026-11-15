@@ -2223,7 +2223,7 @@ async function sendDMMsg(text,rp){
   }
   // Use cached ME.publicKey — no Firestore round-trip on every send
   const myPub=ME.publicKey;
-  if(!myPub){toast('Your public key is missing. Please re-login.',3000);return;}
+  if(!myPub){throw new Error('Your public encryption key is missing. Please sign in again.');}
 
   const[their,mine]=await Promise.all([
     Crypto.encryptMsg(text,CHAT.otherPubKey),
