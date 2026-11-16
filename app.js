@@ -1601,10 +1601,22 @@ function closeChatSearch(){
 }
 
 function searchInChat(){
-  const q=(id('chat-search-inp')?.value||'').toLowerCase().trim();
-  document.querySelectorAll('#msgs-wrap .msg-row').forEach(row=>{
-    const txt=(row.querySelector('.bubble')?.textContent||'').toLowerCase();
-    row.style.display=!q||txt.includes(q)?'':'none';
+  const q=(id('chat-search-inp')?.value||'').trim();
+  const rows=[...document.querySelectorAll('#msgs-wrap .msg-row')];
+  if(!q){
+    rows.forEach(row=>row.style.display='');
+    return;
+  }
+  // Prefer the decrypted in-memory index; never send search text to Firestore.
+  if(typeof ZxSearch!=='undefined'&&CHAT?.id){
+    const matches=new Set(ZxSearch.search(q,{conversationId:CHAT.id}).map(message=>String(message.id)));
+    rows.forEach(row=>row.style.display=matches.has(row.dataset.msgId)?'':'none');
+    return;
+  }
+  const needle=q.toLocaleLowerCase();
+  rows.forEach(row=>{
+    const txt=(row.querySelector('.bubble')?.textContent||'').toLocaleLowerCase();
+    row.style.display=txt.includes(needle)?'':'none';
   });
 }
 
@@ -1985,10 +1997,11 @@ async function renderMsg(msgId,data,chatCtx=getChatContext()){
   const bub=document.createElement('div');
   bub.className='bubble'+(data.deleted?' deleted':'');
   if(data.deleted){
+    if(typeof ZxSearch!=='undefined') ZxSearch.removeMessage(String(msgId));
     bub.textContent='This message was deleted';
   } else {
     bub.textContent='…';
-    decryptBubble(bub,data,mine,chatCtx);
+    decryptBubble(bub,data,mine,chatCtx,msgId);
   }
   bub.addEventListener('contextmenu',e=>{e.preventDefault();if(selectionMode){toggleSelection(msgId);return;}showCtx(e,msgId,mine,!!data.deleted);});
   bub.addEventListener('click',e=>{e.stopPropagation();if(selectionMode){toggleSelection(msgId);return;}if(!data.deleted)showCtx(e,msgId,mine,false);});
@@ -2029,7 +2042,7 @@ async function renderMsg(msgId,data,chatCtx=getChatContext()){
   if(!mine&&document.hidden)sendNotif(data);
 }
 
-async function decryptBubble(bub,data,mine,chatCtx=getChatContext()){
+async function decryptBubble(bub,data,mine,chatCtx=getChatContext(),msgId=null){
   try{
     if(!ME.privKey){bub.textContent='Sign out and back in to restore keys.';return;}
     let plain;
@@ -2043,6 +2056,13 @@ async function decryptBubble(bub,data,mine,chatCtx=getChatContext()){
       const myKey=data.keys?.[ME.uid];
       if(!myKey){bub.textContent='Not encrypted for you';return;}
       plain=await Crypto.decryptMsg(data.encMsg,myKey,data.iv,ME.privKey); if(chatCtx?.id) setLocalPreview('group',chatCtx.id,plain);
+    }
+    // Index only decrypted human-readable text. The index is memory-only and never synced.
+    if(typeof ZxSearch!=='undefined'&&msgId&&chatCtx?.id){
+      let isStructuredAttachment=false;
+      try{const payload=JSON.parse(plain);isStructuredAttachment=payload?.__type==='file'||payload?.__type==='audio';}catch(_){}
+      if(isStructuredAttachment) ZxSearch.removeMessage(String(msgId));
+      else ZxSearch.indexMessage({id:String(msgId),conversationId:chatCtx.id,conversationType:chatCtx.type,senderUid:data.senderUid,type:data.type||'text',text:plain,sentAt:data.sentAt});
     }
     // Detect file message payload
     try{
