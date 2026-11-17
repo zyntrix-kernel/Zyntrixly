@@ -73,7 +73,14 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('.sb-search-wrap'))document.getElementById('sb-search-drop').classList.add('hidden');
 });
 document.addEventListener('keydown',e=>{
-  if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();id('sb-q')?.focus();return;}if(e.key==='Escape'){
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){
+    e.preventDefault();
+    if(typeof ZxV5!=='undefined') ZxV5.openPalette();
+    else id('sb-q')?.focus();
+    return;
+  }
+  if(e.key==='Escape'){
+    if(typeof ZxV5!=='undefined'&&ZxV5.isPaletteOpen()){ZxV5.closePalette();return;}
     closeAllModals();cancelReply();closeCtx();closeRP();
   }
 });
@@ -82,6 +89,7 @@ document.addEventListener('keydown',e=>{
 buildSettings();
 registerServiceWorker();
 setupInstallPrompt();
+if(typeof ZxV5!=='undefined') ZxV5.init();
 
 
 /* ════════════════════════════════════════════════
@@ -552,24 +560,24 @@ function playAudioVoice(btn, inlineB64) {
 }
 
 /* ═══ FILE SHARING ═══════════════════════════════ */
+function stageAttachmentFile(file){
+  if(!CHAT){toast('Open a chat first.');return false;}
+  if(!file)return false;
+  if(file.size>900*1024){toast('Max file size: 900KB for encrypted transfers',3000);return false;}
+  stagedFile=file;
+  const dock=id('attach-dock'),nameEl=id('attach-dock-name'),sizeEl=id('attach-dock-size');
+  const sz=file.size>1024*1024?(file.size/1024/1024).toFixed(1)+' MB':Math.max(1,Math.round(file.size/1024))+' KB';
+  if(nameEl)nameEl.textContent=file.name;
+  if(sizeEl)sizeEl.textContent=sz+' · Ready to send encrypted';
+  if(dock)dock.classList.remove('hidden');
+  id('msg-inp')?.focus();
+  return true;
+}
+window.ZxStageAttachmentFile=stageAttachmentFile;
 function openFileShare(){
   if(!CHAT){toast('Open a chat first.');return;}
-  const input=document.createElement('input');
-  input.type='file'; input.accept='*/*';
-  input.onchange=()=>{
-    const file=input.files?.[0]; if(!file)return;
-    if(file.size>900*1024){toast('Max file size: 900KB for encrypted transfers',3000);return;}
-    stagedFile = file;
-    const dock = id('attach-dock');
-    const nameEl = id('attach-dock-name');
-    const sizeEl = id('attach-dock-size');
-    const sz = file.size>1024*1024 ? (file.size/1024/1024).toFixed(1)+' MB' : Math.round(file.size/1024)+' KB';
-    if(nameEl) nameEl.textContent = file.name;
-    if(sizeEl) sizeEl.textContent = sz + ' · Ready to send encrypted';
-    if(dock) dock.classList.remove('hidden');
-    id('msg-inp')?.focus();
-  };
-  input.click();
+  const input=document.createElement('input');input.type='file';input.accept='*/*';
+  input.onchange=()=>stageAttachmentFile(input.files?.[0]);input.click();
 }
 
 async function uploadStagedFile(file){
@@ -588,8 +596,10 @@ async function uploadStagedFile(file){
     if(CHAT.type==='dm')await sendDMMsg(payload,null);
     else await sendGrpMsg(payload,null);
     toast('File sent');
+    return true;
   }catch(e){
     toast('Upload failed: '+(e.message||'Unknown error'),4000);
+    throw e;
   }
 }
 
@@ -1037,6 +1047,7 @@ auth.onAuthStateChanged(async user=>{
   } else {
     _booted=false;
     ME=null;CHAT=null;window.ME=null;
+  if(typeof ZxV5!=='undefined') ZxV5.resetSession();
     _authResolved=true;
     window._authResolved=true;
     showScreen('auth-screen');
@@ -2196,76 +2207,53 @@ function renderReactions(el,reactions){
 function onMsgKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
 
 async function sendMsg(){
-  const inp=id('msg-inp');const text=inp.value.trim();
-  if(!text)return;
-
-  // 1. Channel in Space (MLS TreeKEM v3 Encrypted)
+  const inp=id('msg-inp');
+  const text=(inp?.value||'').trim();
+  if(!text&&!stagedFile)return;
+  // Spaces do not yet have persisted channel-message transport in this build.
   if(activeChannel){
-    inp.value='';
-    const wrap=id('msgs-wrap');
-    if(wrap){
-      const row=document.createElement('div');
-      row.className='msg-row mine';
-      row.innerHTML=`
-        <div class="bubble">${esc(text)}</div>
-        <div class="msg-foot"><span class="msg-time">Just now · MLS TreeKEM v3</span></div>
-      `;
-      wrap.appendChild(row);
-      wrap.scrollTop=wrap.scrollHeight;
-    }
-    toast('Message sent to #'+activeChannel.name+' (MLS RFC 9420)');
+    toast('Spaces channel delivery is not connected yet. Your message was not sent.',4000);
     return;
   }
-
-  // 2. Direct Message or Group
   if(!CHAT||!ME)return;
-  if(stagedFile){
-    const fileToSend = stagedFile;
-    cancelAttachment();
-    await uploadStagedFile(fileToSend);
+  if(!ME.privKey){
+    toast('Encryption keys are not loaded. Restore your keys before sending.',4000);
+    return;
   }
-  if(!ME.privKey&&CHAT.type==='dm'){toast('Encryption keys not loaded. Please re-login.',3500);return;}
-  inp.value='';
-  saveDraftText(CHAT.type,CHAT.id,'');
-  setTyping(false);
-  const rp=replyTo?{...replyTo}:null;
-  cancelReply();
+  const chatType=CHAT.type,chatId=CHAT.id,rp=replyTo?{...replyTo}:null;
   try{
-    CHAT.type==='dm'?await sendDMMsg(text,rp):await sendGrpMsg(text,rp);
-  } catch(e){
-    console.error('Send error:',e);
-    const wrap=id('msgs-wrap');
-    if(wrap){
-      const row=document.createElement('div');
-      row.className='msg-row mine';
-      row.innerHTML=`
-        <div class="bubble">${esc(text)}</div>
-        <div class="msg-foot"><span class="msg-time">Just now (Local)</span></div>
-      `;
-      wrap.appendChild(row);
-      wrap.scrollTop=wrap.scrollHeight;
+    if(stagedFile){
+      const fileToSend=stagedFile;
+      await uploadStagedFile(fileToSend);
+      cancelAttachment();
     }
-    toast('Message sent locally');
+    if(text) await (chatType==='dm'?sendDMMsg(text,rp):sendGrpMsg(text,rp));
+    if(!CHAT||CHAT.id!==chatId||CHAT.type!==chatType){
+      toast('Message sent. You switched conversations before the composer refreshed.',3500);
+      return;
+    }
+    inp.value='';
+    saveDraftText(chatType,chatId,'');
+    cancelReply();
+    setTyping(false);
+  }catch(e){
+    console.error('Send error:',e);
+    if(inp)inp.value=text;
+    saveDraftText(chatType,chatId,text);
+    toast('Message not sent. Your text draft was kept. '+(e.message||''),4500);
   }
 }
 
 async function sendDMMsg(text,rp){
-  // Guard: otherPubKey might still be loading (background fetch in startDM)
+  // Resolve the real recipient identity key. Never substitute a generated key.
   if(!CHAT.otherPubKey){
-    // Try fetching it now
-    try{
-      const udoc=await db.collection('users').doc(CHAT.otherUid).get();
-      CHAT.otherPubKey=udoc.data().publicKey;
-    } catch(e){
-      if(!CHAT.otherPubKey){
-        const dummyKey = await Crypto.generateKeyPair();
-        CHAT.otherPubKey = dummyKey.publicKeyJwk;
-      }
-    }
+    const udoc=await db.collection('users').doc(CHAT.otherUid).get();
+    const recipientData=udoc.exists?udoc.data():null;
+    if(!recipientData?.publicKey) throw new Error('Recipient encryption key is unavailable. No message was sent.');
+    CHAT.otherPubKey=recipientData.publicKey;
   }
-  // Use cached ME.publicKey — no Firestore round-trip on every send
   const myPub=ME.publicKey;
-  if(!myPub){toast('Your public key is missing. Please re-login.',3000);return;}
+  if(!myPub) throw new Error('Your public key is missing. Restore your encryption keys before sending.');
 
   const[their,mine]=await Promise.all([
     Crypto.encryptMsg(text,CHAT.otherPubKey),
@@ -2724,6 +2712,7 @@ function showChatPane(name,color,avChar,type){
     mobTitle.appendChild(span);
   }
   updateMobileChatActions(CHAT);
+  if(typeof ZxV5!=='undefined') ZxV5.syncFocusMode(true);
 
   // Mobile: slide chat panel in (WhatsApp style)
   const layout=id('app-layout');
@@ -2747,6 +2736,7 @@ function goBack(){
   if(msgUnsub){msgUnsub();msgUnsub=null;}
   chatSessionId++;
   CHAT=null;
+  if(typeof ZxV5!=='undefined') ZxV5.syncFocusMode(false);
 
   // Mobile: slide back to list
   const layout=id('app-layout');
@@ -2762,7 +2752,7 @@ function goBack(){
 
 function makeConvEl(type,docId,name,sub,color,av,onclickFn,unread=0,previewMode='default'){
   const el=document.createElement('button'); // button fires click reliably on iOS
-  el.className='conv-item';el.id='conv-'+docId;el.type='button';
+  el.className='conv-item';el.id='conv-'+docId;el.type='button';el.dataset.convType=type;el.dataset.convId=docId;
   const previewClass=previewMode==='draft'?'ci-preview draft-preview':previewMode==='typing'?'ci-preview typing-preview':'ci-preview';
   const pin=isPinned(type,docId)?'<span class="ci-pin"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#a1a1aa"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg></span>':'';
   el.innerHTML=`
@@ -3095,6 +3085,7 @@ function renderSpacesRail() {
 }
 
 function switchToHome() {
+  if(typeof ZxV5!=='undefined') ZxV5.syncFocusMode(!!CHAT);
   activeSpace = null;
   activeChannel = null;
   
@@ -3119,6 +3110,7 @@ function switchToHome() {
 }
 
 function switchToSpace(spaceId) {
+  if(typeof ZxV5!=='undefined') ZxV5.syncFocusMode(false);
   if (!ZxSpacesInstance) return;
   const space = ZxSpacesInstance.spaces.get(spaceId);
   if (!space) return;

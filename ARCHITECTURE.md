@@ -96,3 +96,14 @@ stateDiagram-v2
 - **Negotiation Pattern:** Standard WebRTC Perfect Negotiation pattern handling polite and impolite peers.
 - **Relay Fallback:** STUN discovery with automatic TURN relay integration and ICE restart on disconnects.
 - **Privacy:** Call history is logged purely client-side in IndexedDB `call_history`; no persistent call logs remain on the server.
+
+
+## V5 experience layer
+
+The V5 browser experience is separated into src/qol/V5Experience.js. It owns device-local
+preferences, Smart Inbox presentation, the command palette, composer file-staging gestures,
+and navigation into messages already present in the current session's decrypted in-memory
+search index. It does not own cryptography, message persistence, or server-side search.
+
+The decrypted search index is cleared when the authenticated session ends. It is session-scoped
+and only covers messages decrypted after a conversation is opened in this browser session.
