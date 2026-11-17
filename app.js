@@ -2219,7 +2219,7 @@ async function sendMsg(){
     return;
   }
   if(!CHAT||!ME)return;
-  if(!ME.privKey){
+  if(!ME.privKey&&CHAT.type==='dm'){
     toast('Encryption keys are not loaded. Restore your keys before sending.',4000);
     return;
   }
