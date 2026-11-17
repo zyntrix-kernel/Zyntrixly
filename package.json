@@ -11,8 +11,9 @@
     "test:unit": "node --test tests/crypto.test.js tests/security.test.js tests/dom_integrity.test.js tests/webrtc.test.js tests/search_index.test.js tests/v5_experience.test.js tests/frontend_design.test.js",
     "test:e2e": "node --test tests/e2e_features.test.js",
     "test:all": "node tests/run_all_tests.js",
-    "test:syntax": "node --check app.js && node --check src/qol/V5Experience.js",
-    "test:visual": "node take_screenshots.js"
+    "test:syntax": "node --check app.js && node --check src/qol/V5Experience.js && node --check scripts/build_frontend.js",
+    "test:visual": "node take_screenshots.js",
+    "build": "node scripts/build_frontend.js"
   },
   "repository": {
     "type": "git",
@@ -31,13 +32,23 @@
     "postcss": "^8.5.32",
     "puppeteer-core": "^25.16.0",
     "tailwindcss": "^3.4.17",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "esbuild": "^0.25.12"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.5.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-static": "^1.66.0",
-    "tailwind-merge": "^3.7.0"
+    "tailwind-merge": "^3.7.0",
+    "@radix-ui/react-avatar": "^1.1.10",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-scroll-area": "^1.2.10",
+    "@radix-ui/react-separator": "^1.1.8",
+    "@radix-ui/react-tabs": "^1.1.13",
+    "cmdk": "^1.1.1",
+    "lucide-react": "^0.468.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   }
 }
