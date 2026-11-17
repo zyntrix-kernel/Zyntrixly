@@ -45,7 +45,7 @@ test('V5 application surfaces compose shadcn components instead of hand-built DO
 test('legacy bridge provides React mount points for sidebar filters and palette triggers', () => {
   const html = read('index.html');
   for (const id of ['zx-v5-ui-root', 'zx-v5-inbox-root', 'zx-v5-shortcut-root', 'zx-v5-mobile-shortcut-root']) {
-    assert.match(html, new RegExp('id=["\\\\']' + id + '["\\\\']'));
+    assert.ok(html.includes('id="' + id + '"'), 'Missing React mount point: ' + id);
   }
   assert.match(read('src/qol/V5Experience.js'), /zx:v5:open-palette/);
   assert.match(read('src/qol/V5Experience.js'), /getInboxSnapshot/);
