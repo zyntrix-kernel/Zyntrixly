@@ -1,0 +1,22 @@
+/* V5 bridge states only. All V5 controls are shadcn/ui React components. */
+.zx-v5-message-focus .bubble{
+  outline:2px solid hsl(var(--ring));
+  outline-offset:4px;
+  box-shadow:0 0 0 6px hsl(var(--ring)/.14);
+}
+body.zx-v5-compact .conv-item{min-height:56px;padding-top:6px;padding-bottom:6px}
+body.zx-v5-compact .conv-item .av-circle{width:34px!important;height:34px!important;font-size:13px!important}
+body.zx-v5-focus-mode .spaces-rail,
+body.zx-v5-focus-mode #sidebar{
+  width:0!important;min-width:0!important;flex-basis:0!important;overflow:hidden!important;
+  opacity:0!important;pointer-events:none!important;border:0!important;padding-left:0!important;padding-right:0!important
+}
+body.zx-v5-reduce-motion *,
+body.zx-v5-reduce-motion *::before,
+body.zx-v5-reduce-motion *::after{
+  animation-duration:.01ms!important;animation-iteration-count:1!important;
+  scroll-behavior:auto!important;transition-duration:.01ms!important
+}
+.composer.zx-v5-drop-ready{
+  outline:2px dashed hsl(var(--ring));outline-offset:-5px;background:hsl(var(--ring)/.08)
+}

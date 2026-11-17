@@ -2,6 +2,9 @@ const { spawn } = require('child_process');
 const path = require('path');
 
 const testSuites = [
+  { name: 'Zyntrixly V5 Experience & Smart Inbox', file: 'tests/v5_experience.test.js' },
+  { name: 'Shadcn UI React Integration', file: 'tests/frontend_design.test.js' },
+  { name: 'Local Decrypted Message Search Index', file: 'tests/search_index.test.js' },
   { name: 'Cryptographic Engine (RSA-OAEP, AES-GCM, PBKDF2)', file: 'tests/crypto.test.js' },
   { name: 'Security & Sanitization (Logger, KeyStore, SessionGuard)', file: 'tests/security.test.js' },
   { name: 'Firestore Security Rules & Authorization Architecture', file: 'tests/firestore_rules.test.js' },

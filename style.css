@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   ZYNTRIXLY V4 (The Quality of Life Update)
+   ZYNTRIXLY V5 (The Ultimate Daily Driver Experience)
    Apple-Grade Encrypted Communications & Sovereign Spaces Design System
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -8,6 +8,7 @@
 @import './src/styles/layout.css';
 @import './src/styles/chat.css';
 @import './src/styles/modals.css';
+@import './src/styles/v5.css';
 
 /* ── Dynamic Font Family Options (Settings Subview) ── */
 body.font-modern {
@@ -21,3 +22,4 @@ body.font-mono {
 body.font-jakarta {
   font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
+

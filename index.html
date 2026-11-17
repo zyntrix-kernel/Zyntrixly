@@ -6,8 +6,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="theme-color" content="#03050f"/>
-  <meta name="description" content="Zyntrixly — Private by default. End-to-end encrypted messaging."/>
-  <title>Zyntrixly — Private by Default</title>
+  <meta name="description" content="Zyntrixly V5 — Private-by-default messaging with Smart Inbox, keyboard search and end-to-end encryption."/>
+  <title>Zyntrixly V5 — Private by Default</title>
   <link rel="manifest" href="manifest.webmanifest"/>
   <link rel="icon" href="assets/app-icon-192.png" sizes="192x192"/>
   <link rel="icon" href="assets/app-icon-512.png" sizes="512x512"/>
@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="vendor/fonts/google-fonts.css"/>
   <link rel="stylesheet" href="shadcn.css"/>
   <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="v5-ui.css"/>
 </head>
 <body class="font-modern">
 
@@ -134,6 +135,7 @@
     <button class="mob-icon-btn mob-list-only" id="mob-newchat-btn" onclick="openNewChat()" style="display:flex">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
     </button>
+    <span id="zx-v5-mobile-shortcut-root"></span>
     <button class="mob-icon-btn" onclick="toggleFullscreen()" id="fs-btn-mob" title="Fullscreen">
       <svg id="fs-icon-mob" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3M16 3h3a2 2 0 012 2v3M8 21H5a2 2 0 01-2-2v-3M16 21h3a2 2 0 002-2v-3"/></svg>
     </button>
@@ -206,6 +208,7 @@
         <div class="sb-search-inner">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="sb-search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input id="sb-q" type="text" placeholder="Search chats..." class="sb-search-input" oninput="onSbSearch()"/>
+          <span id="zx-v5-shortcut-root"></span>          <button id="zx-v5-palette-trigger" type="button" class="zx-v5-palette-trigger" aria-label="Open command palette" title="Search everything · Ctrl/⌘ K"><span>⌘ K</span></button>
           <button id="sb-clear" class="sb-clear hidden" onclick="clearSbSearch()" title="Clear search">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
@@ -215,6 +218,7 @@
 
       <!-- Chat list -->
       <div class="sb-list" id="sb-list">
+        <div id="zx-v5-inbox-root"></div>
         <div id="sb-chats"></div>
         <div id="sb-groups"></div>
         <!-- Archived section -->
@@ -643,7 +647,7 @@
           <img src="zyntrixly-logo.svg" alt="Zyntrixly" class="brand-mark-md"/>
         </div>
         <h1 class="about-app-name"><span class="brand-text">Zyntrixly</span></h1>
-        <p class="about-ver">Version 4.0.0 (Quality of Life Release)</p>
+        <p class="about-ver">Version 5.0.0 (Ultimate Daily Driver Release)</p>
         <p class="about-desc">Zero-knowledge, post-quantum resilient messaging and decentralized community spaces.</p>
         <div class="about-oss">
           <div class="about-oss-hdr">
@@ -919,6 +923,7 @@
 </script>
 <script src="crypto.js"></script>
 <script src="security.js"></script>
+<script src="src/search/SearchIndex.js"></script>
 <!-- ZYNTRIXLY 3.0 APEX ENGINE MODULES -->
 <script src="src/crypto/MLSEngine.js"></script>
 <script src="src/crypto/WebAuthnPRF.js"></script>
@@ -926,6 +931,7 @@
 <script src="src/apps/CanvasEngine.js"></script>
 <script src="src/ai/OnDeviceAI.js"></script>
 <script src="src/media/StageController.js"></script>
+<script src="src/qol/V5Experience.js"></script>
 <script>
 (function ZxBoot(){
   // Firebase already initialised above — wire up auth + db
@@ -1099,20 +1105,6 @@
 </script>
 
 
-<!-- ── Command Palette (Cmd+K / Ctrl+K) ────────────────────────── -->
-<div id="cmd-palette" class="modal-bg hidden" onclick="if(event.target===this)closeCommandPalette()">
-  <div class="cmd-box" style="background:#18181b;border:1px solid #27272a;border-radius:12px;width:90%;max-width:540px;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.8)">
-    <div class="cmd-search-wrap" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #27272a">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#71717a" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" id="cmd-search-inp" placeholder="Type a command or search actions..." style="background:transparent;border:none;color:#fff;font-size:14px;outline:none;flex:1" oninput="filterCommandPalette(this.value)">
-      <kbd style="background:#27272a;color:#a1a1aa;font-size:11px;padding:2px 6px;border-radius:4px;border:1px solid #3f3f46">ESC</kbd>
-    </div>
-    <div id="cmd-list" style="max-height:300px;overflow-y:auto;padding:8px">
-      <!-- Populated dynamically -->
-    </div>
-  </div>
-</div>
-
 <!-- ── Media Lightbox Viewer ───────────────────────────────────── -->
 <div id="media-lightbox" class="modal-bg hidden" onclick="if(event.target===this)closeMediaLightbox()">
   <div style="position:relative;max-width:90vw;max-height:90vh;display:flex;align-items:center;justify-content:center">
@@ -1122,6 +1114,9 @@
     <div id="lightbox-content"></div>
   </div>
 </div>
+
+<div id="zx-v5-ui-root" aria-live="off"></div>
+<script defer src="v5-ui.js"></script>
 
 </body>
 </html>

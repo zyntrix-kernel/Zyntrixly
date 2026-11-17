@@ -1,6 +1,35 @@
+# Zyntrixly V5
+
+**Private by default. Designed for the everyday.**
+
+V5 adds a keyboard-first command palette, Smart Inbox views, session-local decrypted message search with jump-to-message navigation, composer paste/drop attachment staging, and safer message-delivery failure behavior.
+
+- Press Ctrl/⌘ + K to open the command palette.
+- Filter conversations by All, Unread, Pinned, Drafts or Groups.
+- Search message text only in the in-memory index built from conversations decrypted during the current browser session.
+- Paste an image or drop a file onto the composer to stage one encrypted attachment (current transfer limit: 900 KB).
+- Failed sends keep the typed draft and are never rendered as successful local deliveries.
+
+V5 does not yet claim global historical search across unopened conversations, encrypted offline outbox delivery, persisted Spaces channel messaging, linked-device pairing or Android feature parity. Those remain explicit release gates in ZYNTRIXLY_V5_MASTERPLAN.md.
+
+---
+
+
+## V5 UI foundation
+
+The V5 Smart Inbox, search shortcut and command palette are built with actual **shadcn/ui JavaScript components** using the New York style, Radix primitives, CVA, cmdk, Lucide React and Tailwind CSS 3.4. The app's legacy authentication, settings and message surfaces remain in the original DOM layer; they are not described as migrated yet. New V5 UI work should use the component sources in \`src/components/ui\`.
+
+Use the pinned shadcn CLI to add more JavaScript components:
+
+\`\`\`bash
+npm run ui:add -- button
+npm run ui:add -- alert-dialog
+\`\`\`
+
+
 <div align="center">
 
-# 🛡️ Zyntrixly 2.0
+# 🛡️ Zyntrixly 5.0
 
 ### Private. Encrypted. Multi-Device. Yours.
 

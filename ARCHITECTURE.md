@@ -1,7 +1,7 @@
-# 📐 Zyntrixly 2.0 System Architecture
+# 📐 Zyntrixly 5.0 System Architecture
 
 **Codename:** Zyntrixly Evolution  
-**Release:** 2.0.0  
+**Release:** 5.0.0  
 **Project:** zyntrix-kernel/Zyntrixly
 
 ---
@@ -96,3 +96,30 @@ stateDiagram-v2
 - **Negotiation Pattern:** Standard WebRTC Perfect Negotiation pattern handling polite and impolite peers.
 - **Relay Fallback:** STUN discovery with automatic TURN relay integration and ICE restart on disconnects.
 - **Privacy:** Call history is logged purely client-side in IndexedDB `call_history`; no persistent call logs remain on the server.
+
+
+## V5 experience layer
+
+The V5 browser experience is separated into src/qol/V5Experience.js. It owns device-local
+preferences, Smart Inbox presentation, the command palette, composer file-staging gestures,
+and navigation into messages already present in the current session's decrypted in-memory
+search index. It does not own cryptography, message persistence, or server-side search.
+
+The decrypted search index is cleared when the authenticated session ends. It is session-scoped
+and only covers messages decrypted after a conversation is opened in this browser session.
+
+
+## V5 shadcn/ui surface
+
+V5 mounts a React island from \`src/ui/main.jsx\` into explicit mount points in the legacy
+HTML shell. The Smart Inbox and command palette are composed from the project's shadcn/ui
+JavaScript components in \`src/components/ui\`. The bridge in \`src/qol/V5Experience.js\`
+exposes only conversation snapshots, device-local preferences, navigation and palette events.
+It does not own encryption or message persistence.
+
+The build in \`scripts/build_frontend.js\` bundles the React island and generates its Tailwind
+stylesheet into \`dist\`. Vercel builds that output through \`npm run build\`.
+
+Authentication, account settings, existing message rows and several older dialogs remain
+legacy DOM components and are pending incremental migration to shadcn/ui. Do not describe
+the full legacy interface as migrated.

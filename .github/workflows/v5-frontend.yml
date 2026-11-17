@@ -1,0 +1,35 @@
+name: V5 Frontend Verification
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [feat/zyntrixly-v5-ultimate-qol]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: v5-frontend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: shadcn UI, tests and production build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies and reconcile lockfile
+        run: npm install --no-audit --no-fund
+      - name: Check JavaScript syntax
+        run: npm run test:syntax
+      - name: Run V5 and unit tests
+        run: npm run test:unit
+      - name: Build production frontend
+        run: npm run build

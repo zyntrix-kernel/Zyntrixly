@@ -73,7 +73,14 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('.sb-search-wrap'))document.getElementById('sb-search-drop').classList.add('hidden');
 });
 document.addEventListener('keydown',e=>{
-  if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();id('sb-q')?.focus();return;}if(e.key==='Escape'){
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){
+    e.preventDefault();
+    if(typeof ZxV5!=='undefined') ZxV5.openPalette();
+    else id('sb-q')?.focus();
+    return;
+  }
+  if(e.key==='Escape'){
+    if(typeof ZxV5!=='undefined'&&ZxV5.isPaletteOpen()){ZxV5.closePalette();return;}
     closeAllModals();cancelReply();closeCtx();closeRP();
   }
 });
@@ -82,6 +89,7 @@ document.addEventListener('keydown',e=>{
 buildSettings();
 registerServiceWorker();
 setupInstallPrompt();
+if(typeof ZxV5!=='undefined') ZxV5.init();
 
 
 /* ════════════════════════════════════════════════
@@ -552,24 +560,24 @@ function playAudioVoice(btn, inlineB64) {
 }
 
 /* ═══ FILE SHARING ═══════════════════════════════ */
+function stageAttachmentFile(file){
+  if(!CHAT){toast('Open a chat first.');return false;}
+  if(!file)return false;
+  if(file.size>900*1024){toast('Max file size: 900KB for encrypted transfers',3000);return false;}
+  stagedFile=file;
+  const dock=id('attach-dock'),nameEl=id('attach-dock-name'),sizeEl=id('attach-dock-size');
+  const sz=file.size>1024*1024?(file.size/1024/1024).toFixed(1)+' MB':Math.max(1,Math.round(file.size/1024))+' KB';
+  if(nameEl)nameEl.textContent=file.name;
+  if(sizeEl)sizeEl.textContent=sz+' · Ready to send encrypted';
+  if(dock)dock.classList.remove('hidden');
+  id('msg-inp')?.focus();
+  return true;
+}
+window.ZxStageAttachmentFile=stageAttachmentFile;
 function openFileShare(){
   if(!CHAT){toast('Open a chat first.');return;}
-  const input=document.createElement('input');
-  input.type='file'; input.accept='*/*';
-  input.onchange=()=>{
-    const file=input.files?.[0]; if(!file)return;
-    if(file.size>900*1024){toast('Max file size: 900KB for encrypted transfers',3000);return;}
-    stagedFile = file;
-    const dock = id('attach-dock');
-    const nameEl = id('attach-dock-name');
-    const sizeEl = id('attach-dock-size');
-    const sz = file.size>1024*1024 ? (file.size/1024/1024).toFixed(1)+' MB' : Math.round(file.size/1024)+' KB';
-    if(nameEl) nameEl.textContent = file.name;
-    if(sizeEl) sizeEl.textContent = sz + ' · Ready to send encrypted';
-    if(dock) dock.classList.remove('hidden');
-    id('msg-inp')?.focus();
-  };
-  input.click();
+  const input=document.createElement('input');input.type='file';input.accept='*/*';
+  input.onchange=()=>stageAttachmentFile(input.files?.[0]);input.click();
 }
 
 async function uploadStagedFile(file){
@@ -588,8 +596,10 @@ async function uploadStagedFile(file){
     if(CHAT.type==='dm')await sendDMMsg(payload,null);
     else await sendGrpMsg(payload,null);
     toast('File sent');
+    return true;
   }catch(e){
     toast('Upload failed: '+(e.message||'Unknown error'),4000);
+    throw e;
   }
 }
 
@@ -1037,6 +1047,7 @@ auth.onAuthStateChanged(async user=>{
   } else {
     _booted=false;
     ME=null;CHAT=null;window.ME=null;
+  if(typeof ZxV5!=='undefined') ZxV5.resetSession();
     _authResolved=true;
     window._authResolved=true;
     showScreen('auth-screen');
@@ -1601,10 +1612,25 @@ function closeChatSearch(){
 }
 
 function searchInChat(){
-  const q=(id('chat-search-inp')?.value||'').toLowerCase().trim();
-  document.querySelectorAll('#msgs-wrap .msg-row').forEach(row=>{
-    const txt=(row.querySelector('.bubble')?.textContent||'').toLowerCase();
-    row.style.display=!q||txt.includes(q)?'':'none';
+  const q=(id('chat-search-inp')?.value||'').trim();
+  const rows=[...document.querySelectorAll('#msgs-wrap .msg-row')];
+  if(!q){
+    rows.forEach(row=>row.style.display='');
+    return;
+  }
+  // Prefer the decrypted in-memory index; never send search text to Firestore.
+  if(typeof ZxSearch!=='undefined'&&CHAT?.id){
+    const matches=new Set(ZxSearch.search(q,{conversationId:CHAT.id}).map(message=>String(message.id)));
+    if(matches.size){
+      rows.forEach(row=>row.style.display=matches.has(row.dataset.msgId)?'':'none');
+      return;
+    }
+  }
+  // Keep search responsive while the current conversation is still decrypting/indexing.
+  const needle=q.toLocaleLowerCase();
+  rows.forEach(row=>{
+    const txt=(row.querySelector('.bubble')?.textContent||'').toLocaleLowerCase();
+    row.style.display=txt.includes(needle)?'':'none';
   });
 }
 
@@ -1985,10 +2011,11 @@ async function renderMsg(msgId,data,chatCtx=getChatContext()){
   const bub=document.createElement('div');
   bub.className='bubble'+(data.deleted?' deleted':'');
   if(data.deleted){
+    if(typeof ZxSearch!=='undefined') ZxSearch.removeMessage(String(msgId));
     bub.textContent='This message was deleted';
   } else {
     bub.textContent='…';
-    decryptBubble(bub,data,mine,chatCtx);
+    decryptBubble(bub,data,mine,chatCtx,msgId);
   }
   bub.addEventListener('contextmenu',e=>{e.preventDefault();if(selectionMode){toggleSelection(msgId);return;}showCtx(e,msgId,mine,!!data.deleted);});
   bub.addEventListener('click',e=>{e.stopPropagation();if(selectionMode){toggleSelection(msgId);return;}if(!data.deleted)showCtx(e,msgId,mine,false);});
@@ -2029,7 +2056,7 @@ async function renderMsg(msgId,data,chatCtx=getChatContext()){
   if(!mine&&document.hidden)sendNotif(data);
 }
 
-async function decryptBubble(bub,data,mine,chatCtx=getChatContext()){
+async function decryptBubble(bub,data,mine,chatCtx=getChatContext(),msgId=null){
   try{
     if(!ME.privKey){bub.textContent='Sign out and back in to restore keys.';return;}
     let plain;
@@ -2043,6 +2070,13 @@ async function decryptBubble(bub,data,mine,chatCtx=getChatContext()){
       const myKey=data.keys?.[ME.uid];
       if(!myKey){bub.textContent='Not encrypted for you';return;}
       plain=await Crypto.decryptMsg(data.encMsg,myKey,data.iv,ME.privKey); if(chatCtx?.id) setLocalPreview('group',chatCtx.id,plain);
+    }
+    // Index only decrypted human-readable text. The index is memory-only and never synced.
+    if(typeof ZxSearch!=='undefined'&&msgId&&chatCtx?.id){
+      let isStructuredAttachment=false;
+      try{const payload=JSON.parse(plain);isStructuredAttachment=payload?.__type==='file'||payload?.__type==='audio';}catch(_){}
+      if(isStructuredAttachment) ZxSearch.removeMessage(String(msgId));
+      else ZxSearch.indexMessage({id:String(msgId),conversationId:chatCtx.id,conversationType:chatCtx.type,senderUid:data.senderUid,type:data.type||'text',text:plain,sentAt:data.sentAt});
     }
     // Detect file message payload
     try{
@@ -2176,76 +2210,53 @@ function renderReactions(el,reactions){
 function onMsgKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
 
 async function sendMsg(){
-  const inp=id('msg-inp');const text=inp.value.trim();
-  if(!text)return;
-
-  // 1. Channel in Space (MLS TreeKEM v3 Encrypted)
+  const inp=id('msg-inp');
+  const text=(inp?.value||'').trim();
+  if(!text&&!stagedFile)return;
+  // Spaces do not yet have persisted channel-message transport in this build.
   if(activeChannel){
-    inp.value='';
-    const wrap=id('msgs-wrap');
-    if(wrap){
-      const row=document.createElement('div');
-      row.className='msg-row mine';
-      row.innerHTML=`
-        <div class="bubble">${esc(text)}</div>
-        <div class="msg-foot"><span class="msg-time">Just now · MLS TreeKEM v3</span></div>
-      `;
-      wrap.appendChild(row);
-      wrap.scrollTop=wrap.scrollHeight;
-    }
-    toast('Message sent to #'+activeChannel.name+' (MLS RFC 9420)');
+    toast('Spaces channel delivery is not connected yet. Your message was not sent.',4000);
     return;
   }
-
-  // 2. Direct Message or Group
   if(!CHAT||!ME)return;
-  if(stagedFile){
-    const fileToSend = stagedFile;
-    cancelAttachment();
-    await uploadStagedFile(fileToSend);
+  if(!ME.privKey&&CHAT.type==='dm'){
+    toast('Encryption keys are not loaded. Restore your keys before sending.',4000);
+    return;
   }
-  if(!ME.privKey&&CHAT.type==='dm'){toast('Encryption keys not loaded. Please re-login.',3500);return;}
-  inp.value='';
-  saveDraftText(CHAT.type,CHAT.id,'');
-  setTyping(false);
-  const rp=replyTo?{...replyTo}:null;
-  cancelReply();
+  const chatType=CHAT.type,chatId=CHAT.id,rp=replyTo?{...replyTo}:null;
   try{
-    CHAT.type==='dm'?await sendDMMsg(text,rp):await sendGrpMsg(text,rp);
-  } catch(e){
-    console.error('Send error:',e);
-    const wrap=id('msgs-wrap');
-    if(wrap){
-      const row=document.createElement('div');
-      row.className='msg-row mine';
-      row.innerHTML=`
-        <div class="bubble">${esc(text)}</div>
-        <div class="msg-foot"><span class="msg-time">Just now (Local)</span></div>
-      `;
-      wrap.appendChild(row);
-      wrap.scrollTop=wrap.scrollHeight;
+    if(stagedFile){
+      const fileToSend=stagedFile;
+      await uploadStagedFile(fileToSend);
+      cancelAttachment();
     }
-    toast('Message sent locally');
+    if(text) await (chatType==='dm'?sendDMMsg(text,rp):sendGrpMsg(text,rp));
+    if(!CHAT||CHAT.id!==chatId||CHAT.type!==chatType){
+      toast('Message sent. You switched conversations before the composer refreshed.',3500);
+      return;
+    }
+    inp.value='';
+    saveDraftText(chatType,chatId,'');
+    cancelReply();
+    setTyping(false);
+  }catch(e){
+    console.error('Send error:',e);
+    if(inp)inp.value=text;
+    saveDraftText(chatType,chatId,text);
+    toast('Message not sent. Your text draft was kept. '+(e.message||''),4500);
   }
 }
 
 async function sendDMMsg(text,rp){
-  // Guard: otherPubKey might still be loading (background fetch in startDM)
+  // Resolve the real recipient identity key. Never substitute a generated key.
   if(!CHAT.otherPubKey){
-    // Try fetching it now
-    try{
-      const udoc=await db.collection('users').doc(CHAT.otherUid).get();
-      CHAT.otherPubKey=udoc.data().publicKey;
-    } catch(e){
-      if(!CHAT.otherPubKey){
-        const dummyKey = await Crypto.generateKeyPair();
-        CHAT.otherPubKey = dummyKey.publicKeyJwk;
-      }
-    }
+    const udoc=await db.collection('users').doc(CHAT.otherUid).get();
+    const recipientData=udoc.exists?udoc.data():null;
+    if(!recipientData?.publicKey) throw new Error('Recipient encryption key is unavailable. No message was sent.');
+    CHAT.otherPubKey=recipientData.publicKey;
   }
-  // Use cached ME.publicKey — no Firestore round-trip on every send
   const myPub=ME.publicKey;
-  if(!myPub){toast('Your public key is missing. Please re-login.',3000);return;}
+  if(!myPub) throw new Error('Your public key is missing. Restore your encryption keys before sending.');
 
   const[their,mine]=await Promise.all([
     Crypto.encryptMsg(text,CHAT.otherPubKey),
@@ -2704,6 +2715,7 @@ function showChatPane(name,color,avChar,type){
     mobTitle.appendChild(span);
   }
   updateMobileChatActions(CHAT);
+  if(typeof ZxV5!=='undefined') ZxV5.syncFocusMode(true);
 
   // Mobile: slide chat panel in (WhatsApp style)
   const layout=id('app-layout');
@@ -2727,6 +2739,7 @@ function goBack(){
   if(msgUnsub){msgUnsub();msgUnsub=null;}
   chatSessionId++;
   CHAT=null;
+  if(typeof ZxV5!=='undefined') ZxV5.syncFocusMode(false);
 
   // Mobile: slide back to list
   const layout=id('app-layout');
@@ -2742,7 +2755,7 @@ function goBack(){
 
 function makeConvEl(type,docId,name,sub,color,av,onclickFn,unread=0,previewMode='default'){
   const el=document.createElement('button'); // button fires click reliably on iOS
-  el.className='conv-item';el.id='conv-'+docId;el.type='button';
+  el.className='conv-item';el.id='conv-'+docId;el.type='button';el.dataset.convType=type;el.dataset.convId=docId;
   const previewClass=previewMode==='draft'?'ci-preview draft-preview':previewMode==='typing'?'ci-preview typing-preview':'ci-preview';
   const pin=isPinned(type,docId)?'<span class="ci-pin"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#a1a1aa"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg></span>':'';
   el.innerHTML=`
@@ -2894,87 +2907,12 @@ window.startChatCall = function(mode) {
 
 
 /* ── COMMAND PALETTE (Cmd+K / Ctrl+K) ────────────────────────── */
-const CMD_ITEMS = [
-  { id: 'new-dm', label: 'Start New Direct Message', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>', action: () => { openModal('nc-modal'); switchMTab(0); } },
-  { id: 'new-group', label: 'Create New Group Conversation', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>', action: () => { openModal('nc-modal'); switchMTab(1); } },
-  { id: 'settings', label: 'Open Settings', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>', action: () => openSettings() },
-  { id: 'appearance', label: 'Appearance & Themes', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 0 0 20v-20z"/></svg>', action: () => { openSettings(); openSettingsView('appearance'); } },
-  { id: 'devices', label: 'Linked Devices & Sessions', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>', action: () => { openSettings(); openSettingsView('devices'); } },
-  { id: 'safety-num', label: 'Copy Cryptographic Safety Number', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', action: () => copySafetyNumber() },
-  { id: 'clear-cache', label: 'Purge Decrypted Local Cache', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/></svg>', action: () => purgeLocalCache() }
-];
-
 function openCommandPalette() {
-  const p = id('cmd-palette');
-  if (!p) return;
-  p.classList.remove('hidden');
-  const inp = id('cmd-search-inp');
-  if (inp) {
-    inp.value = '';
-    inp.focus();
-  }
-  renderCommandList(CMD_ITEMS);
+  if(typeof ZxV5!=='undefined') ZxV5.openPalette();
 }
 
 function closeCommandPalette() {
-  id('cmd-palette')?.classList.add('hidden');
-}
-
-function filterCommandPalette(q) {
-  const query = (q || '').toLowerCase().trim();
-  const filtered = CMD_ITEMS.filter(item => item.label.toLowerCase().includes(query));
-  renderCommandList(filtered);
-}
-
-function renderCommandList(items) {
-  const list = id('cmd-list');
-  if (!list) return;
-  list.innerHTML = '';
-  if (!items.length) {
-    list.innerHTML = '<div style="padding:16px;text-align:center;color:#71717a;font-size:13px">No commands found</div>';
-    return;
-  }
-  items.forEach((item, idx) => {
-    const btn = document.createElement('button');
-    btn.className = 'cmd-item-btn';
-    btn.style.cssText = 'width:100%;display:flex;align-items:center;gap:12px;padding:10px 12px;border:none;background:transparent;color:#f4f4f5;font-size:13px;border-radius:8px;cursor:pointer;text-align:left;transition:background 0.15s';
-    btn.onmouseenter = () => btn.style.background = '#27272a';
-    btn.onmouseleave = () => btn.style.background = 'transparent';
-    btn.innerHTML = `<span style="font-size:16px">${item.icon}</span><span style="flex:1">${item.label}</span>`;
-    btn.onclick = () => {
-      closeCommandPalette();
-      item.action();
-    };
-    list.appendChild(btn);
-  });
-}
-
-function copySafetyNumber() {
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText('84920 18274 91823 84729 19284 82710 49281 92837 40192 84720 19284 72910').then(() => {
-      toast('Copied safety number to clipboard');
-    });
-  } else {
-    toast('Safety Number: 84920 18274 91823 84729');
-  }
-}
-
-function purgeLocalCache() {
-  if (typeof ZxStorage !== 'undefined') {
-    ZxStorage.shredAllLocalData().then(() => {
-      toast('Local decrypted cache purged cleanly.');
-    });
-  } else {
-    toast('Local cache cleared.');
-  }
-}
-
-function openPairingModal() {
-  toast('Pairing QR Code: Scan from mobile to transfer keys securely');
-}
-
-function revokeCurrentSession(devId) {
-  toast('Session revoked successfully.');
+  if(typeof ZxV5!=='undefined') ZxV5.closePalette();
 }
 
 function openMediaLightbox(url, isVideo = false) {
@@ -3003,14 +2941,8 @@ function closeMediaLightbox() {
   if (content) content.innerHTML = '';
 }
 
-// Global keyboard shortcuts (Cmd+K, Ctrl+K, Escape)
+// Escape closes secondary overlays. Cmd/Ctrl+K is owned by the V5 shadcn command dialog.
 document.addEventListener('keydown', (e) => {
-  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-    e.preventDefault();
-    const p = id('cmd-palette');
-    if (p && !p.classList.contains('hidden')) closeCommandPalette();
-    else openCommandPalette();
-  }
   if (e.key === 'Escape') {
     closeCommandPalette();
     closeMediaLightbox();
@@ -3075,6 +3007,7 @@ function renderSpacesRail() {
 }
 
 function switchToHome() {
+  if(typeof ZxV5!=='undefined') ZxV5.syncFocusMode(!!CHAT);
   activeSpace = null;
   activeChannel = null;
   
@@ -3099,6 +3032,7 @@ function switchToHome() {
 }
 
 function switchToSpace(spaceId) {
+  if(typeof ZxV5!=='undefined') ZxV5.syncFocusMode(false);
   if (!ZxSpacesInstance) return;
   const space = ZxSpacesInstance.spaces.get(spaceId);
   if (!space) return;
