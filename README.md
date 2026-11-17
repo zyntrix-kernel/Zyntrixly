@@ -16,7 +16,7 @@ V5 does not yet claim global historical search across unopened conversations, en
 
 <div align="center">
 
-# 🛡️ Zyntrixly 2.0
+# 🛡️ Zyntrixly 5.0
 
 ### Private. Encrypted. Multi-Device. Yours.
 

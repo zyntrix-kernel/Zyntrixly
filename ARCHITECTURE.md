@@ -1,4 +1,4 @@
-# 📐 Zyntrixly 2.0 System Architecture
+# 📐 Zyntrixly 5.0 System Architecture
 
 **Codename:** Zyntrixly Evolution  
 **Release:** 5.0.0  

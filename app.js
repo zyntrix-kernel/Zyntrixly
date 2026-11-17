@@ -1621,9 +1621,12 @@ function searchInChat(){
   // Prefer the decrypted in-memory index; never send search text to Firestore.
   if(typeof ZxSearch!=='undefined'&&CHAT?.id){
     const matches=new Set(ZxSearch.search(q,{conversationId:CHAT.id}).map(message=>String(message.id)));
-    rows.forEach(row=>row.style.display=matches.has(row.dataset.msgId)?'':'none');
-    return;
+    if(matches.size){
+      rows.forEach(row=>row.style.display=matches.has(row.dataset.msgId)?'':'none');
+      return;
+    }
   }
+  // Keep search responsive while the current conversation is still decrypting/indexing.
   const needle=q.toLocaleLowerCase();
   rows.forEach(row=>{
     const txt=(row.querySelector('.bubble')?.textContent||'').toLocaleLowerCase();
