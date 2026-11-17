@@ -14,6 +14,19 @@ V5 does not yet claim global historical search across unopened conversations, en
 
 ---
 
+
+## V5 UI foundation
+
+The V5 Smart Inbox, search shortcut and command palette are built with actual **shadcn/ui JavaScript components** using the New York style, Radix primitives, CVA, cmdk, Lucide React and Tailwind CSS 3.4. The app's legacy authentication, settings and message surfaces remain in the original DOM layer; they are not described as migrated yet. New V5 UI work should use the component sources in \`src/components/ui\`.
+
+Use the pinned shadcn CLI to add more JavaScript components:
+
+\`\`\`bash
+npm run ui:add -- button
+npm run ui:add -- alert-dialog
+\`\`\`
+
+
 <div align="center">
 
 # 🛡️ Zyntrixly 5.0

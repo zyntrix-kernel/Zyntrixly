@@ -7,6 +7,11 @@
 - Compact density, reduced motion and focus mode preferences.
 - Paste an image or drop a file to stage an attachment.
 
+## Frontend foundation
+- Smart Inbox, search shortcuts and the command palette now use genuine shadcn/ui React components.
+- Tailwind compiles the shadcn component styles into a production bundle.
+- Legacy authentication, settings and older dialogs remain to be migrated.
+
 ## Reliability and trust
 - Failed message writes no longer create a fake “sent locally” message bubble.
 - Failed sends preserve the text draft.

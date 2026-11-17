@@ -34,6 +34,8 @@
 #zx-v5-shortcut-root, #zx-v5-mobile-shortcut-root { display:inline-flex; flex:0 0 auto; }
 #zx-v5-shortcut-root .zx-v5-ui, #zx-v5-mobile-shortcut-root .zx-v5-ui { display:inline-flex; }
 .sb-search-input { flex:1; min-width:0; }
+#zx-v5-inbox-root { position:relative; z-index:1; flex:0 0 auto; }
+.zx-v5-ui [cmdk-input-wrapper] input { min-width:0; }
 .zx-v5-command-kbd {
   display:inline-flex;height:1.25rem;align-items:center;border:1px solid hsl(var(--border));
   border-radius:.25rem;padding:0 .35rem;color:hsl(var(--muted-foreground));

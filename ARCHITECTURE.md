@@ -107,3 +107,19 @@ search index. It does not own cryptography, message persistence, or server-side 
 
 The decrypted search index is cleared when the authenticated session ends. It is session-scoped
 and only covers messages decrypted after a conversation is opened in this browser session.
+
+
+## V5 shadcn/ui surface
+
+V5 mounts a React island from \`src/ui/main.jsx\` into explicit mount points in the legacy
+HTML shell. The Smart Inbox and command palette are composed from the project's shadcn/ui
+JavaScript components in \`src/components/ui\`. The bridge in \`src/qol/V5Experience.js\`
+exposes only conversation snapshots, device-local preferences, navigation and palette events.
+It does not own encryption or message persistence.
+
+The build in \`scripts/build_frontend.js\` bundles the React island and generates its Tailwind
+stylesheet into \`dist\`. Vercel builds that output through \`npm run build\`.
+
+Authentication, account settings, existing message rows and several older dialogs remain
+legacy DOM components and are pending incremental migration to shadcn/ui. Do not describe
+the full legacy interface as migrated.

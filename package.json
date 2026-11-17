@@ -13,7 +13,8 @@
     "test:all": "node tests/run_all_tests.js",
     "test:syntax": "node --check app.js && node --check src/qol/V5Experience.js && node --check scripts/build_frontend.js",
     "test:visual": "node take_screenshots.js",
-    "build": "node scripts/build_frontend.js"
+    "build": "node scripts/build_frontend.js",
+    "ui:add": "shadcn add"
   },
   "repository": {
     "type": "git",
@@ -33,7 +34,8 @@
     "puppeteer-core": "^25.16.0",
     "tailwindcss": "^3.4.17",
     "tailwindcss-animate": "^1.0.7",
-    "esbuild": "^0.25.12"
+    "esbuild": "^0.25.12",
+    "shadcn": "2.3.0"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.5.0",

@@ -22,6 +22,15 @@ delivery semantics.
 
 These items are implemented in this branch but remain subject to runtime verification.
 
+## V5 shadcn/ui component foundation
+
+- [x] Add real shadcn/ui JavaScript component sources for Button, Badge, Input, Avatar, Tabs, Dialog, Command, ScrollArea, Separator and Card.
+- [x] Build the Smart Inbox, palette triggers and command dialog with those components.
+- [x] Add a React/Tailwind production build and Vercel output configuration.
+- [x] Add design-system and component-contract tests plus CI build checks.
+- [ ] Migrate authentication, settings, remaining dialogs, context menus and composer controls to shadcn/ui.
+- [ ] Remove legacy shadcn-lookalike CSS after all old UI consumers have migrated.
+
 ## V5 quality bar
 
 ### Product feel

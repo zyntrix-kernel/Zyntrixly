@@ -2907,87 +2907,12 @@ window.startChatCall = function(mode) {
 
 
 /* ── COMMAND PALETTE (Cmd+K / Ctrl+K) ────────────────────────── */
-const CMD_ITEMS = [
-  { id: 'new-dm', label: 'Start New Direct Message', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>', action: () => { openModal('nc-modal'); switchMTab(0); } },
-  { id: 'new-group', label: 'Create New Group Conversation', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>', action: () => { openModal('nc-modal'); switchMTab(1); } },
-  { id: 'settings', label: 'Open Settings', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>', action: () => openSettings() },
-  { id: 'appearance', label: 'Appearance & Themes', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 0 0 20v-20z"/></svg>', action: () => { openSettings(); openSettingsView('appearance'); } },
-  { id: 'devices', label: 'Linked Devices & Sessions', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>', action: () => { openSettings(); openSettingsView('devices'); } },
-  { id: 'safety-num', label: 'Copy Cryptographic Safety Number', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', action: () => copySafetyNumber() },
-  { id: 'clear-cache', label: 'Purge Decrypted Local Cache', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/></svg>', action: () => purgeLocalCache() }
-];
-
 function openCommandPalette() {
-  const p = id('cmd-palette');
-  if (!p) return;
-  p.classList.remove('hidden');
-  const inp = id('cmd-search-inp');
-  if (inp) {
-    inp.value = '';
-    inp.focus();
-  }
-  renderCommandList(CMD_ITEMS);
+  if(typeof ZxV5!=='undefined') ZxV5.openPalette();
 }
 
 function closeCommandPalette() {
-  id('cmd-palette')?.classList.add('hidden');
-}
-
-function filterCommandPalette(q) {
-  const query = (q || '').toLowerCase().trim();
-  const filtered = CMD_ITEMS.filter(item => item.label.toLowerCase().includes(query));
-  renderCommandList(filtered);
-}
-
-function renderCommandList(items) {
-  const list = id('cmd-list');
-  if (!list) return;
-  list.innerHTML = '';
-  if (!items.length) {
-    list.innerHTML = '<div style="padding:16px;text-align:center;color:#71717a;font-size:13px">No commands found</div>';
-    return;
-  }
-  items.forEach((item, idx) => {
-    const btn = document.createElement('button');
-    btn.className = 'cmd-item-btn';
-    btn.style.cssText = 'width:100%;display:flex;align-items:center;gap:12px;padding:10px 12px;border:none;background:transparent;color:#f4f4f5;font-size:13px;border-radius:8px;cursor:pointer;text-align:left;transition:background 0.15s';
-    btn.onmouseenter = () => btn.style.background = '#27272a';
-    btn.onmouseleave = () => btn.style.background = 'transparent';
-    btn.innerHTML = `<span style="font-size:16px">${item.icon}</span><span style="flex:1">${item.label}</span>`;
-    btn.onclick = () => {
-      closeCommandPalette();
-      item.action();
-    };
-    list.appendChild(btn);
-  });
-}
-
-function copySafetyNumber() {
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText('84920 18274 91823 84729 19284 82710 49281 92837 40192 84720 19284 72910').then(() => {
-      toast('Copied safety number to clipboard');
-    });
-  } else {
-    toast('Safety Number: 84920 18274 91823 84729');
-  }
-}
-
-function purgeLocalCache() {
-  if (typeof ZxStorage !== 'undefined') {
-    ZxStorage.shredAllLocalData().then(() => {
-      toast('Local decrypted cache purged cleanly.');
-    });
-  } else {
-    toast('Local cache cleared.');
-  }
-}
-
-function openPairingModal() {
-  toast('Pairing QR Code: Scan from mobile to transfer keys securely');
-}
-
-function revokeCurrentSession(devId) {
-  toast('Session revoked successfully.');
+  if(typeof ZxV5!=='undefined') ZxV5.closePalette();
 }
 
 function openMediaLightbox(url, isVideo = false) {
@@ -3016,14 +2941,8 @@ function closeMediaLightbox() {
   if (content) content.innerHTML = '';
 }
 
-// Global keyboard shortcuts (Cmd+K, Ctrl+K, Escape)
+// Escape closes secondary overlays. Cmd/Ctrl+K is owned by the V5 shadcn command dialog.
 document.addEventListener('keydown', (e) => {
-  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-    e.preventDefault();
-    const p = id('cmd-palette');
-    if (p && !p.classList.contains('hidden')) closeCommandPalette();
-    else openCommandPalette();
-  }
   if (e.key === 'Escape') {
     closeCommandPalette();
     closeMediaLightbox();
