@@ -4,39 +4,59 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
-const css = fs.readFileSync(path.join(root, 'src/styles/v5.css'), 'utf8');
-const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-const app = fs.readFileSync(path.join(root, 'src/qol/V5Experience.js'), 'utf8');
+const read = file => fs.readFileSync(path.join(root, file), 'utf8');
+const exists = file => fs.existsSync(path.join(root, file));
 
-test('V5 visual system defines a coherent product-specific color palette', () => {
-  for (const token of ['--zx-ink', '--zx-shell', '--zx-panel', '--zx-blue', '--zx-frost', '--zx-muted']) {
-    assert.match(css, new RegExp(token + '\\s*:'), 'Missing design token ' + token);
+test('project is configured for official shadcn/ui JavaScript components', () => {
+  const config = JSON.parse(read('components.json'));
+  assert.equal(config.style, 'new-york');
+  assert.equal(config.tsx, false);
+  assert.equal(config.aliases.components, '@/components');
+  assert.equal(config.aliases.ui, '@/components/ui');
+});
+
+test('shadcn/ui primitives are real React components backed by Radix and CVA', () => {
+  for (const file of [
+    'src/components/ui/button.jsx',
+    'src/components/ui/badge.jsx',
+    'src/components/ui/input.jsx',
+    'src/components/ui/avatar.jsx',
+    'src/components/ui/tabs.jsx',
+    'src/components/ui/dialog.jsx',
+    'src/components/ui/command.jsx',
+    'src/components/ui/scroll-area.jsx',
+    'src/components/ui/separator.jsx'
+  ]) assert.ok(exists(file), 'Missing shadcn component: ' + file);
+  assert.match(read('src/components/ui/button.jsx'), /@radix-ui\/react-slot/);
+  assert.match(read('src/components/ui/button.jsx'), /class-variance-authority/);
+  assert.match(read('src/components/ui/dialog.jsx'), /@radix-ui\/react-dialog/);
+  assert.match(read('src/components/ui/command.jsx'), /from ['"]cmdk['"]/);
+});
+
+test('V5 application surfaces compose shadcn components instead of hand-built DOM controls', () => {
+  const app = read('src/ui/main.jsx');
+  for (const component of ['Button', 'Badge', 'Avatar', 'Tabs', 'Dialog', 'Command', 'ScrollArea', 'Separator']) {
+    assert.match(app, new RegExp(component), 'V5 UI is missing ' + component);
   }
-  assert.match(css, /--zx-blue\s*:\s*#[0-9a-f]{6}/i);
+  assert.match(app, /createPortal/);
+  assert.match(app, /window\.ZxSearch/);
 });
 
-test('V5 interaction surfaces retain visible keyboard focus and reduced-motion support', () => {
-  assert.match(css, /:focus-visible/);
-  assert.match(css, /prefers-reduced-motion\s*:\s*reduce/);
+test('legacy bridge provides React mount points for sidebar filters and palette triggers', () => {
+  const html = read('index.html');
+  for (const id of ['zx-v5-ui-root', 'zx-v5-inbox-root', 'zx-v5-shortcut-root', 'zx-v5-mobile-shortcut-root']) {
+    assert.match(html, new RegExp('id=["\\\\']' + id + '["\\\\']'));
+  }
+  assert.match(read('src/qol/V5Experience.js'), /zx:v5:open-palette/);
+  assert.match(read('src/qol/V5Experience.js'), /getInboxSnapshot/);
 });
 
-test('V5 layout has a narrow-screen treatment for the mobile command palette entry point', () => {
-  assert.match(html, /id=["']mob-palette-btn["']/);
-  assert.match(html, /id=["']mob-palette-btn["'][^>]*aria-label=["'][^"']+["']/);
-  assert.match(css, /max-width\s*:\s*700px/);
-});
-
-test('message bubbles use the V5 signal palette without decorative gradients', () => {
-  const sentRule = css.match(/\.msg-row\.mine\s+\.bubble\s*\{([^}]*)\}/);
-  const receivedRule = css.match(/\.msg-row\.theirs\s+\.bubble\s*\{([^}]*)\}/);
-  assert.ok(sentRule, 'Sent-message rule is present');
-  assert.ok(receivedRule, 'Received-message rule is present');
-  assert.match(sentRule[1], /background(?:-color)?\s*:\s*var\(--zx-blue\)/);
-  assert.match(receivedRule[1], /background(?:-color)?\s*:\s*var\(--zx-panel\)/);
-  assert.doesNotMatch(sentRule[1], /gradient/i);
-});
-
-test('command palette copy describes local search in plain language', () => {
-  assert.match(app, /Messages are searched on this device/);
-  assert.doesNotMatch(app, /messages in memory · no cloud search/i);
+test('production build emits the React bundle and generated Tailwind stylesheet', () => {
+  const pkg = JSON.parse(read('package.json'));
+  assert.match(pkg.scripts.build, /scripts\/build_frontend\.js/);
+  for (const dep of ['react', 'react-dom', 'cmdk', 'lucide-react']) {
+    assert.ok(pkg.dependencies[dep], 'Missing runtime dependency ' + dep);
+  }
+  assert.ok(pkg.devDependencies.esbuild, 'Missing esbuild build dependency');
+  assert.ok(exists('scripts/build_frontend.js'));
 });
