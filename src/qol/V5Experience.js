@@ -245,6 +245,8 @@
   const list=byId('sb-list');
   if(list&&typeof MutationObserver!=='undefined'){const mo=new MutationObserver(()=>applyInboxFilter());mo.observe(list,{childList:true,subtree:true});}
   wireComposer();
+  const paletteTrigger=byId('zx-v5-palette-trigger');
+  if(paletteTrigger)paletteTrigger.addEventListener('click',openPalette);
  }
  function resetSession(){closePalette();if(root.ZxSearch&&typeof root.ZxSearch.clearIndex==='function')root.ZxSearch.clearIndex();syncFocusMode(false);}
  function getStatus(){return {version:'5.0.0',preferences:prefs?prefs.get():{...DEFAULTS},

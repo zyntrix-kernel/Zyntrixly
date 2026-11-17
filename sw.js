@@ -1,4 +1,4 @@
-const CACHE='zyntrixly-v3';
+const CACHE='zyntrixly-v5';
 const SHELL=[
   './',
   './index.html',
@@ -7,6 +7,8 @@ const SHELL=[
   './security.js',
   './webrtc.js',
   './style.css',
+  './src/qol/V5Experience.js',
+  './src/styles/v5.css',
   './manifest.webmanifest',
   './assets/app-icon-192.png',
   './assets/app-icon-512.png',
