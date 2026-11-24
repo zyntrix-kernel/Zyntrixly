@@ -1,13 +1,13 @@
-// ════════════════════════════════════════════════
-//  ZYNTRIXLY 2.0 — src/config/appConfig.js
+// ══════════════════════════════════════════
+//  ZYNTRIXLY 10 — src/config/appConfig.js
 //  Centralized Runtime & Environment Configuration
-// ════════════════════════════════════════════════
+// ══════════════════════════════════════════
 
 const ZxConfig = (() => {
   const DEFAULT_CONFIG = {
-    version: '2.0.0',
+    version: '10.0.0',
     appName: 'Zyntrixly',
-    codename: 'Zyntrixly Evolution',
+    codename: 'The Sovereign Client',
     // WebRTC STUN/TURN configuration
     iceServers: [
       { urls: 'stun:stun.l.google.com:19302' },

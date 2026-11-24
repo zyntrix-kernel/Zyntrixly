@@ -1,12 +1,12 @@
 {
-  "name": "Zyntrixly",
+  "name": "Zyntrixly 10 — The Sovereign Client",
   "short_name": "Zyntrixly",
-  "description": "Zero-knowledge end-to-end encrypted messaging and calling",
+  "description": "Zero-knowledge private OS: encrypted messaging, calling, vault and on-device intelligence",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#05070a",
-  "theme_color": "#05070a",
+  "background_color": "#050507",
+  "theme_color": "#050507",
   "orientation": "any",
   "icons": [
     {

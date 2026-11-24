@@ -1,7 +1,7 @@
-# ════════════════════════════════════════════════
-#  ZYNTRIXLY 2.0 — Production Dockerfile
+# ════════════════════════════════════════
+#  ZYNTRIXLY 10 — Production Dockerfile
 #  Ultra-lightweight static server via Caddy
-# ════════════════════════════════════════════════
+# ════════════════════════════════════════
 
 FROM caddy:2-alpine
 
@@ -12,10 +12,11 @@ WORKDIR /srv
 COPY index.html ./
 COPY app.js crypto.js webrtc.js security.js sw.js ./
 COPY style.css shadcn.css manifest.webmanifest ./
-COPY app-icon.svg app-icon.png zyntrixly-logo.svg zyntrixly-logo.png ./
+COPY app-icon.svg app-icon.png zyntrixly-logo.svg ./
 COPY assets ./assets/
 COPY src ./src/
 COPY api ./api/
+COPY vendor ./vendor/
 COPY Caddyfile /etc/caddy/Caddyfile
 
 # Expose HTTP port

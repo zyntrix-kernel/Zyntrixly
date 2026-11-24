@@ -1,4 +1,4 @@
-const CACHE='zyntrixly-v3';
+const CACHE='zyntrixly-v10';
 const SHELL=[
   './',
   './index.html',
@@ -7,6 +7,21 @@ const SHELL=[
   './security.js',
   './webrtc.js',
   './style.css',
+  './shadcn.css',
+  './src/styles/v10.css',
+  './src/v10/MotionEngine.js',
+  './src/v10/CommandDeck.js',
+  './src/v10/Vault.js',
+  './src/v10/PanicLock.js',
+  './src/v10/Concierge.js',
+  './src/v10/boot.js',
+  './vendor/gsap/gsap.min.js',
+  './src/crypto/MLSEngine.js',
+  './src/crypto/WebAuthnPRF.js',
+  './src/spaces/SpaceManager.js',
+  './src/apps/CanvasEngine.js',
+  './src/ai/OnDeviceAI.js',
+  './src/media/StageController.js',
   './manifest.webmanifest',
   './assets/app-icon-192.png',
   './assets/app-icon-512.png',
@@ -30,7 +45,11 @@ const SHELL=[
 ];
 
 self.addEventListener('install',e=>{
-  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)));
+  // Resilient precache: one missing optional asset (e.g. vendor/gsap on a
+  // raw static checkout) must never fail the whole service worker install.
+  e.waitUntil(caches.open(CACHE).then(async c=>{
+    await Promise.allSettled(SHELL.map(u=>c.add(u)));
+  }));
   self.skipWaiting();
 });
 
