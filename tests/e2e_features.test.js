@@ -269,13 +269,16 @@ test('E2E-05: Real-Time Messaging & iMessage Bubbles', async () => {
   });
   assert.strictEqual(bubbleText, testMsg, 'Sent message rendered in bubble');
 
-  // Verify Apple HIG iOS Blue color on sent bubble
-  const bubbleBg = await page.evaluate(() => {
+  // Verify V10 Darkroom styling on sent bubble (ember gradient + ember hairline)
+  const mineStyle = await page.evaluate(() => {
     const b = document.querySelector('#msg-test-1 .bubble');
-    return window.getComputedStyle(b).backgroundColor;
+    const s = window.getComputedStyle(b);
+    return { bgImage: s.backgroundImage, border: s.borderLeftColor };
   });
-  // rgb(0, 122, 255) is #007aff
-  assert.strictEqual(bubbleBg, 'rgb(0, 122, 255)', 'Sent bubble background is Apple HIG iOS System Blue');
+  assert.ok(
+    mineStyle.bgImage.includes('linear-gradient') && mineStyle.border.includes('255, 106, 61'),
+    'Sent bubble uses the V10 Darkroom ember gradient with ember hairline'
+  );
 
   // Add received bubble
   await page.evaluate(() => {
@@ -295,8 +298,8 @@ test('E2E-05: Real-Time Messaging & iMessage Bubbles', async () => {
     const b = document.querySelector('#msg-test-2 .bubble');
     return window.getComputedStyle(b).backgroundColor;
   });
-  // rgb(44, 44, 46) is #2c2c2e
-  assert.strictEqual(theirsBg, 'rgb(44, 44, 46)', 'Received bubble background is Apple HIG dark gray #2c2c2e');
+  // rgb(18, 18, 22) is #121216 — the Darkroom raised surface
+  assert.strictEqual(theirsBg, 'rgb(18, 18, 22)', 'Received bubble background is the V10 Darkroom raised surface #121216');
 });
 
 test('E2E-06: Message Reply & Reaction Interactions', async () => {
