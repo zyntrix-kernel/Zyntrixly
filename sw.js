@@ -1,4 +1,4 @@
-const CACHE='zyntrixly-v10';
+const CACHE='zyntrixly-v101';
 const SHELL=[
   './',
   './index.html',

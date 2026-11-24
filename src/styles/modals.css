@@ -796,7 +796,7 @@
 /* ── PWA Install Banner ── */
 .install-banner {
   position: fixed;
-  bottom: 20px;
+  bottom: 92px; /* clear the composer dock — never covers the input */
   right: 20px;
   background: linear-gradient(180deg, rgba(22, 28, 40, 0.94), rgba(10, 14, 22, 0.97));
   border: 1px solid var(--border-normal);
@@ -853,3 +853,43 @@
 .install-btn-muted {
   color: var(--text-muted);
 }
+
+/* ═══ MOBILE BOTTOM SHEETS — real mobile-app modal pattern (≤925px) ═══════
+   Desktop keeps centered dialogs; on phones every dialog docks to the bottom
+   edge with a slide-up spring, grab handle, and safe-area padding.          */
+
+@media (max-width: 925px) {
+  .modal-bg {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal {
+    max-width: 100%;
+    width: 100%;
+    max-height: 88dvh;
+    border-radius: 20px 20px 0 0;
+    border-bottom: none;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    animation: sheetUp 0.28s var(--spring-bounce) both;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .modal::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4px;
+    margin: 0 auto 8px;
+    border-radius: 999px;
+    background: var(--border-strong);
+    flex-shrink: 0;
+  }
+}
+
+@keyframes sheetUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+

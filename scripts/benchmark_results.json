@@ -1,0 +1,324 @@
+{
+  "ours": {
+    "desktop": {
+      "title": "ZYNTRIXLY (ours)",
+      "sidebar": {
+        "w": 340,
+        "h": 900
+      },
+      "sidebarStyle": {
+        "width": "340px",
+        "minWidth": "auto",
+        "maxWidth": "none"
+      },
+      "chatHdr": {
+        "w": 1036,
+        "h": 48
+      },
+      "mobHdr": {
+        "w": 0,
+        "h": 0
+      },
+      "composer": {
+        "w": 1036,
+        "h": 69
+      },
+      "composerPad": {
+        "paddingBottom": "10px",
+        "padding": "10px 12px"
+      },
+      "input": {
+        "w": 834,
+        "h": 48
+      },
+      "inputStyle": {
+        "fontSize": "15px",
+        "lineHeight": "22.5px",
+        "minHeight": "auto"
+      },
+      "sendBtn": {
+        "w": 0,
+        "h": 0
+      },
+      "emojiBtn": {
+        "w": 36,
+        "h": 36
+      },
+      "convItem": {
+        "w": 315,
+        "h": 64
+      },
+      "convItemStyle": {
+        "padding": "8px 10px",
+        "gap": "12px"
+      },
+      "bubble": {
+        "w": 620,
+        "h": 64
+      },
+      "bubbleStyle": {
+        "padding": "10px 14px",
+        "fontSize": "14.5px",
+        "lineHeight": "21.025px",
+        "maxWidth": "none",
+        "borderRadius": "18px 18px 18px 5px"
+      },
+      "msgsWrap": {
+        "w": 1036,
+        "h": 783
+      },
+      "appLayout": {
+        "display": "grid",
+        "gridTemplateColumns": "64px 340px 1036px",
+        "flexDirection": "row"
+      },
+      "spaceRail": {
+        "w": 64,
+        "h": 900
+      },
+      "mainPanel": {
+        "w": 1036,
+        "h": 900
+      },
+      "smallTargets": [
+        {
+          "sel": "rail-btn-home",
+          "w": 36,
+          "h": 36
+        },
+        {
+          "sel": "rail-space-space_core",
+          "w": 36,
+          "h": 36
+        },
+        {
+          "sel": "rail-explore-btn",
+          "w": 36,
+          "h": 36
+        },
+        {
+          "sel": "sb-icon-btn",
+          "w": 36,
+          "h": 36
+        },
+        {
+          "sel": "fs-btn-sb",
+          "w": 36,
+          "h": 36
+        },
+        {
+          "sel": "sb-icon-btn",
+          "w": 36,
+          "h": 36
+        },
+        {
+          "sel": "ai-catchup-btn",
+          "w": 97,
+          "h": 30
+        },
+        {
+          "sel": "sb-icon-btn",
+          "w": 36,
+          "h": 36
+        },
+        {
+          "sel": "sb-icon-btn",
+          "w": 36,
+          "h": 36
+        },
+        {
+          "sel": "compose-icon-btn",
+          "w": 36,
+          "h": 36
+        },
+        {
+          "sel": "emoji-btn",
+          "w": 36,
+          "h": 36
+        },
+        {
+          "sel": "audio-rec-btn",
+          "w": 36,
+          "h": 36
+        },
+        {
+          "sel": "send-btn",
+          "w": 38,
+          "h": 38
+        },
+        {
+          "sel": "install-btn",
+          "w": 72,
+          "h": 30
+        },
+        {
+          "sel": "install-btn",
+          "w": 59,
+          "h": 30
+        }
+      ],
+      "smallCount": 15
+    },
+    "mobile": {
+      "title": "ZYNTRIXLY (ours)",
+      "sidebar": {
+        "w": 0,
+        "h": 0
+      },
+      "sidebarStyle": {
+        "width": "100%",
+        "minWidth": "0px",
+        "maxWidth": "none"
+      },
+      "chatHdr": {
+        "w": 390,
+        "h": 48
+      },
+      "mobHdr": {
+        "w": 390,
+        "h": 48
+      },
+      "composer": {
+        "w": 390,
+        "h": 69
+      },
+      "composerPad": {
+        "paddingBottom": "10px",
+        "padding": "10px 12px"
+      },
+      "input": {
+        "w": 274,
+        "h": 48
+      },
+      "inputStyle": {
+        "fontSize": "15px",
+        "lineHeight": "22.5px",
+        "minHeight": "auto"
+      },
+      "sendBtn": {
+        "w": 0,
+        "h": 0
+      },
+      "emojiBtn": {
+        "w": 44,
+        "h": 44
+      },
+      "convItem": {
+        "w": 0,
+        "h": 0
+      },
+      "convItemStyle": {
+        "padding": "8px 10px",
+        "gap": "12px"
+      },
+      "bubble": {
+        "w": 246,
+        "h": 106
+      },
+      "bubbleStyle": {
+        "padding": "10px 14px",
+        "fontSize": "14.5px",
+        "lineHeight": "21.025px",
+        "maxWidth": "none",
+        "borderRadius": "18px 18px 18px 5px"
+      },
+      "msgsWrap": {
+        "w": 390,
+        "h": 679
+      },
+      "appLayout": {
+        "display": "grid",
+        "gridTemplateColumns": "390px",
+        "flexDirection": "row"
+      },
+      "spaceRail": {
+        "w": 0,
+        "h": 0
+      },
+      "mainPanel": {
+        "w": 390,
+        "h": 796
+      },
+      "smallTargets": [
+        {
+          "sel": "send-btn",
+          "w": 38,
+          "h": 38
+        }
+      ],
+      "smallCount": 1
+    }
+  },
+  "element": {
+    "desktop": {
+      "title": "Element",
+      "panels": [],
+      "headers": [],
+      "composers": [],
+      "bubbles": [],
+      "listItems": [],
+      "hOverflow": 0,
+      "_ok": true
+    },
+    "mobile": {
+      "title": "Element",
+      "panels": [],
+      "headers": [],
+      "composers": [],
+      "bubbles": [],
+      "listItems": [],
+      "hOverflow": 0,
+      "_ok": true
+    }
+  },
+  "telegram": {
+    "desktop": {
+      "title": "Telegram Web",
+      "panels": [],
+      "headers": [],
+      "composers": [],
+      "bubbles": [],
+      "listItems": [],
+      "hOverflow": 0,
+      "_ok": true
+    },
+    "mobile": {
+      "title": "Telegram Web",
+      "panels": [
+        {
+          "sel": "div.sidebar-left-overlay",
+          "w": 390,
+          "h": 844
+        }
+      ],
+      "headers": [],
+      "composers": [],
+      "bubbles": [],
+      "listItems": [],
+      "hOverflow": 0,
+      "_ok": true
+    }
+  },
+  "whatsapp": {
+    "desktop": {
+      "title": "WhatsApp",
+      "panels": [],
+      "headers": [],
+      "composers": [],
+      "bubbles": [],
+      "listItems": [],
+      "hOverflow": 0,
+      "_ok": true
+    },
+    "mobile": {
+      "title": "WhatsApp",
+      "panels": [],
+      "headers": [],
+      "composers": [],
+      "bubbles": [],
+      "listItems": [],
+      "hOverflow": 0,
+      "_ok": true
+    }
+  }
+}
