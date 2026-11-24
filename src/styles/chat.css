@@ -1,6 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   ZYNTRIXLY V4 — CHAT ENGINE, WHITEBOARD CANVAS & SPATIAL STAGE
-   Apple HIG Messages Precision · Specular Insets · Sub-pixel Alignment
+   ZYNTRIXLY 10 — CHAT ENGINE, WHITEBOARD CANVAS & SPATIAL STAGE
+   Voice-coded bubbles (emerald = you, graphite = them) · pop physics ·
+   vault-teal presence · sub-pixel precision
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* ── Chat Pane Shell ── */
@@ -16,12 +17,12 @@
 
 /* ── Chat Header Bar ── */
 .chat-hdr {
-  height: 60px;
+  height: 62px;
   padding: 0 16px;
-  background: rgba(18, 18, 21, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border-normal);
+  background: rgba(6, 9, 15, 0.78);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  border-bottom: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -58,7 +59,7 @@
 .chat-hdr-name {
   font-size: 15px;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.012em;
   color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
@@ -70,19 +71,20 @@
   color: var(--text-muted);
 }
 
-/* MLS v3 Security Badge */
+/* MLS v3 Security Badge — machine voice in mint */
 .mls-badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 600;
-  padding: 2px 7px;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
   border-radius: var(--radius-pill);
-  background: rgba(52, 199, 89, 0.12);
-  color: var(--system-green);
-  border: 1px solid rgba(52, 199, 89, 0.25);
-  box-shadow: 0 0 10px rgba(52, 199, 89, 0.1);
+  background: rgba(45, 212, 191, 0.10);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+  box-shadow: 0 0 12px rgba(45, 212, 191, 0.10);
 }
 
 /* AI Catch-Up Button */
@@ -91,21 +93,20 @@
   align-items: center;
   gap: 6px;
   height: 30px;
-  padding: 0 10px;
+  padding: 0 11px;
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--border-normal);
+  background: var(--accent-tint);
+  border: 1px solid var(--accent-border);
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-primary);
-  box-shadow: var(--shadow-sm);
+  color: var(--accent);
+  box-shadow: 0 0 14px rgba(45, 212, 191, 0.08);
   transition: all var(--anim-fast) ease;
 }
 
 .ai-catchup-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 14px rgba(255, 255, 255, 0.08);
+  background: rgba(45, 212, 191, 0.18);
+  box-shadow: 0 0 20px rgba(45, 212, 191, 0.18);
 }
 
 .chat-hdr-actions {
@@ -146,33 +147,33 @@
   max-width: 72%;
   position: relative;
   word-break: break-word;
-  animation: msgFadeIn 0.18s var(--spring-ease);
+  animation: msgPop 0.24s var(--spring-bounce);
 }
 
-@keyframes msgFadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes msgPop {
+  from { opacity: 0; transform: translateY(6px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* Sent Messages (Strict Apple HIG iOS System Blue #007aff rgb(0, 122, 255)) */
+/* Sent Messages — Emerald: my voice */
 .msg.mine, .msg-row.mine {
   align-self: flex-end;
 }
 
 .msg.mine .msg-bubble,
 .msg-row.mine .bubble {
-  background-color: #007aff;
-  background-image: linear-gradient(180deg, #007aff 0%, #0062cc 100%);
+  background-color: #059669;
+  background-image: var(--voice-gradient);
   color: #ffffff;
-  border-radius: 18px 18px 4px 18px;
+  border-radius: 18px 18px 5px 18px;
   padding: 10px 14px;
-  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 3px 12px rgba(5, 150, 105, 0.30), 0 1px 3px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   font-size: 14.5px;
   line-height: 1.45;
 }
 
-/* Received Messages (Strict Apple HIG Dark Gray #2c2c2e rgb(44, 44, 46)) */
+/* Received Messages — elevated graphite */
 .msg:not(.mine), .msg-row.theirs, .msg-row:not(.mine) {
   align-self: flex-start;
 }
@@ -180,13 +181,11 @@
 .msg:not(.mine) .msg-bubble,
 .msg-row.theirs .bubble,
 .msg-row:not(.mine) .bubble {
-  background-color: #2c2c2e;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background-color: var(--bg-surface-floating);
   color: var(--text-primary);
-  border-radius: 18px 18px 18px 4px;
+  border-radius: 18px 18px 18px 5px;
   padding: 10px 14px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), var(--rim-highlight-subtle);
   border: 1px solid var(--border-normal);
   font-size: 14.5px;
   line-height: 1.45;
@@ -209,7 +208,7 @@
   gap: 4px;
   margin-top: 4px;
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.65);
+  color: rgba(255, 255, 255, 0.66);
 }
 
 .msg:not(.mine) .msg-foot {
@@ -219,11 +218,11 @@
 
 .msg-ticks {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.72);
 }
 
 .msg-ticks.read {
-  color: #93c5fd;
+  color: #5eead4;
   font-weight: 600;
 }
 
@@ -239,10 +238,10 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 7px;
+  padding: 2px 8px;
   border-radius: var(--radius-pill);
   font-size: 11.5px;
-  background: rgba(24, 24, 27, 0.8);
+  background: rgba(16, 21, 31, 0.88);
   border: 1px solid var(--border-normal);
   box-shadow: var(--shadow-sm);
   color: var(--text-primary);
@@ -255,18 +254,18 @@
 }
 
 .r-pill.mine-r {
-  background: rgba(0, 122, 255, 0.2);
-  border-color: rgba(0, 122, 255, 0.4);
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(16, 185, 129, 0.4);
 }
 
 /* Replied Excerpt inside bubble */
 .replied-preview {
   padding: 4px 8px;
-  border-left: 2px solid rgba(255, 255, 255, 0.5);
+  border-left: 2px solid rgba(94, 234, 212, 0.6);
   margin-bottom: 6px;
   font-size: 12px;
-  opacity: 0.85;
-  background: rgba(0, 0, 0, 0.1);
+  opacity: 0.88;
+  background: rgba(0, 0, 0, 0.14);
   border-radius: 4px;
 }
 
@@ -276,8 +275,8 @@
   align-items: center;
   gap: 10px;
   padding: 8px 16px;
-  background: var(--bg-surface-raised);
-  border-top: 1px solid var(--border-normal);
+  background: rgba(10, 14, 22, 0.9);
+  border-top: 1px solid var(--border-subtle);
   font-size: 12.5px;
 }
 
@@ -285,7 +284,8 @@
   width: 3px;
   height: 24px;
   border-radius: var(--radius-pill);
-  background: var(--system-blue);
+  background: var(--accent-gradient);
+  box-shadow: 0 0 8px var(--accent-glow);
 }
 
 .rs-body {
@@ -297,7 +297,7 @@
 
 .rs-who {
   font-weight: 600;
-  color: var(--system-blue);
+  color: var(--accent);
 }
 
 .rs-txt {
@@ -325,8 +325,8 @@
 /* ── Attachment Preview Dock ── */
 .attach-dock {
   padding: 8px 16px;
-  background: var(--bg-surface-raised);
-  border-top: 1px solid var(--border-normal);
+  background: rgba(10, 14, 22, 0.9);
+  border-top: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -336,6 +336,10 @@
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.file-icon-box {
+  color: var(--accent);
 }
 
 .attach-dock-name {
@@ -352,10 +356,10 @@
 /* ── Composer Dock ── */
 .composer {
   padding: 12px 16px;
-  background: rgba(18, 18, 21, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border-normal);
+  background: rgba(6, 9, 15, 0.78);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  border-top: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -366,7 +370,7 @@
 .compose-icon-btn {
   width: 36px;
   height: 36px;
-  border-radius: var(--radius-button);
+  border-radius: var(--radius-pill);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -381,38 +385,39 @@
 
 .compose-input {
   flex: 1;
-  height: 40px;
+  height: 42px;
   padding: 0 16px;
-  background: var(--bg-surface-raised);
+  background: rgba(4, 6, 11, 0.6);
   border: 1px solid var(--border-normal);
   border-radius: var(--radius-pill);
   color: var(--text-primary);
   font-size: 14px;
-  transition: all var(--anim-fast) ease;
+  transition: all var(--anim-normal) ease;
 }
 
 .compose-input:focus {
   outline: none;
-  border-color: var(--system-blue);
-  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+  border-color: var(--accent-border);
+  background: rgba(4, 6, 11, 0.85);
+  box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.10);
 }
 
 .send-btn {
   position: relative;
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: var(--radius-pill);
-  background: var(--system-blue);
+  background: var(--voice-gradient);
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--shadow-blue);
+  box-shadow: var(--shadow-voice);
   transition: all var(--anim-fast) var(--spring-ease);
 }
 
 .send-btn:hover {
-  background: var(--system-blue-hover);
+  filter: brightness(1.08);
   transform: scale(1.05);
 }
 
@@ -420,7 +425,7 @@
 .rec-hud {
   position: absolute;
   inset: 0;
-  background: var(--bg-surface);
+  background: rgba(8, 11, 18, 0.97);
   display: flex;
   align-items: center;
   padding: 0 16px;
@@ -432,8 +437,8 @@
   width: 10px;
   height: 10px;
   border-radius: var(--radius-pill);
-  background: var(--system-red);
-  box-shadow: 0 0 10px rgba(255, 59, 48, 0.6);
+  background: var(--system-red-strong);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
   animation: recBlink 1s infinite alternate;
 }
 
@@ -459,7 +464,7 @@
 .rec-wave-bar {
   width: 3px;
   height: 6px;
-  background: var(--system-blue);
+  background: var(--accent);
   border-radius: var(--radius-pill);
   animation: recWave 0.8s infinite ease-in-out alternate;
 }
@@ -480,16 +485,17 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  background: #09090b;
+  background: var(--bg-app);
   overflow: hidden;
 }
 
 .canvas-toolbar {
   height: 52px;
   padding: 0 16px;
-  background: rgba(18, 18, 21, 0.9);
+  background: rgba(6, 9, 15, 0.88);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border-normal);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -515,9 +521,9 @@
 }
 
 .canvas-tool-btn.active {
-  background: var(--bg-surface-raised);
-  border-color: rgba(255, 255, 255, 0.2);
-  color: var(--text-primary);
+  background: var(--accent-tint);
+  border-color: var(--accent-border);
+  color: var(--accent);
 }
 
 .swatch-group {
@@ -525,8 +531,8 @@
   align-items: center;
   gap: 6px;
   padding: 0 8px;
-  border-left: 1px solid var(--border-normal);
-  border-right: 1px solid var(--border-normal);
+  border-left: 1px solid var(--border-subtle);
+  border-right: 1px solid var(--border-subtle);
 }
 
 .color-swatch {
@@ -580,6 +586,7 @@
 .stage-title {
   font-size: 20px;
   font-weight: 700;
+  letter-spacing: -0.015em;
   color: var(--text-primary);
   display: flex;
   align-items: center;
@@ -614,19 +621,25 @@
   text-align: center;
   gap: 10px;
   box-shadow: var(--shadow-sm);
-  transition: all var(--anim-fast) ease;
+  transition: all var(--anim-normal) var(--spring-ease);
+}
+
+.stage-speaker-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
 }
 
 .stage-speaker-card.speaking {
-  border-color: var(--system-green);
-  box-shadow: 0 0 16px rgba(52, 199, 89, 0.25);
+  border-color: rgba(45, 212, 191, 0.5);
+  box-shadow: 0 0 20px rgba(45, 212, 191, 0.16), var(--shadow-sm);
 }
 
 .stage-speaker-av {
   width: 56px;
   height: 56px;
   border-radius: var(--radius-pill);
-  background: var(--bg-surface-raised);
+  background: var(--bg-surface-floating);
+  border: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -640,10 +653,12 @@
 }
 
 .stage-speaker-role {
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.05em;
-  color: var(--system-green);
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
 }
 
 .stage-ctrl-bar {

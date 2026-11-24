@@ -6,9 +6,9 @@ const puppeteer = require('puppeteer-core');
 const PORT = 3456;
 const CHROME_PATH = process.env.CHROME_BIN || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const LOCAL_DIR = path.join(__dirname, 'screenshots');
-const ARTIFACT_DIR = process.env.ARTIFACT_DIR || path.join('C:', 'Users', 'USER', '.gemini', 'antigravity', 'brain', 'cb239868-c9aa-42f5-ac96-9790b5d3c206', 'screenshots');
+const ARTIFACT_DIR = process.env.ARTIFACT_DIR || null;
 
-[LOCAL_DIR, ARTIFACT_DIR].forEach(dir => {
+[LOCAL_DIR, ARTIFACT_DIR].filter(Boolean).forEach(dir => {
   if (dir && !fs.existsSync(dir)) {
     try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {}
   }

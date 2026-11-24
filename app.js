@@ -836,7 +836,7 @@ function applyFont(style,save=true){
 function toggleAuthMode(){
   isSignIn=!isSignIn;
   id('auth-title').textContent=isSignIn?'Welcome back':'Create account';
-  id('auth-subtitle').textContent=isSignIn?'Sign in to continue to Zyntrixly':'Private by default';
+  id('auth-subtitle').textContent=isSignIn?'Sign in to continue to Zyntrixly 10':'Private by default';
   id('auth-btn-label').textContent=isSignIn?'Sign in':'Create account';
   id('auth-toggle-label').textContent=isSignIn?'Create a new account':'Already have an account?';
   id('f-confirm-wrap').classList.toggle('hidden',isSignIn);

@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🛡️ Zyntrixly 2.0
+# 🛡️ Zyntrixly 10 (Obsidian)
 
 ### Private. Encrypted. Multi-Device. Yours.
 
@@ -15,9 +15,22 @@ No phone number. No email required. No surveillance. No telemetry.
 
 ---
 
-## 🌟 What's New in Zyntrixly 2.0
+## 🌑 What's New in Zyntrixly 10 — "Obsidian"
 
-Zyntrixly 2.0 transforms Zyntrixly from an encrypted prototype into an enterprise-grade, privacy-first communication platform:
+Zyntrixly 10 is a ground-up visual redesign built on a single doctrine (**tasteskill anti-slop**): one system, quiet panels, color spent on meaning.
+
+- 🌌 **Obsidian Design System:** Deep-space ink ground (`#04060B`) with a layered aurora field and film grain, replacing flat zinc black.
+- 🎨 **Voice-Coded Palette:** Vault Teal (`#2DD4BF`) is reserved for security and active states; Emerald (`#10B981`) belongs exclusively to *your* voice — bubbles, send, toggles. Color now means something.
+- ⌨️ **Machine Voice Typography:** JetBrains Mono speaks for the machine — security badges, version chips, and record-keeping timestamps render in mono with tabular numerals.
+- ✨ **Choreographed Motion:** Staggered auth-card rise, startup lockup with V10 chip and breathing halo, bubble pop physics, spring pill indicators — every entrance earned, nothing decorative.
+- 🧭 **Instrument Details:** Gradient hairlines on every floating surface, teal-tinted focus rings, concentric 12→20→24px radii, refined 5px scrollbars.
+- 🏷️ **V10 Branding:** Version 10.0.0 across the PWA manifest, service-worker cache, About view, and startup lockup.
+
+---
+
+## 🌟 What Shipped in Zyntrixly 2.0
+
+Zyntrixly 2.0 transformed Zyntrixly from an encrypted prototype into an enterprise-grade, privacy-first communication platform:
 
 - 🛡️ **Zero-Knowledge Metadata Budget:** Plaintext previews (`lastMsg`) eliminated from database records; message previews are decrypted on the client.
 - 🔑 **Multi-Device Cryptographic Architecture:** Multi-device identity keys, deterministic safety numbers (60-digit SHA-512 fingerprints), and BIP-39 recovery keys.

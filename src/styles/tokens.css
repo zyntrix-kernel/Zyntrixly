@@ -1,63 +1,83 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   ZYNTRIXLY V4 (Quality of Life) — DESIGN TOKENS & SYSTEM FOUNDATION
-   Architecture: Apple HIG + shadcn Zinc OLED Dark Design System
-   Interaction Engineering: Micro-Spring Physics & Concentric Radii
+   ZYNTRIXLY 10 — "OBSIDIAN" · DESIGN TOKENS & SYSTEM FOUNDATION
+   Doctrine: tasteskill anti-slop — one system, quiet panels, color spent on
+   meaning. Deep-space ink ground, Vault Teal for security states, Emerald
+   reserved for the user's own voice. JetBrains Mono speaks for the machine.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 :root {
-  /* ── Core OLED Palette (Apple + Zinc 950) ── */
-  --bg-app: #09090b;
-  --bg-surface: #121215;
-  --bg-surface-raised: #18181b;
-  --bg-surface-floating: #1f1f23;
-  --bg-surface-hover: rgba(255, 255, 255, 0.04);
-  --bg-surface-active: rgba(255, 255, 255, 0.08);
+  /* ── Obsidian Ground (cold ink, blue-cast) ── */
+  --bg-app: #04060b;
+  --bg-surface: #0a0e16;
+  --bg-surface-raised: #10151f;
+  --bg-surface-floating: #161c28;
+  --bg-surface-hover: rgba(148, 197, 214, 0.05);
+  --bg-surface-active: rgba(148, 197, 214, 0.09);
 
-  /* ── Apple HIG System Colors ── */
-  --system-blue: #007aff;
-  --system-blue-hover: #0066d6;
-  --system-blue-gradient: linear-gradient(180deg, #007aff 0%, #0062cc 100%);
-  --system-green: #34c759;
-  --system-orange: #ff9500;
-  --system-red: #ff3b30;
-  --system-purple: #af52de;
+  /* ── Voice-Coded Palette ── */
+  /* Vault Teal — security, focus, "the vault is sealed" */
+  --accent: #2dd4bf;
+  --accent-strong: #14b8a6;
+  --accent-deep: #0f766e;
+  --accent-glow: rgba(45, 212, 191, 0.32);
+  --accent-gradient: linear-gradient(135deg, #5eead4 0%, #2dd4bf 48%, #0ea5e9 100%);
+  --accent-tint: rgba(45, 212, 191, 0.12);
+  --accent-border: rgba(45, 212, 191, 0.28);
+
+  /* Emerald — my voice: my bubbles, send, toggles-on */
+  --voice: #10b981;
+  --voice-strong: #059669;
+  --voice-gradient: linear-gradient(160deg, #10b981 0%, #059669 100%);
+  --voice-glow: rgba(16, 185, 129, 0.30);
+
+  /* Semantic status */
+  --system-blue: #38bdf8;          /* links & informational only */
+  --system-blue-hover: #0ea5e9;
+  --system-green: #34d399;
+  --system-orange: #fbbf24;
+  --system-red: #f87171;
+  --system-red-strong: #ef4444;
 
   /* ── Typographic Tiers ── */
-  --text-primary: #fafafa;
-  --text-muted: #a1a1aa;
-  --text-subdued: #71717a;
-  --text-disabled: #3f3f46;
+  --text-primary: #f2f6f9;
+  --text-muted: #9aa8b6;
+  --text-subdued: #64707e;
+  --text-disabled: #3c4550;
 
-  /* ── Specular Hairlines & Hairline Borders ── */
-  --border-subtle: rgba(255, 255, 255, 0.05);
-  --border-normal: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.14);
-  --border-focus: rgba(0, 122, 255, 0.6);
-  --rim-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
-  --rim-highlight-subtle: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  /* ── Hairlines & Rims (cool cast) ── */
+  --border-subtle: rgba(151, 180, 199, 0.07);
+  --border-normal: rgba(151, 180, 199, 0.11);
+  --border-strong: rgba(151, 180, 199, 0.19);
+  --border-focus: var(--accent-border);
+  --rim-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.09);
+  --rim-highlight-subtle: inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+  --hairline-gradient: linear-gradient(90deg, transparent, rgba(94, 234, 212, 0.35) 50%, transparent);
 
   /* ── Concentric Radii Hierarchy ── */
-  --radius-outer: 16px;
-  --radius-card: 12px;
-  --radius-button: 10px;
+  --radius-outer: 20px;
+  --radius-card: 16px;
+  --radius-button: 12px;
   --radius-pill: 9999px;
-  --radius-tag: 6px;
+  --radius-tag: 7px;
+  --radius-modal: 24px;
 
   /* ── Depths & Shadows ── */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), var(--rim-highlight-subtle);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5), var(--rim-highlight);
-  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.7), var(--rim-highlight);
-  --shadow-blue: 0 4px 14px rgba(0, 122, 255, 0.35);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 6px rgba(0, 0, 0, 0.2), var(--rim-highlight-subtle);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45), 0 2px 28px rgba(0, 0, 0, 0.28), var(--rim-highlight);
+  --shadow-lg: 0 18px 48px rgba(0, 0, 0, 0.62), 0 4px 90px rgba(0, 0, 0, 0.4), var(--rim-highlight);
+  --shadow-accent: 0 4px 18px rgba(45, 212, 191, 0.28), 0 1px 4px rgba(45, 212, 191, 0.2);
+  --shadow-voice: 0 4px 16px var(--voice-glow);
 
-  /* ── Spring Motions & Transitions ── */
+  /* ── Spring Motions ── */
   --spring-ease: cubic-bezier(0.16, 1, 0.3, 1);
   --spring-bounce: cubic-bezier(0.34, 1.45, 0.64, 1);
   --anim-fast: 140ms;
-  --anim-normal: 200ms;
+  --anim-normal: 220ms;
+  --anim-slow: 420ms;
 
   /* ── Typography Stack ── */
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", -apple-system-subheadline, "Segoe UI", Roboto, sans-serif;
-  --font-mono: "SF Mono", SFMono-Regular, ui-monospace, Menlo, Consolas, monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", SFMono-Regular, ui-monospace, Menlo, Consolas, monospace;
 }
 
 /* ── Base Reset & Font Smoothing ── */
@@ -81,6 +101,37 @@ html, body {
   user-select: none;
 }
 
+/* ── V10 Aurora Field (fixed ambience behind every screen) ── */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(1100px 620px at 12% -8%, rgba(45, 212, 191, 0.075), transparent 62%),
+    radial-gradient(900px 560px at 96% 4%, rgba(14, 116, 233, 0.075), transparent 60%),
+    radial-gradient(760px 620px at 50% 118%, rgba(16, 185, 129, 0.05), transparent 64%);
+}
+
+/* Film grain — one quiet texture over the whole instrument */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+}
+
+/* ── Machine Voice: mono for security & record-keeping ── */
+.mls-badge, .sb-e2e, .about-ver, .ver-chip, .ci-unread, .call-timer,
+.rec-timer, .si-sub, .sp-handle, .auth-badge, .startup-sub, .kbd {
+  font-family: var(--font-mono);
+  font-feature-settings: "zero" 1;
+}
+
 /* Optical Number Alignment */
 .tabular-nums, .msg-time, .ci-unread, .call-timer, .rec-timer, .status-counter {
   font-variant-numeric: tabular-nums;
@@ -95,7 +146,13 @@ p, .ep-sub, .auth-subtitle, .about-desc {
   text-wrap: pretty;
 }
 
-/* Modern Minimalist Scrollbars */
+/* Selection — vault teal */
+::selection {
+  background: rgba(45, 212, 191, 0.28);
+  color: #ffffff;
+}
+
+/* ── Modern Minimalist Scrollbars ── */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -106,12 +163,12 @@ p, .ep-sub, .auth-subtitle, .about-desc {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(151, 180, 199, 0.14);
   border-radius: var(--radius-pill);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(94, 234, 212, 0.35);
 }
 
 /* Background Ambient Canvas */
@@ -144,7 +201,8 @@ button, [role="button"] {
               background-color var(--anim-fast) ease,
               border-color var(--anim-fast) ease,
               box-shadow var(--anim-fast) ease,
-              opacity var(--anim-fast) ease;
+              opacity var(--anim-fast) ease,
+              color var(--anim-fast) ease;
 }
 
 button:active, [role="button"]:active {
@@ -152,6 +210,6 @@ button:active, [role="button"]:active {
 }
 
 button:focus-visible, input:focus-visible {
-  outline: 2px solid var(--system-blue);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }

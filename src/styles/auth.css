@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   ZYNTRIXLY V4 — AUTHENTICATION SCREEN & SOVEREIGN ACCESS
-   Apple HIG Aesthetic, Concentric Radii, Specular Hairline
+   ZYNTRIXLY 10 — SOVEREIGN ACCESS · AUTHENTICATION
+   Staggered rise choreography · gradient hairline · vault-teal focus
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* ── Auth Screen ── */
@@ -13,49 +13,120 @@
 }
 
 .auth-card {
-  background: var(--bg-surface);
+  background: linear-gradient(180deg, rgba(22, 28, 40, 0.72), rgba(10, 14, 22, 0.86));
   border: 1px solid var(--border-normal);
   border-radius: var(--radius-outer);
-  padding: 32px 28px;
-  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(20px);
+  padding: 34px 30px 28px;
+  box-shadow: var(--shadow-lg), 0 0 90px rgba(45, 212, 191, 0.05);
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
   position: relative;
+  overflow: hidden;
+  animation: cardArrive 0.6s var(--spring-ease) both;
+}
+
+/* Gradient hairline — the dealt moment of the auth screen */
+.auth-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--hairline-gradient);
+  pointer-events: none;
+}
+
+/* Slow aurora sweep inside the card, once per load */
+.auth-card::after {
+  content: "";
+  position: absolute;
+  inset: -60% -20%;
+  background: conic-gradient(from 200deg at 50% 50%, transparent 0deg, rgba(45, 212, 191, 0.05) 70deg, rgba(14, 165, 233, 0.05) 130deg, transparent 200deg);
+  animation: auroraSweep 9s var(--spring-ease) 1 both;
+  pointer-events: none;
+}
+
+@keyframes auroraSweep {
+  from { transform: rotate(0deg) scale(1); opacity: 0; }
+  30% { opacity: 1; }
+  to { transform: rotate(28deg) scale(1.15); opacity: 0.55; }
+}
+
+/* Staggered rise of every direct child */
+.auth-card > * {
+  animation: riseIn 0.55s var(--spring-ease) both;
+}
+
+.auth-card > *:nth-child(1) { animation-delay: 0.05s; }
+.auth-card > *:nth-child(2) { animation-delay: 0.12s; }
+.auth-card > *:nth-child(3) { animation-delay: 0.19s; }
+.auth-card > *:nth-child(4) { animation-delay: 0.26s; }
+.auth-card > *:nth-child(5) { animation-delay: 0.33s; }
+.auth-card > *:nth-child(6) { animation-delay: 0.40s; }
+.auth-card > *:nth-child(7) { animation-delay: 0.47s; }
+
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cardArrive {
+  from { opacity: 0; transform: translateY(18px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .auth-header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 26px;
 }
 
 .auth-icon {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 16px;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 16px;
+  border-radius: 18px;
   background: var(--bg-surface-raised);
   border: 1px solid var(--border-normal);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md), 0 0 40px rgba(45, 212, 191, 0.10);
+  position: relative;
+}
+
+/* Halo ring — quiet pulse behind the mark */
+.auth-icon::before {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border-radius: 22px;
+  border: 1px solid rgba(45, 212, 191, 0.22);
+  animation: haloBreathe 3.2s ease-in-out infinite;
+}
+
+@keyframes haloBreathe {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.04); }
 }
 
 .brand-mark-md {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
 }
 
 .auth-title {
-  font-size: 22px;
+  font-size: 23px;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.022em;
   color: var(--text-primary);
-  margin-bottom: 6px;
+  margin-bottom: 7px;
 }
 
 .auth-subtitle {
-  font-size: 13.5px;
+  font-size: 13px;
   color: var(--text-muted);
+  letter-spacing: 0.01em;
 }
 
 .auth-form {
@@ -72,29 +143,36 @@
 
 .field-icon {
   position: absolute;
-  left: 12px;
+  left: 13px;
   color: var(--text-subdued);
   pointer-events: none;
   display: flex;
   align-items: center;
+  transition: color var(--anim-normal) ease;
+}
+
+.field-wrap:focus-within .field-icon {
+  color: var(--accent);
 }
 
 .auth-input {
   width: 100%;
-  height: 44px;
-  padding: 0 40px;
-  background: var(--bg-surface-raised);
+  height: 46px;
+  padding: 0 42px;
+  background: rgba(4, 6, 11, 0.6);
   border: 1px solid var(--border-normal);
   border-radius: var(--radius-button);
   color: var(--text-primary);
   font-size: 14px;
-  transition: border-color var(--anim-fast) ease, box-shadow var(--anim-fast) ease;
+  letter-spacing: 0.005em;
+  transition: border-color var(--anim-normal) ease, box-shadow var(--anim-normal) ease, background-color var(--anim-normal) ease;
 }
 
 .auth-input:focus {
   outline: none;
-  border-color: var(--system-blue);
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+  border-color: var(--accent-border);
+  background: rgba(4, 6, 11, 0.82);
+  box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.14), var(--rim-highlight-subtle);
 }
 
 .pw-toggle {
@@ -109,10 +187,10 @@
 .auth-err {
   font-size: 12.5px;
   color: var(--system-red);
-  background: rgba(255, 59, 48, 0.1);
-  padding: 8px 12px;
+  background: rgba(248, 113, 113, 0.09);
+  padding: 9px 12px;
   border-radius: var(--radius-tag);
-  border: 1px solid rgba(255, 59, 48, 0.2);
+  border: 1px solid rgba(248, 113, 113, 0.22);
 }
 
 .auth-submit, .btn-default {
@@ -120,25 +198,35 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 44px;
-  background: var(--text-primary);
-  color: #121215;
+  height: 46px;
+  background: var(--accent-gradient);
+  color: #041210;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   border-radius: var(--radius-button);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  transition: opacity var(--anim-fast) ease, transform var(--anim-fast) var(--spring-ease);
+  box-shadow: var(--shadow-accent), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: transform var(--anim-fast) var(--spring-ease), box-shadow var(--anim-normal) ease, filter var(--anim-normal) ease;
 }
 
 .auth-submit:hover, .btn-default:hover {
-  opacity: 0.92;
+  filter: brightness(1.07);
+  box-shadow: 0 6px 26px rgba(45, 212, 191, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.auth-submit:hover svg, .btn-default:hover svg {
+  transform: translateX(2px);
+}
+
+.auth-submit svg {
+  transition: transform var(--anim-normal) var(--spring-ease);
 }
 
 .auth-divider {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 18px 0;
+  margin: 20px 0 16px;
 }
 
 .divider-line {
@@ -148,28 +236,31 @@
 }
 
 .divider-or {
-  font-size: 11.5px;
+  font-size: 11px;
+  font-family: var(--font-mono);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.09em;
   color: var(--text-subdued);
 }
 
 .auth-toggle {
   width: 100%;
-  height: 40px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 13.5px;
+  font-weight: 500;
   color: var(--text-muted);
   border: 1px solid var(--border-normal);
   border-radius: var(--radius-button);
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(148, 197, 214, 0.03);
 }
 
 .auth-toggle:hover {
   background: var(--bg-surface-hover);
   color: var(--text-primary);
+  border-color: var(--border-strong);
 }
 
 .auth-badge {
@@ -177,9 +268,16 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  margin-top: 20px;
-  font-size: 11.5px;
-  color: var(--text-subdued);
+  margin-top: 22px;
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0.9;
+}
+
+.auth-badge svg {
+  opacity: 0.9;
 }
 
 .auth-footer {
@@ -187,4 +285,5 @@
   font-size: 11.5px;
   color: var(--text-subdued);
   margin-top: 18px;
+  animation: riseIn 0.6s var(--spring-ease) 0.55s both;
 }
